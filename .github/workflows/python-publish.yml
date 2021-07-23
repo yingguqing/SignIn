@@ -9,7 +9,7 @@
 name: Upload Python Package
 
 on: [push]
-  schedule:
+  #schedule:
     #         ┌───────────── minute (0 - 59)
     #         │ ┌───────────── hour (0 - 23)
     #         │ │ ┌───────────── day of the month (1 - 31)
@@ -20,7 +20,7 @@ on: [push]
     #         │ │ │ │ │
     #         * * * * *
     # 定时执行，Runs at 00:00 UTC every day
-    - cron:  '0 0 * * *'
+    #- cron:  '0 0 * * *'
 
 jobs:
   deploy:
