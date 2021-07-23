@@ -38,7 +38,7 @@ class Network:
 
         lv = int(time.time() * 1000)
         url_headers['Cookie'] = 'WT_FPC=id={id}:lv={lv}:ss={ss}'.format(id=self.id, lv=lv, ss=self.ss)
-        # requests.packages.urllib3.disable_warnings()
+        requests.packages.urllib3.disable_warnings()
         # verify=False
         res = requests.post(url=url, data=params, headers=url_headers)
         text = res.text
