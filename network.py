@@ -42,6 +42,7 @@ class Network:
         # verify=False
         res = requests.post(url=url, data=params, headers=url_headers)
         text = res.text
+        print(text)
         try:
             jsonValue = json.loads(text)
             return jsonValue
@@ -94,7 +95,7 @@ class Network:
             result = jsonValue['result']
             desc = jsonValue['desc']
             loc_time = time.strftime("%Y-%m-%d", time.localtime())
-            # 000:签到成功,111:已签到,001:系统繁忙,010:会话失效
+            # 000:签到成功,111:已签到,001:系统繁忙,010:会话失效,100:录超时
             if result == '001':
                 if self.retime < 10:
                     self.retime += 1
