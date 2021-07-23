@@ -8,9 +8,19 @@
 
 name: Upload Python Package
 
-on:
-  release:
-    types: [published]
+on: [push]
+  schedule:
+    #         ┌───────────── minute (0 - 59)
+    #         │ ┌───────────── hour (0 - 23)
+    #         │ │ ┌───────────── day of the month (1 - 31)
+    #         │ │ │ ┌───────────── month (1 - 12 or JAN-DEC)
+    #         │ │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
+    #         │ │ │ │ │                                   
+    #         │ │ │ │ │
+    #         │ │ │ │ │
+    #         * * * * *
+    # 定时执行，Runs at 00:00 UTC every day
+    - cron:  '0 0 * * *'
 
 jobs:
   deploy:
@@ -22,15 +32,23 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build
-    - name: Build package
-      run: python -m build
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+
+    - name: Run Python Application  
+      run:
+        python main.py ${{ secrets.SessionId  }} ${{ secrets.Config  }}
+    - name: Commit files
+      run: |
+         git config --local user.email "yingguqing@gmail.com"
+         git config --local user.name "yingguqing"
+         git add README.md
+         git commit -m "update readme.md"
+         
+    - name: Push changes
+      uses:  ad-m/github-push-action@master
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+         github_token: ${{ secrets.MY_GIT_TOKEN  }}
+         branch: main
