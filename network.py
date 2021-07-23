@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 from common import random_string, sign
 import time
 import os
+import urllib3
 
 
 class Network:
@@ -39,8 +40,13 @@ class Network:
         lv = int(time.time() * 1000)
         url_headers['Cookie'] = 'WT_FPC=id={id}:lv={lv}:ss={ss}'.format(id=self.id, lv=lv, ss=self.ss)
         requests.packages.urllib3.disable_warnings()
-        # verify=False
-        res = requests.post(url=url, data=params, headers=url_headers)
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+        try:
+            requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
+        except AttributeError:
+            pass
+
+        res = requests.post(url=url, data=params, headers=url_headers, verify=False)
         text = res.text
         print(text)
         try:
