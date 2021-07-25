@@ -47,13 +47,12 @@ class Network:
             pass
 
         res = requests.post(url=url, data=params, headers=url_headers, verify=False)
-        text = res.text
-        print(text)
         try:
-            jsonValue = json.loads(text)
+            jsonValue = res.json()
+            print(jsonValue)
             return jsonValue
         except ValueError:
-            print(text)
+            print(res.text)
             return None
 
     # 请求的url封装
