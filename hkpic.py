@@ -3,7 +3,7 @@
 # 比思每日签到
 
 from network import Network
-from common import load_cookies, save_cookies, get_running_path
+from common import load_cookies, save_cookies
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -150,9 +150,6 @@ class HKPIC(Network):
         params = 'formhash=%s&qdxq=kx' % formhash
         html = self.request(url, params)
         pattern = re.compile(r'<div\s+class\s*=\s*"c"\s*>\W*(.*?)\W*<\s*/\s*div\s*>', re.S)
-
-        path = get_running_path('a.html')
-        soup = BeautifulSoup(open(path), 'html.parser')
 
         items = re.findall(pattern, html)
         if items:
