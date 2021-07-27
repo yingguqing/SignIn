@@ -5,11 +5,7 @@ from cmcc import CMCC
 from hkpic import HKPIC
 import sys
 import json
-import requests
-import re
 from common import weixin_send_msg, save_readme
-from bs4 import BeautifulSoup
-
 
 
 if __name__ == "__main__":

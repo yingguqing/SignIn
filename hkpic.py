@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # 比思每日签到
 
-from sys import path
 from network import Network
 from common import load_cookies, save_cookies, get_running_path
 from bs4 import BeautifulSoup
@@ -176,7 +175,7 @@ class HKPIC(Network):
                     if href.startswith('space-uid-'):
                         self.user_href = href
                         break
-
+        # 提取板块下所有的帖子链接
         for span in soup.find_all('a', onclick='atarget(this)'):
             if not span.has_attr("style"):
                 href = span['href']
@@ -188,7 +187,7 @@ class HKPIC(Network):
         if self.reply_times < 15:
             self.forum_list(block, page+1)
 
-    # 读取帖子内容（url为相对地址，即不带host）
+    # 读取帖子内容
     def thread(self, url):
         if not url.startswith(self.host):
             url = urljoin(self.host, url)
