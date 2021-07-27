@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # 比思每日签到
 
+import json
 from network import Network
 from common import load_cookies, save_cookies
 from bs4 import BeautifulSoup
@@ -20,11 +21,17 @@ class HKPIC(Network):
         self.index = 0
         self.username = jsonValue['username']
         self.password = jsonValue['password']
+        # 加密的key
         self.xor = jsonValue['xor']
+        # cookie保存到本地的Key
         self.cookies_key = 'HKPIC'
         self.is_login = False
+        # 需要签到
         self.need_sign_in = True
-        self.cookies = load_cookies(self.cookies_key, self.xor)
+        self.cookies = ''
+        # 读取本地cookie值
+        self.cookie_dit = load_cookies(self.cookies_key, self.xor)
+        self.response_cookies({})
         # 别人空间地址
         self.user_href = ''
         # 发表评论次数
@@ -41,17 +48,19 @@ class HKPIC(Network):
             'DNT': '1',
             'Proxy-Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Referer': 'http://bisi666.xyz/plugin.php?id=k_pwchangetip:tip'
+            'Referer': urljoin(self.host, 'plugin.php?id=k_pwchangetip:tip')
         }
 
     # 保存cookie
     def response_cookies(self, cookies):
-        for key, value in cookies.items():
-            self.cookies += key + '=' + value + ';'
-        save_cookies(self.cookies_key, self.xor, self.cookies)
+        self.cookie_dit = {**self.cookie_dit, **cookies}
+        self.cookies = ''
+        for key, value in self.cookie_dit.items():
+            self.cookies += '%s=%s;' % (key, value)
+        save_cookies(self.cookies_key, self.xor, json.dumps(self.cookie_dit))
 
     # 开始入口
-    def runAction(self):
+    def runAction(self, auto:True):
         # 获取所有比思域名
         self.getHost()
 
@@ -61,8 +70,11 @@ class HKPIC(Network):
             return
 
         # 如果cookie失效，就自动登录
-        if not self.is_login and not self.login():
-            print('比思：登录失败')
+        if not self.is_login:
+            if self.login() and auto:
+                self.runAction(False)
+            else:
+                print('比思：登录失败')
             return
 
         # 获取签到信息，并进行签到
@@ -104,12 +116,15 @@ class HKPIC(Network):
             html = self.request(url, post=False)
             if html is not None and html.find('比思論壇') > -1:
                 self.host = host
+                self.headers['Origin'] = host
+                self.headers['Referer'] = urljoin(host, 'plugin.php?id=k_pwchangetip:tip')
                 soup = BeautifulSoup(html, 'html.parser')
                 # 读取首页的用户名，如果存在，表示cookie还能用
                 span = soup.find('a', title='訪問我的空間')
-                self.is_login = span.text == self.username
-                if self.is_login:
-                    self.need_sign_in = html.find('簽到領獎!') > -1
+                if span:
+                    self.is_login = span.text == self.username
+                    if self.is_login:
+                        self.need_sign_in = html.find('簽到領獎!') > -1
                 return True
         return False
 

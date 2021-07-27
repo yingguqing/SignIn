@@ -130,11 +130,15 @@ def load_cookies(key, xor_key):
     if key in all_cookies.keys():
         value = all_cookies[key]
     else:
-        return ''
+        return {}
     if value:
-        return xor(value, xor_key, False) 
+        try:
+            s = xor(value, xor_key, False)
+            return json.loads(s)
+        except ValueError:
+            return {}
     else:
-        return ''
+        return {}
 
 
 # 写入cookie
