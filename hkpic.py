@@ -24,6 +24,7 @@ class HKPIC(Network):
         self.xor = jsonValue['xor']
         self.cookies_key = 'HKPIC'
         self.is_login = False
+        self.need_sign_in = True
         self.cookies = load_cookies(self.cookies_key, self.xor)
         # 别人空间地址
         self.user_href = ''
@@ -66,7 +67,9 @@ class HKPIC(Network):
             return
 
         # 获取签到信息，并进行签到
-        self.getSignInInfo()
+        if self.need_sign_in:
+            self.getSignInInfo()
+
         # 所有能发表评论的板块
         all = [2, 5, 10, 11, 18, 20, 22, 25, 27, 28, 31, 33, 38, 39, 42, 46, 47, 49, 50, 57, 58, 59, 60, 61, 66, 67, 68, 75, 77, 78, 79, 83, 89, 91, 96, 98, 100, 104, 105, 106, 110, 114, 115, 117, 118, 120, 121, 122, 123, 124, 126, 135, 140, 142, 150, 151, 153, 159, 163, 164, 165, 167, 182, 184, 194, 196, 198, 201, 202, 208, 209, 210, 211, 212, 214, 232, 233, 234, 235, 236, 239, 244, 255, 256, 291, 299, 300, 304, 310, 313, 314, 338, 362, 370, 372, 373, 375, 376, 377, 378, 381, 387, 390, 398, 401, 405, 417, 418, 419, 422, 423, 427, 433, 445, 447, 454, 474, 492, 628, 776, 924, 925]
         # 发表15次评论
@@ -106,7 +109,8 @@ class HKPIC(Network):
                 # 读取首页的用户名，如果存在，表示cookie还能用
                 span = soup.find('a', title='訪問我的空間')
                 self.is_login = span.text == self.username
-                        
+                if self.is_login:
+                    self.need_sign_in = html.find('簽到領獎!') > -1
                 return True
         return False
 
