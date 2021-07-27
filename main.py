@@ -1,13 +1,36 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from network import Network
+from cmcc import CMCC
+from hkpic import HKPIC
 import sys
 import json
+import requests
+import re
+from common import weixin_send_msg, save_readme
+from bs4 import BeautifulSoup
+
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         sys.exit()
     sessionid = sys.argv[1]
     jsonValue = json.loads(sys.argv[2])
-    Network(sessionid, jsonValue).apiSignIn()
+    openid = jsonValue['WeiXinOpenID']
+
+    # 广东移动App签到
+    cmccValue = jsonValue['CMCC']
+    cmcc = CMCC(sessionid, cmccValue)
+    cmcc.runAction()
+    weixin_send_msg(' '.join(cmcc.weixin), openid)
+    save_readme(cmcc.weixin)
+
+    # 比思签到+赚取每日金币
+    hkpicValue = jsonValue['HKPIC']
+    hkpic = HKPIC(hkpicValue)
+    hkpic.runAction()
+    
+
+
+    

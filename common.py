@@ -9,14 +9,18 @@ import os
 import sys
 import random
 import string
+import requests
+import json
+import base64
 
+all_cookies = {}
 
 # 获取运行目录
 def get_running_path(path=''):
     if getattr(sys, 'frozen', False):
-        return os.path.dirname(sys.executable) + path
+        return os.path.join(os.path.dirname(sys.executable), path)
     elif __file__:
-        return os.path.dirname(__file__) + path
+        return os.path.join(os.path.dirname(__file__), path)
 
 
 def random_string(randomlength=32):
@@ -46,6 +50,117 @@ def random_num_string(randomlength=32):
         str_list += random_num_string(randomlength-count)
     random_str = ''.join(str_list)
     return random_str
+
+
+# 保存内容到readme中
+def save_readme(texts):
+    fold = os.path.abspath('.')
+    readMePath = os.path.join(fold, "README.md")
+    with open(readMePath, 'a+') as f:
+        f.seek(0)
+        f.write('  \n')
+        f.write('  \n'.join(texts))
+        f.flush()
+
+
+def get_access_token():
+    """
+    获取微信全局接口的凭证(默认有效期俩个小时)
+    如果不每天请求次数过多, 通过设置缓存即可
+    """
+    result = requests.get(
+        url="https://api.weixin.qq.com/cgi-bin/token",
+        params={
+            "grant_type": "client_credential",
+            "appid": "wxc4ab4341d9a8577a",
+            "secret": "e6c46e8cc24a95df1742ff8b25aaf36b",
+        }
+    ).json()
+
+    if result.get("access_token"):
+        access_token = result.get('access_token')
+    else:
+        access_token = None
+    return access_token
+
+
+def weixin_send_msg(msg, openid):
+    access_token = get_access_token()
+
+    all_msg = []
+    if type(msg) is str:
+        all_msg.append(msg)
+    elif type(msg) is list:
+        all_msg += msg
+    else:
+        return
+
+    body = {
+        "touser": openid,
+        "msgtype": "text",
+        "text": {
+            "content": ' '.join(msg)
+        }
+    }
+    response = requests.post(
+        url="https://api.weixin.qq.com/cgi-bin/message/custom/send",
+        params={
+            'access_token': access_token
+        },
+        data=bytes(json.dumps(body, ensure_ascii=False), encoding='utf-8')
+    )
+    # 这里可根据回执code进行判定是否发送成功(也可以根据code根据错误信息)
+    result = response.json()
+    print(result)
+    all_msg.append(json.dumps(result))
+    save_readme(all_msg)
+
+
+# 读取相应的cookie
+def load_cookies(key, xor_key):
+    path = get_running_path('cookies.txt')
+    if not os.path.exists(path):
+        return ''
+    global all_cookies
+    if not all_cookies:
+        with open(path, 'r') as f:
+            jsonData = f.read()
+            if jsonData:
+                all_cookies = json.loads(jsonData)
+    if key in all_cookies.keys():
+        value = all_cookies[key]
+    else:
+        return ''
+    if value:
+        return xor(value, xor_key, False) 
+    else:
+        return ''
+
+
+# 写入cookie
+def save_cookies(key, xor_key, cookies):
+    path = get_running_path('cookies.txt')
+    global all_cookies
+    all_cookies[key] = xor(cookies, xor_key, True)
+    with open(path, 'w') as f:
+        f.write(json.dumps(all_cookies))   # 重写数据
+        f.flush()
+
+
+def xor(text, key, encrty):
+    if not encrty:
+        text = str(base64.b64decode(text), "utf-8")
+    ml = len(text)
+    kl = len(key)
+    result = []
+    #通过取整，求余的方法重新得到key
+    for i in range(ml):
+        #一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"刚好相反
+        result.append(chr(ord(key[i % kl])^ord(text[i])))
+    result = ''.join(result)
+    if encrty:
+        result = str(base64.b64encode(result.encode("utf-8")), "utf-8")
+    return result
 
 
 def int_overflow(val):
