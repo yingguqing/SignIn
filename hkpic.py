@@ -35,7 +35,8 @@ class HKPIC(Network):
         # 别人空间地址
         self.user_href = ''
         # 发表评论次数（1小时内限发10次，有奖次数为15次）
-        self.reply_times = 0
+        # 评论有风险，可能会永久封号，禁止评论时，设置成99
+        self.reply_times = 99
         self.headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -187,8 +188,24 @@ class HKPIC(Network):
         url = urljoin(self.host, api)
         print(f'进入版块:{url}')
         html = self.request(url, post=False)
-        soup = BeautifulSoup(html, 'html.parser')
+        # 获取最大页码
+        pattern = re.compile(r'共\s+(\d*?)\s+頁', re.S)
+        page_max = 0
+        items = re.findall(pattern, html)
+        for item in items:
+            try:
+                num = int(item)
+                if num:
+                    page_max = num
+                    break
+            except ValueError:
+                pass
 
+        # 请求页码超过最大页码时，不处理
+        if page > page_max:
+            self.forum_list()
+
+        soup = BeautifulSoup(html, 'html.parser')
         # 提取板块下所有的帖子链接
         spans = soup.find_all('a', onclick='atarget(this)')
         for span in spans:

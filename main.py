@@ -25,4 +25,4 @@ if __name__ == "__main__":
     # 比思签到+赚取每日金币
     hkpicValue = jsonValue['HKPIC']
     hkpic = HKPIC(hkpicValue)
-    # hkpic.runAction()
+    hkpic.runAction()
