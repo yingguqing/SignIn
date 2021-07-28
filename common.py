@@ -123,6 +123,7 @@ def save_file(name, text):
         f.write(text)
         f.flush()
 
+
 # 读取相应的cookie
 def load_cookies(key, xor_key):
     path = get_running_path('cookies.txt')
