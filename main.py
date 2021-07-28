@@ -6,7 +6,6 @@ from hkpic import HKPIC
 import sys
 import json
 from common import weixin_send_msg, save_readme
-import re
 
 
 if __name__ == "__main__":
@@ -19,15 +18,11 @@ if __name__ == "__main__":
     # 广东移动App签到
     cmccValue = jsonValue['CMCC']
     cmcc = CMCC(sessionid, cmccValue)
-    cmcc.runAction()
-    weixin_send_msg(' '.join(cmcc.weixin), openid)
-    save_readme(cmcc.weixin)
+    # cmcc.runAction()
+    # weixin_send_msg(' '.join(cmcc.weixin), openid)
+    # save_readme(cmcc.weixin)
 
     # 比思签到+赚取每日金币
     hkpicValue = jsonValue['HKPIC']
     hkpic = HKPIC(hkpicValue)
-    hkpic.runAction()
-    
-
-
-    
+    # hkpic.runAction()

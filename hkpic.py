@@ -20,7 +20,7 @@ class HKPIC(Network):
         self.all_host = [self.host]
         self.index = 0
         self.username = jsonValue['username']
-        self.password = jsonValue['password']
+        self.password = quote(jsonValue['password'])
         # 加密的key
         self.xor = jsonValue['xor']
         # cookie保存到本地的Key
@@ -56,38 +56,45 @@ class HKPIC(Network):
         self.cookie_dit = {**self.cookie_dit, **cookies}
         self.cookies = ''
         for key, value in self.cookie_dit.items():
-            self.cookies += '%s=%s;' % (key, value)
+            self.cookies += f'{key}={value};'
         save_cookies(self.cookies_key, self.xor, json.dumps(self.cookie_dit))
 
     # 开始入口
     def runAction(self, auto=True):
+        print('------------- 比思签到 -------------')
         # 获取所有比思域名
         self.getHost()
 
         # 访问首页得到可用域名
         if not self.forum():
-            print('比思：没有可用域名')
+            print('没有可用域名')
             return
+
+        print(f'域名:{self.host}')
 
         # 如果cookie失效，就自动登录
         if not self.is_login:
             if self.login() and auto:
                 self.runAction(False)
             else:
-                print('比思：登录失败')
+                print('登录失败')
             return
+        else:
+            print('自动登录成功')
 
         # 获取签到信息，并进行签到
         if self.need_sign_in:
             self.getSignInInfo()
+        else:
+            print('今天已签到。')
 
-        # 所有能发表评论的板块
-        all = [2, 5, 10, 11, 18, 20, 22, 25, 27, 28, 31, 33, 38, 39, 42, 46, 47, 49, 50, 57, 58, 59, 60, 61, 66, 67, 68, 75, 77, 78, 79, 83, 89, 91, 96, 98, 100, 104, 105, 106, 110, 114, 115, 117, 118, 120, 121, 122, 123, 124, 126, 135, 140, 142, 150, 151, 153, 159, 163, 164, 165, 167, 182, 184, 194, 196, 198, 201, 202, 208, 209, 210, 211, 212, 214, 232, 233, 234, 235, 236, 239, 244, 255, 256, 291, 299, 300, 304, 310, 313, 314, 338, 362, 370, 372, 373, 375, 376, 377, 378, 381, 387, 390, 398, 401, 405, 417, 418, 419, 422, 423, 427, 433, 445, 447, 454, 474, 492, 628, 776, 924, 925]
         # 发表15次评论
-        self.forum_list(choice(all), randint(3, 20))
+        print('开始评论。')
+        self.forum_list()
         # 访问别人空间并留言
         self.visitUserZone()
-            
+        print('------------- 比思签到完成 -------------')
+
     # 获取比思域名
     def getHost(self):
         url = 'https://api.github.com/repos/hkpic-forum/hkpic/contents/README.md'
@@ -127,12 +134,11 @@ class HKPIC(Network):
     def login(self):
         api_param = 'mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes&inajax=1'
         url = self.encapsulateURL('member.php', api_param)
-        params = 'fastloginfield=username&username=%s&password=%s&quickforward=yes&handlekey=ls' % (self.username, quote(self.password))
+        params = f'fastloginfield=username&username={self.username}&password={self.password}&quickforward=yes&handlekey=ls'
         jsonString = self.request(url, params)
         tip = urljoin(self.host, 'plugin.php?id=k_pwchangetip:tip')
         result = jsonString.find(tip) > -1
-        if not result:
-            print('登录失败:%s' % jsonString)
+        print('用户名登录成功' if result else f'登录失败\n{jsonString}')
         return result
 
     # 获取签到信息
@@ -148,33 +154,41 @@ class HKPIC(Network):
             if items:
                 self.signIn(items[0])
             else:
-                print('比思：获取formhash失败')
+                print('获取签到formhash失败')
 
     # 签到
     def signIn(self, formhash):
         if formhash is None or len(formhash) == 0:
-            print('比思：formhash为空')
+            print('签到formhash为空')
             return
         api_param = 'id=dsu_paulsign:sign&operation=qiandao&infloat=1&sign_as=1&inajax=1'
         url = self.encapsulateURL('plugin.php', api_param)
-        params = 'formhash=%s&qdxq=kx' % formhash
+        params = f'formhash={formhash}&qdxq=kx'
         html = self.request(url, params)
         pattern = re.compile(r'<div\s+class\s*=\s*"c"\s*>\W*(.*?)\W*<\s*/\s*div\s*>', re.S)
         items = re.findall(pattern, html)
         if items:
             print(items[0])
         else:
-            print('比思：签到失败--%s' % html)
+            print(f'签到失败\n{html}')
 
-    # 版块帖子列表(block：版块id，page：页码)
-    def forum_list(self, block, page):
-        api = 'forum-%d-%d.html' % (block, page)
+    # 版块帖子列表
+    def forum_list(self):
+        # 所有能发表评论的板块
+        all = [2, 5, 10, 11, 18, 20, 22, 25, 27, 28, 31, 33, 38, 39, 42, 46, 47, 49, 50, 57, 58, 59, 60, 61, 66, 67, 68, 75, 77, 78, 79, 83, 89, 91, 96, 98, 100, 104, 105, 106, 110, 114, 115, 117, 118, 120, 121, 122, 123, 124, 126, 135, 140, 142, 150, 151, 153, 159, 163, 164, 165, 167, 182, 184, 194, 196, 198, 201, 202, 208, 209, 210, 211, 212, 214, 232, 233, 234, 235, 236, 239, 244, 255, 256, 291, 299, 300, 304, 310, 313, 314, 338, 362, 370, 372, 373, 375, 376, 377, 378, 381, 387, 390, 398, 401, 405, 417, 418, 419, 422, 423, 427, 433, 445, 447, 454, 474, 492, 628, 776, 924, 925]
+        # 版块id
+        block = choice(all)
+        # 页码
+        page = randint(3, 30)
+        api = f'forum-{block}-{page}.html'
         url = urljoin(self.host, api)
+        print(f'进入版块:{url}')
         html = self.request(url, post=False)
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         # 提取板块下所有的帖子链接
-        for span in soup.find_all('a', onclick='atarget(this)'):
+        spans = soup.find_all('a', onclick='atarget(this)')
+        for span in spans:
             if not span.has_attr("style"):
                 href = span['href']
                 # 读取帖子内容，发表评论
@@ -184,7 +198,7 @@ class HKPIC(Network):
 
         # 评论数不够15条时，获取帖子下一页列表
         if self.reply_times < 15:
-            self.forum_list(block, page+1)
+            self.forum_list()
 
     # 读取帖子内容
     def thread(self, url):
@@ -195,12 +209,12 @@ class HKPIC(Network):
 
         # 提取别人空间地址
         if not self.user_href:
-            for span in soup.find_all('a', class_='xw1'):
+            spans = soup.find_all('a', class_='xw1')
+            for span in spans:
                 if span.has_attr('href'):
                     href = span['href']
                     if href.startswith('space-uid-'):
                         self.user_href = href
-                        print('提取别人空间地址成功')
                         break
 
         # 评论数够就不再发表
@@ -209,11 +223,12 @@ class HKPIC(Network):
 
         span = soup.find('input', attrs={'name': 'formhash'})
         if not span.has_attr('value'):
-            print('比思：获取评论的formhash参数失败')
+            print('获取评论的formhash参数失败')
             return
         formhash = span['value']
         comments = []
-        for span in soup.find_all('td', class_='t_f'):
+        spans = soup.find_all('td', class_='t_f')
+        for span in spans:
             comment = span.text.replace('\n', '').replace('\r', '')
             count = len(comment)
             # 过滤过长和过短评论
@@ -227,38 +242,35 @@ class HKPIC(Network):
         while True:
             comment = choice(comments)
             # 从评论中随机取出一个进行发表
-            if self.reply(comment, formhash, url):
+            if self.reply(comment, formhash):
                 break
 
     # 发表评论
-    def reply(self, comment, formhash, thread_url):
+    def reply(self, comment, formhash):
         api_param = 'mod=post&action=reply&fid=142&tid=7104505&extra=page%3D1&replysubmit=yes&infloat=yes&handlekey=fastpost&inajax=1'
         url = self.encapsulateURL('forum.php', api_param)
         timestamp = int(time.time())
-        params = 'message=%s&posttime=%d&formhash=%s&usesig=1&subject=++' % (quote(comment, 'utf-8'), timestamp, formhash)
+        c = quote(comment, 'utf-8')
+        params = f'message={c}&posttime={timestamp}&formhash={formhash}&usesig=1&subject=++'
         # 非常感謝，回復發佈成功
         html = self.request(url, params)
-        try:
-            if html.find('非常感謝，回復發佈成功') > -1:
-                print(thread_url)
-                print('「%s」:發佈成功' % comment)
-                self.reply_times += 1
-                return True
-            elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
-                print('回贴数超过限制')
-                self.reply_times = 9999
-                return True
-            else:
-                pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
-                items = re.findall(pattern, html)
-                if items:
-                    print('\n'.join(items))
-                else:
-                    print(html)
-                return False
-        finally:
+        if html.find('非常感謝，回復發佈成功') > -1:
+            self.reply_times += 1
+            print(f'第{self.reply_times}条：「{comment}」->發佈成功')
             # 评论有时间间隔限制
             time.sleep(60)
+            return True
+        elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
+            print('回贴数超过限制')
+            self.reply_times = 9999
+            return True
+        else:
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            items = re.findall(pattern, html)
+            print('\n'.join(items) if items else html)
+            # 评论有时间间隔限制
+            time.sleep(60)
+            return False
 
     # 访问别人空间
     def visitUserZone(self):
@@ -267,15 +279,15 @@ class HKPIC(Network):
                 url = urljoin(self.host, self.user_href)
             else:
                 url = self.user_href
-            
-            print('访问别人空间：%s', url)
+
+            print(f'访问别人空间：{url}')
             uid = ''
             formhash = ''
             pattern = re.compile(r'space-uid-(\d*?).html', re.S)
             items = re.findall(pattern, url)
             if items:
                 uid = items[0]
-            
+
             html = self.request(url, post=False)
             print(html)
             soup = BeautifulSoup(html, 'html.parser')
@@ -291,11 +303,8 @@ class HKPIC(Network):
     def leavMessage(self, uid, formhash):
         api_param = 'mod=spacecp&ac=comment&inajax=1'
         url = self.encapsulateURL('home.php', api_param)
-        refer = quote('home.php?mod=space&uid=%s' % uid, 'utf-8')
+        refer = quote(f'home.php?mod=space&uid={uid}', 'utf-8')
         message = quote('留个言，赚个金币。', 'utf-8')
-        params = 'message={m}&refer={r}&id={u}&idtype=uid&commentsubmit=true&handlekey=commentwall_{u}&formhash={f}'.format(m=message, r=refer, u=uid, f=formhash)
+        params = f'message={message}&refer={refer}&id={uid}&idtype=uid&commentsubmit=true&handlekey=commentwall_{uid}&formhash={formhash}'
         html = self.request(url, params)
-        if html.find('操作成功') > -1:
-            print('留言成功')
-        else:
-            print('留言失败')
+        print('留言成功' if html.find('操作成功') > -1 else '留言失败')
