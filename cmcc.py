@@ -86,7 +86,7 @@ class CMCC(Network):
             if result == '001':
                 if self.retime < max_time:
                     self.retime += 1
-                    time.sleep(5)
+                    time.sleep(15)
                     self.run(api_param, params, title, max_time)
                 else:
                     self.weixin.append('{title}失败,{desc}'.format(title=title, desc=desc))
@@ -104,7 +104,7 @@ class CMCC(Network):
             'servicename': 'GMCCAPP_630_032_001_002',
             'sessionid': self.sessionid
         }
-        self.run(api_param, params, '移动签到', max_time=5)
+        self.run(api_param, params, '移动签到', max_time=10)
         self.draw()
 
     # 累计三天后，抽奖(暂时不行，参数不对)
@@ -114,4 +114,4 @@ class CMCC(Network):
             'servicename': 'GMCCAPP_630_032_001_005',
             'sessionid': self.sessionid
         }
-        self.run(api_param, params, '每日抽奖', max_time=2)
+        self.run(api_param, params, '每日抽奖', max_time=5)

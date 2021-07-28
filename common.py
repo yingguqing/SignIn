@@ -116,6 +116,13 @@ def weixin_send_msg(msg, openid):
     save_readme(all_msg)
 
 
+# 保存文件
+def save_file(name, text):
+    path = get_running_path(name)
+    with open(path, 'a+') as f:
+        f.write(text)
+        f.flush()
+
 # 读取相应的cookie
 def load_cookies(key, xor_key):
     path = get_running_path('cookies.txt')
