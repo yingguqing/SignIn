@@ -60,7 +60,7 @@ class HKPIC(Network):
         save_cookies(self.cookies_key, self.xor, json.dumps(self.cookie_dit))
 
     # 开始入口
-    def runAction(self, auto:True):
+    def runAction(self, auto=True):
         # 获取所有比思域名
         self.getHost()
 
