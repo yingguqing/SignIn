@@ -20,11 +20,10 @@ on: #[push]
     #         │ │ │ │ │
     #         * * * * *
     # 定时执行，Runs at 00:00 UTC every day
-    - cron:  '0 0 * * *'
+  - cron:  '0 0 * * *'
 
 jobs:
-  deploy:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:

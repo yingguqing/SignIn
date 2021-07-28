@@ -95,16 +95,11 @@ class HKPIC(Network):
         req = self.request(url, post=False, is_save_cookies=False)
         if type(req) is dict and 'content' in req.keys():
             content = str(base64.b64decode(req['content']), 'utf-8')
-            tag = re.findall(r'([a-zA-z]+://[^\s]*)', content)
-            for t in tag:
-                s = t
-                index = t.find('(')
-                if index > 0:
-                    s = s[:index]
-                index = s.find('<')
-                if index > 0:
-                    s = s[:index]
-                self.all_host.append(s)
+            pattern = re.compile(r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:[\w\d]+|([^[:punct:]\s]|/)))', re.S)
+            all = re.findall(pattern, content)
+            for h in all:
+                if type(h) is tuple and h:
+                    self.all_host.append(h[0])
         else:
             print('获取域名失败')
 

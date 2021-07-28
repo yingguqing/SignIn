@@ -6,6 +6,7 @@ from hkpic import HKPIC
 import sys
 import json
 from common import weixin_send_msg, save_readme
+import re
 
 
 if __name__ == "__main__":
