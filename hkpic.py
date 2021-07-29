@@ -93,7 +93,7 @@ class HKPIC(Network):
         else:
             print('今天已签到。')
 
-        self.myMoney()
+        self.myMoney(False)
         # 发表15次评论
         if self.reply_times < 15:
             print('开始评论。')
