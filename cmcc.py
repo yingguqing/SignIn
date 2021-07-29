@@ -105,7 +105,6 @@ class CMCC(Network):
             'sessionid': self.sessionid
         }
         self.run(api_param, params, '移动签到', max_time=10)
-        self.draw()
 
     # 累计三天后，抽奖(暂时不行，参数不对)
     def draw(self):
