@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_cookies, print_sleep, save_cookies
+from common import load_cookies, print_sleep, save_cookies, save_readme
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -101,7 +101,8 @@ class HKPIC(Network):
         # 访问别人空间并留言
         self.visitUserZone()
         # 查询我的金币
-        self.myMoney()
+        money = self.myMoney()
+        save_readme([f'金钱：{money}'])
         print('------------- 比思签到完成 -------------')
 
     # 获取比思域名

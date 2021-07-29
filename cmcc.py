@@ -89,7 +89,7 @@ class CMCC(Network):
                     time.sleep(15)
                     self.run(api_param, params, title, max_time)
                 else:
-                    self.weixin.append('{title}失败,{desc}'.format(title=title, desc=desc))
+                    self.weixin.append('{title},{desc}'.format(title=title, desc=desc))
             else:
                 self.weixin.append('{title}：{desc}'.format(title=title, desc=desc))
 
