@@ -295,7 +295,7 @@ class HKPIC(Network):
         html = self.request(url, params)
         if html.find('非常感謝，回復發佈成功') > -1:
             self.reply_times += 1
-            print(f'第{self.reply_times}条：「{comment}」->發佈成功')
+            print(f'第{self.reply_times}条：「{comment}」-> 發佈成功')
             # 评论有时间间隔限制
             print_sleep(60)
             self.myMoney(False)
