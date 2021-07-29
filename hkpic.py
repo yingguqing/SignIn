@@ -84,7 +84,7 @@ class HKPIC(Network):
             if auto and self.login() :
                 self.runAction(False)
             return
-        else:
+        elif auto:
             print('自动登录成功')
 
         # 获取签到信息，并进行签到
