@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_cookies, save_cookies, save_file
+from common import load_cookies, print_sleep, save_cookies
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -36,7 +36,11 @@ class HKPIC(Network):
         self.user_href = ''
         # 发表评论次数（1小时内限发10次，有奖次数为15次）
         # 评论有风险，可能会永久封号，禁止评论时，设置成99
-        self.reply_times = 99
+        self.reply_times = 0
+        # 自己的空间地址
+        self.my_zone_url = ''
+        # 我的金币
+        self.my_money = 0
         self.headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -62,23 +66,23 @@ class HKPIC(Network):
 
     # 开始入口
     def runAction(self, auto=True):
-        print('------------- 比思签到 -------------')
-        # 获取所有比思域名
-        self.getHost()
+        if auto:
+            print('------------- 比思签到 -------------')
+            # 获取所有比思域名
+            self.getHost()
 
         # 访问首页得到可用域名
         if not self.forum():
             print('没有可用域名')
             return
 
-        print(f'域名:{self.host}')
+        if auto:
+            print(f'域名:{self.host}')
 
         # 如果cookie失效，就自动登录
         if not self.is_login:
-            if self.login() and auto:
+            if auto and self.login() :
                 self.runAction(False)
-            else:
-                print('登录失败')
             return
         else:
             print('自动登录成功')
@@ -89,11 +93,15 @@ class HKPIC(Network):
         else:
             print('今天已签到。')
 
+        self.myMoney()
         # 发表15次评论
-        print('开始评论。')
+        if self.reply_times < 15:
+            print('开始评论。')
         self.forum_list()
         # 访问别人空间并留言
         self.visitUserZone()
+        # 查询我的金币
+        self.myMoney()
         print('------------- 比思签到完成 -------------')
 
     # 获取比思域名
@@ -125,6 +133,8 @@ class HKPIC(Network):
                 # 读取首页的用户名，如果存在，表示cookie还能用
                 span = soup.find('a', title='訪問我的空間')
                 if span:
+                    # 提取自己的空间地址
+                    self.my_zone_url = urljoin(self.host, span['href']) if span.has_attr('href') else ''
                     self.is_login = span.text == self.username
                     if self.is_login:
                         self.need_sign_in = html.find('簽到領獎!') > -1
@@ -133,6 +143,9 @@ class HKPIC(Network):
 
     # 登录
     def login(self):
+        # 需要登录时，把cookie清空
+        self.cookie_dit = {}
+        self.cookies = ''
         api_param = 'mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes&inajax=1'
         url = self.encapsulateURL('member.php', api_param)
         params = f'fastloginfield=username&username={self.username}&password={self.password}&quickforward=yes&handlekey=ls'
@@ -175,11 +188,8 @@ class HKPIC(Network):
 
     # 版块帖子列表
     def forum_list(self):
-        # 所有能发表评论的板块
-        all = [2, 5, 10, 11, 18, 20, 22, 25, 27, 28, 31, 33, 38, 39, 42, 46, 47, 49, 50, 57, 58, 59, 60, 61, 66, 67, 68, 75, 77, 78, 79, 83, 89, 91, 96, 98, 100,
-               104, 105, 106, 110, 114, 115, 117, 118, 120, 121, 122, 123, 124, 126, 135, 140, 142, 150, 151, 153, 159, 163, 164, 165, 167, 182, 184, 194, 196, 198, 201,
-               202, 208, 209, 210, 211, 212, 214, 232, 233, 234, 235, 236, 239, 244, 255, 256, 291, 299, 300, 304, 310, 313, 314, 338, 362, 370, 372, 373, 375, 376, 377,
-               378, 381, 387, 390, 398, 401, 405, 417, 418, 419, 422, 423, 427, 433, 445, 447, 454, 474, 492, 628, 776, 924, 925]
+        # 帖子较多的板块
+        all = [2, 10, 11, 18, 20, 31, 42, 50, 79, 117, 123, 135, 142, 153, 239, 313, 398, 445, 454, 474, 776, 924]
         # 版块id
         block = choice(all)
         # 页码
@@ -203,17 +213,23 @@ class HKPIC(Network):
 
         # 请求页码超过最大页码时，不处理
         if page > page_max:
+            print(f'{block}:请求页码超过最大页码，重新进入版块。')
             self.forum_list()
 
         soup = BeautifulSoup(html, 'html.parser')
         # 提取板块下所有的帖子链接
         spans = soup.find_all('a', onclick='atarget(this)')
+        # 板块内的回贴数(每个版块内最多回复3次)
+        forum_reply_time = 0
         for span in spans:
             if not span.has_attr("style"):
                 href = span['href']
                 # 读取帖子内容，发表评论
                 self.thread(href)
-                if self.reply_times >= 15:
+                forum_reply_time += 1
+                if forum_reply_time >= 3:
+                    break
+                elif self.reply_times >= 15:
                     return
 
         # 评论数不够15条时，获取帖子下一页列表
@@ -267,6 +283,8 @@ class HKPIC(Network):
 
     # 发表评论
     def reply(self, comment, formhash):
+        # 发表评论前的金币数
+        money_history = self.my_money
         api_param = 'mod=post&action=reply&fid=142&tid=7104505&extra=page%3D1&replysubmit=yes&infloat=yes&handlekey=fastpost&inajax=1'
         url = self.encapsulateURL('forum.php', api_param)
         timestamp = int(time.time())
@@ -278,7 +296,12 @@ class HKPIC(Network):
             self.reply_times += 1
             print(f'第{self.reply_times}条：「{comment}」->發佈成功')
             # 评论有时间间隔限制
-            time.sleep(60)
+            print_sleep(60)
+            self.myMoney(False)
+            if money_history == self.my_money:
+                # 如果发表评论后，金币数不增加，就不再发表评论
+                print('评论达到每日上限。不再发表评论。')
+                self.reply_times = 99
             return True
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
             print('回贴数超过限制')
@@ -289,17 +312,13 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
             # 评论有时间间隔限制
-            time.sleep(60)
+            print_sleep(60)
             return False
 
     # 访问别人空间
     def visitUserZone(self):
         if self.user_href:
-            if not self.user_href.startswith(self.host):
-                url = urljoin(self.host, self.user_href)
-            else:
-                url = self.user_href
-
+            url = self.user_href if self.user_href.startswith(self.host) else urljoin(self.host, self.user_href)
             print(f'访问别人空间：{url}')
             uid = ''
             formhash = ''
@@ -309,7 +328,6 @@ class HKPIC(Network):
                 uid = items[0]
 
             html = self.request(url, post=False)
-            print(html)
             soup = BeautifulSoup(html, 'html.parser')
             span = soup.find('input', attrs={'name': 'formhash'})
             if span.has_attr('value'):
@@ -327,4 +345,67 @@ class HKPIC(Network):
         message = quote('留个言，赚个金币。', 'utf-8')
         params = f'message={message}&refer={refer}&id={uid}&idtype=uid&commentsubmit=true&handlekey=commentwall_{uid}&formhash={formhash}'
         html = self.request(url, params)
-        print('留言成功' if html.find('操作成功') > -1 else '留言失败')
+        if html.find('操作成功') > -1:
+            print('留言成功')
+            pattern = re.compile(r'\{\s*\'cid\'\s*:\s*\'(\d*?)\'\s*\}', re.S)
+            items = re.findall(pattern, html)
+            if items:
+                cid = items[0]
+                self.deleteMessage(cid, formhash)
+        else:
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            items = re.findall(pattern, html)
+            print('\n'.join(items) if items else html)
+            print('留言失败')
+
+    # 删除留言
+    def deleteMessage(self, cid, formhash):
+        if not cid:
+            return
+        
+        if self.user_href.startswith(self.host):
+            refer = self.user_href
+        else:
+            refer = urljoin(self.host, self.user_href)
+
+        # 获取删除留言相关参数
+        self.headers['Referer'] = refer
+        api_param = f'mod=spacecp&ac=comment&op=delete&cid={cid}&handlekey=delcommenthk_{cid}&infloat=yes&handlekey=c_{cid}_delete&inajax=1&ajaxtarget=fwin_content_c_{cid}_delete'
+        url = self.encapsulateURL('home.php', api_param)
+        self.request(url, post=False)
+
+        # 请求删除留言
+        api_param = f'mod=spacecp&ac=comment&op=delete&cid={cid}&inajax=1'
+        url = self.encapsulateURL('home.php', api_param)
+        refer = quote(refer, 'utf-8')
+        params = f'referer={refer}&deletesubmit=true&formhash={formhash}&handlekey=c_{cid}_delete'
+        html = self.request(url, params)
+        if html.find('操作成功') > -1:
+            print('删除留言成功')
+        else:
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            items = re.findall(pattern, html)
+            print('\n'.join(items) if items else html)
+            print('删除留言失败')
+
+    # 获取我的金币数
+    def myMoney(self, is_print=True):
+        if not self.my_zone_url:
+            return
+        html = self.request(self.my_zone_url, post=False)
+        soup = BeautifulSoup(html, 'html.parser')
+        is_money = False
+        for string in soup.strings:
+            flag = repr(string)
+            if not is_money and flag.find('金錢') > -1:
+                is_money = True
+            elif is_money:
+                try:
+                    money = int(string)
+                    self.my_money = money
+                    if is_print:
+                        print(f'金钱：{money}')
+                    return
+                except ValueError:
+                    return
+                    

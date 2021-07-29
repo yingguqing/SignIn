@@ -12,7 +12,9 @@ import string
 import requests
 import json
 import base64
+import time
 
+DEBUG = False
 all_cookies = {}
 
 # 获取运行目录
@@ -174,6 +176,24 @@ def xor(text, key, encrty):
         result = str(base64.b64encode(result.encode("utf-8")), "utf-8")
     return result
 
+
+# 休息提示
+def print_sleep(secs, interval=10):
+    if secs <= 0:
+        return
+
+    global DEBUG
+    if not DEBUG:
+        time.sleep(secs)
+        return
+
+    count = 0
+    while count < secs:
+        time.sleep(1)
+        if count % interval == 0:
+            print(f'休息{secs}， 还剩{secs - count}秒')
+        count += 1
+        
 
 def int_overflow(val):
     maxint = 2147483647
