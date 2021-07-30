@@ -409,12 +409,19 @@ class HKPIC(Network):
         if not uid:
             return
 
+        print('获取所有留言动态')
         api_params = f'mod=space&uid={uid}&do=home&view=me&from=space'
         url = self.encapsulateURL('home.php', api_params)
         
         html = self.request(url, post=False)
         pattern = re.compile(r'"home.php\?mod=spacecp&amp;ac=feed&amp;op=menu&amp;feedid=(\d+)"')
         feedids = re.findall(pattern, html)
+        if feedids:
+            print(f'共有{len(feedids)}条动态')
+        else:
+            print('没有动态需要删除')
+            return
+        
         for feedid in feedids:
             self.delLeavMessageDynamic(feedid, url)
     
