@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_cookies, print_sleep, save_cookies, save_readme, save_file
+from common import load_cookies, print_sleep, save_cookies, save_readme
 from bs4 import BeautifulSoup
 import re
 import base64

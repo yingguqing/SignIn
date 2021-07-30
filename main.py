@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from os import path
-from posixpath import ismount
 from cmcc import CMCC
 from hkpic import HKPIC
 import sys
 import json
-from common import weixin_send_msg, save_readme, get_running_path, save_file
-import re
+from common import weixin_send_msg, save_readme
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
