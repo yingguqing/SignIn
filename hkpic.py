@@ -304,6 +304,7 @@ class HKPIC(Network):
             self.reply_times = 9999
             return True
         else:
+            print(comment)
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
