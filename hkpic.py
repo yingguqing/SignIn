@@ -133,7 +133,7 @@ class HKPIC(Network):
 
         # 发表15次评论
         if self.reply_times < self.max_reply_times:
-            print('开始评论。')
+            print('开始评论。每次评论需要间隔60秒。')
         self.forum_list(True)
 
         # 访问别人空间并留言
@@ -289,15 +289,15 @@ class HKPIC(Network):
         if html.find('非常感謝，回復發佈成功') > -1:
             self.reply_times += 1
             print(f'第{self.reply_times}条：「{comment}」-> 發佈成功')
-            # 评论有时间间隔限制
-            if self.reply_times < self.max_reply_times:
-                print_sleep(60)
-
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表评论后，金币数不增加，就不再发表评论
                 print('评论达到每日上限。不再发表评论。')
                 self.reply_times = 99
+            elif self.reply_times < self.max_reply_times:
+                print(f'金钱：+{self.my_money - money_history}')
+            # 评论有时间间隔限制
+            print_sleep(60)
             return True
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
             print('评论数超过限制')
@@ -306,9 +306,7 @@ class HKPIC(Network):
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
             items = re.findall(pattern, html)
-            if items:
-                items.insert(0, comment)
-            print('\n'.join(items) if items else html)
+            print('\n'.join([comment] + items) if items else html)
             # 评论有时间间隔限制
             if self.reply_times < self.max_reply_times:
                 print_sleep(60)
