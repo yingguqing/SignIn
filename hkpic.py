@@ -304,9 +304,10 @@ class HKPIC(Network):
             self.reply_times = 9999
             return True
         else:
-            print(comment)
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
             items = re.findall(pattern, html)
+            if items:
+                items.insert(0, comment)
             print('\n'.join(items) if items else html)
             # 评论有时间间隔限制
             if self.reply_times < self.max_reply_times:
