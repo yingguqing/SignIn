@@ -119,7 +119,7 @@ def weixin_send_msg(msg, openid):
 
 
 # 保存文件
-def save_file(name, text):
+def save_file(text, name):
     path = get_running_path(name)
     with open(path, 'a+') as f:
         f.write(text)
@@ -127,10 +127,10 @@ def save_file(name, text):
 
 
 # 读取相应的cookie
-def load_cookies(key, xor_key):
+def load_cookies(key, xor_key, default):
     path = get_running_path('cookies.txt')
     if not os.path.exists(path):
-        return ''
+        return default
     global all_cookies
     if not all_cookies:
         with open(path, 'r') as f:
@@ -140,15 +140,15 @@ def load_cookies(key, xor_key):
     if key in all_cookies.keys():
         value = all_cookies[key]
     else:
-        return {}
+        return default
     if value:
         try:
             s = xor(value, xor_key, False)
             return json.loads(s)
         except ValueError:
-            return {}
+            return default
     else:
-        return {}
+        return default
 
 
 # 写入cookie

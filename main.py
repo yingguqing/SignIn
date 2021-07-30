@@ -8,7 +8,7 @@ from hkpic import HKPIC
 import sys
 import json
 from common import weixin_send_msg, save_readme, get_running_path, save_file
-
+import re
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

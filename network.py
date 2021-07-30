@@ -63,17 +63,28 @@ class Network:
     def response_cookies(self, cookies):
         pass
 
+    # 补全链接
+    def fullURL(self, href, host=None):
+        host = self.host if not host else host
+        if href.startswith(host):
+            return href
+        else:
+            return urljoin(host, href)
+
     # 请求的url封装
     def encapsulateURL(self, api, params):
         url = urljoin(self.host, api)
-        if params is not None:
-            query = ''
-            if type(params) is dict:
-                p = []
-                for (key, value) in params.items():
-                    p.append('{key}={value}'.format(key=key, value=value))
-                query = '&'.join(p)
-            elif type(params) is str:
-                query = params
-            url += '?%s' % query
-        return url
+        if not params:
+            return url
+
+        query = ''
+        if type(params) is dict:
+            p = []
+            for (key, value) in params.items():
+                p.append('{key}={value}'.format(key=key, value=value))
+            query = '&'.join(p)
+        elif type(params) is str:
+            query = params
+
+        return f'{url}?{query}'
+

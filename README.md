@@ -29,7 +29,4 @@
 移动签到,系统繁忙
 每日抽奖,啊哦,幸运女神没来,未中奖,继续加油哦~  
 {"errcode": 45015, "errmsg": "response out of time limit or subscription is canceled rid: 6103448b-5ead6733-3dba7385"}  
-2021-07-30  
-移动签到,系统繁忙  
-每日抽奖,啊哦,幸运女神没来,未中奖,继续加油哦~  
-金钱：None
+金钱：208  
