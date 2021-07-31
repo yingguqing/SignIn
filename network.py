@@ -5,6 +5,7 @@
 import requests
 from urllib.parse import urljoin
 import time
+import platform
 
 
 class Network:
@@ -38,24 +39,26 @@ class Network:
         requests.packages.urllib3.disable_warnings()
         requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
         try:
-            requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
-        except AttributeError:
-            pass
-        
-        if post:
-            res = requests.post(url=url, data=params, headers=url_headers, verify=False)
-        else:
-            res = requests.get(url=url, headers=url_headers, verify=False)
+            if platform.system() != "Windows":
+                requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
 
-        res.encoding = 'utf-8'
+            if post:
+                res = requests.post(url=url, data=params, headers=url_headers, verify=False)
+            else:
+                res = requests.get(url=url, headers=url_headers, verify=False)
 
-        # 保存cookie
-        if is_save_cookies:
-            self.response_cookies(res.cookies)
-
-        try:
+            res.encoding = 'utf-8'
+            # 保存cookie
+            if is_save_cookies:
+                self.response_cookies(res.cookies)
             jsonValue = res.json()
+            res.close()
             return jsonValue
+        except AttributeError as e:
+            print(e)
+            pass
+        except requests.exceptions.ConnectionError:
+            return '域名不通'
         except ValueError:
             return res.text
 
@@ -87,4 +90,3 @@ class Network:
             query = params
 
         return f'{url}?{query}'
-

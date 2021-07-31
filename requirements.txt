@@ -1,4 +1,4 @@
-requests==2.25.1
-urllib3==1.26.4
-certifi==2020.12.5
-Beautifulsoup4==4.9.3
+requests
+urllib3
+certifi
+Beautifulsoup4

@@ -7,7 +7,6 @@ import ctypes
 import random
 import os
 import sys
-import random
 import string
 import requests
 import json
@@ -16,6 +15,7 @@ import time
 
 DEBUG = False
 all_cookies = {}
+
 
 # 获取运行目录
 def get_running_path(path=''):
@@ -54,14 +54,19 @@ def random_num_string(randomlength=32):
     return random_str
 
 
-# 保存内容到readme中
-def save_readme(texts):
+# 保存日志到文件中
+def save_log(texts):
     fold = os.path.abspath('.')
-    readMePath = os.path.join(fold, "README.md")
-    with open(readMePath, 'a+') as f:
+    path = os.path.join(fold, "log.txt")
+    with open(path, 'a+', encoding='utf-8') as f:
         f.seek(0)
-        f.write('  \n')
-        f.write('  \n'.join(texts))
+        if type(texts) is list:
+            f.write('\n'.join(texts))
+        elif type(texts) is str:
+            f.write(texts)
+        else:
+            f.write(f'{texts}')
+        f.write('\n')
         f.flush()
 
 
@@ -115,7 +120,7 @@ def weixin_send_msg(msg, openid):
     result = response.json()
     print(result)
     all_msg.append(json.dumps(result))
-    save_readme(all_msg)
+    save_log(all_msg)
 
 
 # 保存文件
@@ -167,10 +172,10 @@ def xor(text, key, encrty):
     ml = len(text)
     kl = len(key)
     result = []
-    #通过取整，求余的方法重新得到key
+    # 通过取整，求余的方法重新得到key
     for i in range(ml):
-        #一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"刚好相反
-        result.append(chr(ord(key[i % kl])^ord(text[i])))
+        # 一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"刚好相反
+        result.append(chr(ord(key[i % kl]) ^ ord(text[i])))
     result = ''.join(result)
     if encrty:
         result = str(base64.b64encode(result.encode("utf-8")), "utf-8")
@@ -193,7 +198,7 @@ def print_sleep(secs, interval=10):
         if count % interval == 0:
             print(f'休息{secs}， 还剩{secs - count}秒')
         count += 1
-        
+
 
 def int_overflow(val):
     maxint = 2147483647

@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_cookies, print_sleep, save_cookies, save_readme
+from common import load_cookies, print_sleep, save_cookies, save_log
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -25,12 +25,15 @@ class HKPIC(Network):
         self.xor = jsonValue['xor']
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC'
+        # 是否需要登录
         self.is_login = False
         # 需要签到
         self.need_sign_in = True
+        # 网络请求所要用到的cookie
         self.cookies = ''
         # 读取本地cookie值
         self.cookie_dit = load_cookies('HKPIC', self.xor, {})
+        # 将cookie初始化成已保存的值
         self.response_cookies({})
         # 别人空间地址
         self.user_href = ''
@@ -46,10 +49,10 @@ class HKPIC(Network):
         self.formhash = ''
         # 是否留言
         self.is_leave_message = True
+        # 基本的请求头，特殊情况时，在请求上使用header参数来特殊处理
         self.headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Origin': 'bisi666.xyz',
             'Accept-Encoding': 'gzip, deflate',
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 GDMobile/8.0.4',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -60,34 +63,35 @@ class HKPIC(Network):
             'Upgrade-Insecure-Requests': '1',
             'Referer': self.fullURL('plugin.php?id=k_pwchangetip:tip')
         }
-        self.comments = ["走过了年少，脚起了水泡。", "人生自古谁无死，啊个拉屎不用纸！", "如果跟导师讲不清楚，那么就把他搞胡涂吧！",
-                         "不要在一棵树上吊死，在附近几棵树上多试试死几次。", "老天，你让夏天和冬天同房了吧？生出这鬼天气！",
-                         "恋爱就是无数个饭局，结婚就是一个饭局。", "如果回帖是一种美德，那我早就成为圣人了！", "男人靠的住，母猪能上树！",
-                         "天塌下来你顶着，我垫着！", "美女未抱身先走，常使色狼泪满襟。", "穿别人的鞋，走自己的路，让他们找去吧。",
-                         "怀揣两块，胸怀500万！", "鸳鸳相抱何时了，鸯在一边看热闹。", "丑，但是丑的特别，也就是特别的丑！",
-                         "自从我变成了狗屎，就再也没有人踩在我头上了。", "我怀疑楼主用的是金山快译且额外附带了中对中翻译。",
-                         "流氓不可怕，就怕流氓有文化。", "听君一席话，省我十本书！", "如果有一双眼睛陪我一同哭泣，就值得我为生命受苦。",
-                         "人生重要的不是所站的位置，而是所朝的方向！", "内练一口气，外练一口屁。", "找不到恐龙，就用蜥蜴顶。", 
-                         "女，喜甜食，甚胖！该女有一癖好：痛恨蚂蚁，见必杀之。问其故曰：这小东西，那么爱吃甜食，腰还那么细！",
-                         "不在放荡中变坏，就在沉默中变态！", "只要不下流，我们就是主流！", "月经不仅仅是女人的痛苦，也是男人的痛苦。",
-                         "佛曰，色即是空，空即是色！今晚，偶想空一下。","勿以坑小而不灌，勿以坑大而灌之。", "读书读到抽筋处，文思方能如尿崩！",
-                         "睡眠是一门艺术——谁也无法阻挡我追求艺术的脚步！", "人生不能像做菜、把所有的料都准备好才下锅！","锻炼肌肉，防止挨揍！", 
-                         "我妈常说，我们家要是没有电话就不会这么穷。", "我不在江湖，但江湖中有我的传说。", "我喜欢孩子，更喜欢造孩子的过程！",
-                         "时间永远是旁观者，所有的过程和结果，都需要我们自己承担。", "其实我是一个天才，可惜天妒英才！", "站的更高，尿的更远。",
-                         "漏洞与补丁齐飞，蓝屏共死机一色！", "比我有才的都没我帅，比我帅的都没我有才！", "我身在江湖，江湖里却没有我得传说。",
-                         "有来有往，你帮我挖坑，我买一送一，填埋加烧纸。", "所有的男人生来平等，结婚的除外。", "不在课堂上沉睡，就在酒桌上埋醉。",
-                         "只有假货是真的，别的都是假的！", "男人有冲动可能是爱你，也可能是不爱，但没有冲动肯定是不爱！", "我在马路边丢了一分钱！",
-                         "商女不知亡国恨、妓女不懂婚外情。", "脱了衣服我是禽兽，穿上衣服我是衣冠禽兽！", "你的丑和你的脸没有关系。",
-                         "路边的野花不要，踩。", "长得真有创意，活得真有勇气！",  "走自己的路，让别人打车去吧。", "如果恐龙是人，那人是什么？"
-                         "男人与女人，终究也只是欲望的动物吧！真的可以因为爱而结合吗？对不起，我也不知道。","有事秘书干，没事干秘书！",
-                         "关羽五绺长髯，风度翩翩，手提青龙偃月刀，江湖人送绰号——刀郎。", "解释就系掩饰，掩饰等于无出色，无出色不如回家休息！",
-                         "俺从不写措字，但俺写通假字！", "生我之前谁是我，生我之后我是谁？", "我靠！看来医生是都疯了！要不怎么让他出院了！",
-                         "勃起不是万能的，但不能勃起却是万万都不能的！", "沒有激情的亲吻，哪來床上的翻滾？", "做爱做的事，交配交的人。",
-                         "有时候，你必须跌到你从未经历的谷底，才能再次站在你从未到达的高峰。", "避孕的效果：不成功，便成“人”。",
-                         "与时俱进，你我共赴高潮！", "恐龙说：“遇到色狼，不慌不忙；遇到禽兽，慢慢享受。", "生，容易。活，容易。生活，不容易。",
-                         "人家解释，我想，这世界上又要多我这一个疯子了。", "长大了娶唐僧做老公，能玩就玩一玩，不能玩就把他吃掉。",
-                         "此地禁止大小便，违者没收工具。", "昨天，系花对我笑了一下，乐得我晚上直数羊，一只羊，两只羊，三只羊。",
-                         "打破老婆终身制，实行小姨股份制。引入小姐竞争制，推广情人合同制。", "要是我灌水，就骂我“三个代表”没学好吧。"]
+        # 所有评论内容，随机使用
+        self.comments = ['走过了年少，脚起了水泡。', '人生自古谁无死，啊个拉屎不用纸！', '如果跟导师讲不清楚，那么就把他搞胡涂吧！',
+                         '不要在一棵树上吊死，在附近几棵树上多试试死几次。', '老天，你让夏天和冬天同房了吧？生出这鬼天气！',
+                         '恋爱就是无数个饭局，结婚就是一个饭局。', '如果回帖是一种美德，那我早就成为圣人了！', '男人靠的住，母猪能上树！',
+                         '天塌下来你顶着，我垫着！', '美女未抱身先走，常使色狼泪满襟。', '穿别人的鞋，走自己的路，让他们找去吧。',
+                         '怀揣两块，胸怀500万！', '鸳鸳相抱何时了，鸯在一边看热闹。', '丑，但是丑的特别，也就是特别的丑！',
+                         '自从我变成了狗屎，就再也没有人踩在我头上了。', '我怀疑楼主用的是金山快译且额外附带了中对中翻译。',
+                         '流氓不可怕，就怕流氓有文化。', '听君一席话，省我十本书！', '如果有一双眼睛陪我一同哭泣，就值得我为生命受苦。',
+                         '人生重要的不是所站的位置，而是所朝的方向！', '内练一口气，外练一口屁。', '找不到恐龙，就用蜥蜴顶。',
+                         '女，喜甜食，甚胖！该女有一癖好：痛恨蚂蚁，见必杀之。问其故曰：这小东西，那么爱吃甜食，腰还那么细！',
+                         '不在放荡中变坏，就在沉默中变态！', '只要不下流，我们就是主流！', '月经不仅仅是女人的痛苦，也是男人的痛苦。',
+                         '佛曰，色即是空，空即是色！今晚，偶想空一下。', '勿以坑小而不灌，勿以坑大而灌之。', '读书读到抽筋处，文思方能如尿崩！',
+                         '睡眠是一门艺术——谁也无法阻挡我追求艺术的脚步！', '人生不能像做菜、把所有的料都准备好才下锅！', '锻炼肌肉，防止挨揍！',
+                         '我妈常说，我们家要是没有电话就不会这么穷。', '我不在江湖，但江湖中有我的传说。', '我喜欢孩子，更喜欢造孩子的过程！',
+                         '时间永远是旁观者，所有的过程和结果，都需要我们自己承担。', '其实我是一个天才，可惜天妒英才！', '站的更高，尿的更远。',
+                         '漏洞与补丁齐飞，蓝屏共死机一色！', '比我有才的都没我帅，比我帅的都没我有才！', '我身在江湖，江湖里却没有我得传说。',
+                         '有来有往，你帮我挖坑，我买一送一，填埋加烧纸。', '所有的男人生来平等，结婚的除外。', '不在课堂上沉睡，就在酒桌上埋醉。',
+                         '只有假货是真的，别的都是假的！', '男人有冲动可能是爱你，也可能是不爱，但没有冲动肯定是不爱！', '我在马路边丢了一分钱！',
+                         '商女不知亡国恨、妓女不懂婚外情。', '脱了衣服我是禽兽，穿上衣服我是衣冠禽兽！', '你的丑和你的脸没有关系。',
+                         '路边的野花不要，踩。', '长得真有创意，活得真有勇气！',  '走自己的路，让别人打车去吧。', '如果恐龙是人，那人是什么？'
+                         '男人与女人，终究也只是欲望的动物吧！真的可以因为爱而结合吗？对不起，我也不知道。', '有事秘书干，没事干秘书！',
+                         '关羽五绺长髯，风度翩翩，手提青龙偃月刀，江湖人送绰号——刀郎。', '解释就系掩饰，掩饰等于无出色，无出色不如回家休息！',
+                         '俺从不写措字，但俺写通假字！', '生我之前谁是我，生我之后我是谁？', '我靠！看来医生是都疯了！要不怎么让他出院了！',
+                         '勃起不是万能的，但不能勃起却是万万都不能的！', '沒有激情的亲吻，哪來床上的翻滾？', '做爱做的事，交配交的人。',
+                         '有时候，你必须跌到你从未经历的谷底，才能再次站在你从未到达的高峰。', '避孕的效果：不成功，便成“人”。',
+                         '与时俱进，你我共赴高潮！', '恐龙说：“遇到色狼，不慌不忙；遇到禽兽，慢慢享受。', '生，容易。活，容易。生活，不容易。',
+                         '人家解释，我想，这世界上又要多我这一个疯子了。', '长大了娶唐僧做老公，能玩就玩一玩，不能玩就把他吃掉。',
+                         '此地禁止大小便，违者没收工具。', '昨天，系花对我笑了一下，乐得我晚上直数羊，一只羊，两只羊，三只羊。',
+                         '打破老婆终身制，实行小姨股份制。引入小姐竞争制，推广情人合同制。', '要是我灌水，就骂我“三个代表”没学好吧。']
 
     # 保存cookie
     def response_cookies(self, cookies):
@@ -95,12 +99,12 @@ class HKPIC(Network):
         self.cookies = ''
         for key, value in self.cookie_dit.items():
             self.cookies += f'{key}={value};'
+        # 将cookie加密保存到本地文件中
         save_cookies('HKPIC', self.xor, json.dumps(self.cookie_dit))
 
     # 开始入口
     def runAction(self, auto=True):
         if auto:
-            print('------------- 比思签到 -------------')
             # 获取所有比思域名
             self.getHost()
 
@@ -114,7 +118,7 @@ class HKPIC(Network):
 
         # 如果cookie失效，就自动登录
         if not self.is_login:
-            if auto and self.login() :
+            if auto and self.login():
                 self.runAction(False)
             return
         elif auto:
@@ -122,7 +126,6 @@ class HKPIC(Network):
 
         if not self.formhash:
             print('formhash提取失败')
-            print('------------- 比思签到完成 -------------')
             return
 
         # 签到
@@ -131,7 +134,7 @@ class HKPIC(Network):
         else:
             print('今天已签到。')
 
-        # 发表15次评论
+        # 评论
         if self.reply_times < self.max_reply_times:
             print('开始评论。每次评论需要间隔60秒。')
         self.forum_list(True)
@@ -141,11 +144,10 @@ class HKPIC(Network):
 
         # 查询我的金币
         self.myMoney()
-        save_readme([f'金钱：{self.my_money}'])
+        save_log([f'金钱：{self.my_money}'])
 
         # 删除自己空间留言所产生的动态
         self.delAllLeavMessageDynamic()
-        print('------------- 比思签到完成 -------------')
 
     # 获取比思域名
     def getHost(self):
@@ -170,6 +172,12 @@ class HKPIC(Network):
         for host in self.all_host:
             url = self.fullURL('forum.php', host)
             html = self.request(url, post=False)
+
+            if html == '域名不通':
+                print(f'{host} 请求失败，切换下一个域名')
+                time.sleep(1)
+                continue
+
             if html is not None and html.find('比思論壇') > -1:
                 self.host = host
                 self.headers['Origin'] = host
@@ -197,7 +205,7 @@ class HKPIC(Network):
         self.cookies = ''
         api_param = 'mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes&inajax=1'
         url = self.encapsulateURL('member.php', api_param)
-        params = f'fastloginfield=username&username={self.username}&password={self.password}&quickforward=yes&handlekey=ls'
+        params = f'fastloginfield=username&cookietime=2592000&username={self.username}&password={self.password}&quickforward=yes&handlekey=ls'
         jsonString = self.request(url, params)
         tip = self.fullURL('plugin.php?id=k_pwchangetip:tip')
         result = jsonString.find(tip) > -1
@@ -237,7 +245,7 @@ class HKPIC(Network):
                 if item != 'space-uid-562776.html':
                     self.user_href = self.fullURL(item)
                     break
-        
+
         if self.reply_times >= self.max_reply_times:
             return
 
@@ -251,7 +259,7 @@ class HKPIC(Network):
         # 板块内的贴子数(每个版块内最多回复3次)
         forum_reply_time = 0
         for span in spans:
-            if not span.has_attr("style"):
+            if not span.has_attr('style'):
                 href = span['href']
                 # 发表评论
                 comment = choice(self.comments)
@@ -409,22 +417,22 @@ class HKPIC(Network):
         if not uid:
             return
 
-        print('获取所有留言动态')
+        print('获取留言动态')
         api_params = f'mod=space&uid={uid}&do=home&view=me&from=space'
         url = self.encapsulateURL('home.php', api_params)
-        
+
         html = self.request(url, post=False)
         pattern = re.compile(r'"home.php\?mod=spacecp&amp;ac=feed&amp;op=menu&amp;feedid=(\d+)"')
         feedids = re.findall(pattern, html)
         if feedids:
-            print(f'共有{len(feedids)}条动态')
+            print(f'{len(feedids)}条动态')
         else:
             print('没有动态需要删除')
             return
-        
+
         for feedid in feedids:
             self.delLeavMessageDynamic(feedid, url)
-    
+
     # 删除一条动态
     def delLeavMessageDynamic(self, feedid, referer):
         if not feedid or not referer:
@@ -442,7 +450,7 @@ class HKPIC(Network):
         params = f'referer={referer}&feedsubmit=true&formhash={self.formhash}'
         html = self.request(url, params)
         if html.find('操作成功') > -1:
-            print('删除动态成功')
+            print('一条删除动态成功')
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
             items = re.findall(pattern, html)
