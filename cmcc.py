@@ -67,6 +67,10 @@ class CMCC(Network):
         headers = self.encapsulateHeader()
         url = self.encapsulateURL('gmccapp/confactapp/', api_param)
         jsonValue = self.request(url, params, headers, is_save_cookies=False)
+        if not jsonValue:
+            self.weixin.append('{title}：「返回数据为空」'.format(title=title))
+            return
+
         print(jsonValue)
         allKeys = jsonValue.keys()
         if 'isDraw' in allKeys:

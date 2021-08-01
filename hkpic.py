@@ -395,21 +395,15 @@ class HKPIC(Network):
         if not self.my_zone_url:
             return
         html = self.request(self.my_zone_url, post=False)
-        soup = BeautifulSoup(html, 'html.parser')
-        is_money = False
-        for string in soup.strings:
-            flag = repr(string)
-            if not is_money and flag.find('金錢') > -1:
-                is_money = True
-            elif is_money:
-                try:
-                    money = int(string)
-                    self.my_money = money
-                    if is_print:
-                        print(f'金钱：{money}')
-                    return
-                except ValueError:
-                    return
+        pattern = re.compile(r'<li>金錢:\s*<a href=".*?">(\d+)</a>', re.S)
+        items = re.findall(pattern, html)
+        if items:
+            money = int(items[0])
+            self.my_money = money
+            if is_print:
+                print(f'金钱：{money}')
+        else:
+            print('获取金币失败')
 
     # 删除自己空间留言所产生的动态
     def delAllLeavMessageDynamic(self):
