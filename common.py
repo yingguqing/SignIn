@@ -17,6 +17,22 @@ DEBUG = False
 all_cookies = {}
 
 
+
+# 从字典中获取相应key值的value
+def valueForKey(dic, key, default=None):
+    if not dic or not key:
+        return default
+
+    if type(dic) is not dict:
+        return default
+
+    if key not in dic.keys():
+        return default
+
+    value = dic[key]
+    return value if value else default
+
+
 # 获取运行目录
 def get_running_path(path=''):
     if getattr(sys, 'frozen', False):
@@ -148,6 +164,7 @@ def load_cookies(key, xor_key, default):
         return default
     if value:
         try:
+            print(xor_key)
             s = xor(value, xor_key, False)
             return json.loads(s)
         except ValueError:

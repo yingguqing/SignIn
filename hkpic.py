@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_cookies, print_sleep, save_cookies, save_log
+from common import load_cookies, print_sleep, save_cookies, save_log, valueForKey
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -19,10 +19,10 @@ class HKPIC(Network):
         super().__init__(jsonValue)
         self.all_host = [self.host]
         self.index = 0
-        self.username = jsonValue['username']
-        self.password = quote(jsonValue['password'])
+        self.username = valueForKey(jsonValue, 'username')
+        self.password = quote(valueForKey(jsonValue, 'password', default=''))
         # 加密的key
-        self.xor = jsonValue['xor']
+        self.xor = valueForKey(jsonValue, 'xor')
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC'
         # 是否需要登录
@@ -63,6 +63,8 @@ class HKPIC(Network):
             'Upgrade-Insecure-Requests': '1',
             'Referer': self.fullURL('plugin.php?id=k_pwchangetip:tip')
         }
+        # 帖子较多的板块
+        self.all_fid = [2, 10, 11, 18, 20, 31, 42, 50, 79, 117, 123, 135, 142, 153, 239, 313, 398, 445, 454, 474, 776, 924]
         # 所有评论内容，随机使用
         self.comments = ['走过了年少，脚起了水泡。', '人生自古谁无死，啊个拉屎不用纸！', '如果跟导师讲不清楚，那么就把他搞胡涂吧！',
                          '不要在一棵树上吊死，在附近几棵树上多试试死几次。', '老天，你让夏天和冬天同房了吧？生出这鬼天气！',
@@ -136,7 +138,7 @@ class HKPIC(Network):
 
         # 评论
         if self.reply_times < self.max_reply_times:
-            print('开始评论。每次评论需要间隔60秒。')
+            print('开始评论。\n每次评论需要间隔60秒。')
         self.forum_list(True)
 
         # 访问别人空间并留言
@@ -156,7 +158,11 @@ class HKPIC(Network):
 
         req = self.request(url, post=False, is_save_cookies=False)
         if type(req) is dict and 'content' in req.keys():
-            content = str(base64.b64decode(req['content']), 'utf-8')
+            content = str(base64.b64decode(valueForKey(req, 'content', default='')), 'utf-8')
+            if not content:
+                print('获取域名失败')
+                return
+
             pattern = re.compile(r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:[\w\d]+|([^[:punct:]\s]|/)))', re.S)
             all = re.findall(pattern, content)
             for h in all:
@@ -227,10 +233,9 @@ class HKPIC(Network):
 
     # 版块帖子列表
     def forum_list(self, first_time=False):
-        # 帖子较多的板块
-        all = [2, 10, 11, 18, 20, 31, 42, 50, 79, 117, 123, 135, 142, 153, 239, 313, 398, 445, 454, 474, 776, 924]
         # 版块id
-        fid = choice(all)
+        fid = choice(self.all_fid)
+        self.all_fid.remove(fid)
         # 页码
         page = randint(3, 10)
         api = f'forum-{fid}-{page}.html'
@@ -254,6 +259,10 @@ class HKPIC(Network):
             self.myMoney(False)
 
         soup = BeautifulSoup(html, 'html.parser')
+        span = soup.find('a', href=f'forum-{fid}-1.html')
+        if span and span.text:
+            print(f'进入版块：{fid}「{span.text}」')
+                
         # 提取板块下所有的帖子链接
         spans = soup.find_all('a', onclick='atarget(this)')
         # 板块内的贴子数(每个版块内最多回复3次)

@@ -5,7 +5,7 @@
 import requests
 from urllib.parse import urljoin
 import time
-import platform
+from common import valueForKey
 
 
 class Network:
@@ -14,7 +14,8 @@ class Network:
     weixin = [time.strftime("%Y-%m-%d", time.localtime())]
 
     def __init__(self, jsonValue):
-        self.host = jsonValue['host']
+        self.host = valueForKey(jsonValue, 'host')
+        self.verify = True
         self.cookies = ''
         # 重试次数
         self.retime = 0
@@ -37,30 +38,32 @@ class Network:
             url_headers['Cookie'] = self.cookies
 
         requests.packages.urllib3.disable_warnings()
-        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+        # requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+        text = ''
         try:
-            if platform.system() != "Windows":
-                requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
-
+            # requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
             if post:
-                res = requests.post(url=url, data=params, headers=url_headers, verify=False)
+                res = requests.post(url=url, data=params, headers=url_headers, verify=self.verify)
             else:
-                res = requests.get(url=url, headers=url_headers, verify=False)
+                res = requests.get(url=url, headers=url_headers, verify=self.verify)
 
             res.encoding = 'utf-8'
             # 保存cookie
             if is_save_cookies:
                 self.response_cookies(res.cookies)
-            jsonValue = res.json()
-            res.close()
-            return jsonValue
+
+            try:
+                return res.json()
+            except ValueError:  
+                return res.text
+            finally:
+                res.close()
+
         except AttributeError as e:
             print(e)
             pass
         except requests.exceptions.ConnectionError:
             return '域名不通'
-        except ValueError:
-            return res.text
 
     # 保存cookie，子类重写
     def response_cookies(self, cookies):

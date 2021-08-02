@@ -46,6 +46,7 @@ jobs:
          git config --local user.name "yingguqing"
          git add README.md
          git add cookies.txt
+         git add log.txt
          git commit -m "update readme.md"
          
     - name: Push changes

@@ -3,7 +3,7 @@
 # 广东移动app每日签到
 
 from network import Network
-from common import random_string, sign
+from common import random_string, sign, valueForKey
 import time
 import json
 
@@ -13,9 +13,9 @@ class CMCC(Network):
     def __init__(self, sessionid, jsonValue):
         super().__init__(jsonValue)
         self.sessionid = sessionid
-        self.id = jsonValue['id']
-        self.ss = jsonValue['ss']
-        self.ac_id = jsonValue['ac_id']
+        self.id = valueForKey(jsonValue, 'id')
+        self.ss = valueForKey(jsonValue, 'ss')
+        self.ac_id = valueForKey(jsonValue, 'ac_id')
         self.headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
             'Accept': 'application/json, text/plain, */*',
@@ -74,15 +74,15 @@ class CMCC(Network):
         print(jsonValue)
         allKeys = jsonValue.keys()
         if 'isDraw' in allKeys:
-            isDraw = jsonValue['isDraw']
-            desc = jsonValue['desc']
+            isDraw = valueForKey(jsonValue, 'isDraw')
+            desc = valueForKey(jsonValue, 'desc')
             if isDraw == '1':
                 self.weixin.append('{title},{desc}'.format(title=title, desc=desc))
                 return
         elif 'result' in allKeys:
-            result = jsonValue['result']
-            desc = jsonValue['desc']
-            if 'isDraw' in allKeys and jsonValue['isDraw'] == '1':
+            result = valueForKey(jsonValue, 'result')
+            desc = valueForKey(jsonValue, 'desc')
+            if 'isDraw' in allKeys and valueForKey(jsonValue, 'isDraw') == '1':
                 # 已抽奖
                 self.weixin.append('{title},{desc}'.format(title=title, desc=desc))
                 return
