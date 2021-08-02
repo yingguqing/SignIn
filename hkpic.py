@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_cookies, print_sleep, save_cookies, save_log, valueForKey
+from common import load_cookies, print_sleep, save_cookies, save_log, valueForKey, today_in_log
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -141,8 +141,9 @@ class HKPIC(Network):
             print('开始评论。\n每次评论需要间隔60秒。')
         self.forum_list(True)
 
-        # 访问别人空间并留言
-        self.visitUserZone()
+        if not today_in_log():
+            # 访问别人空间并留言
+            self.visitUserZone()
 
         # 查询我的金币
         self.myMoney()
