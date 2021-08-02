@@ -59,7 +59,7 @@ class CMCC(Network):
         lv = int(time.time() * 1000)
         headers = {
             'Referer': 'https://gd.10086.cn/gmccapp/confactpage/signInNew/index.html?isApp=0&WT.ac_id=%s&session=%s' % (self.ac_id, self.sessionid),
-            'Cookie': 'WT_FPC=id={id}:lv={lv}:ss={ss}'.format(id=self.id, lv=lv, ss=self.ss)
+            'Cookie': 'WT_FPC=id={id}:lv={lv}:ss={ss}; mobile=28985-22868-5494-39063'.format(id=self.id, lv=lv, ss=self.ss)
         }
         return headers
 
