@@ -5,7 +5,7 @@ from cmcc import CMCC
 from hkpic import HKPIC
 import sys
 import json
-from common import weixin_send_msg, save_log
+from common import weixin_send_msg, save_log, today_in_log
 
 
 if __name__ == "__main__":
@@ -17,11 +17,12 @@ if __name__ == "__main__":
     openid = jsonValue['WeiXinOpenID']
 
     # 广东移动App签到
-    cmccValue = jsonValue['CMCC']
-    cmcc = CMCC(sessionid, cmccValue)
-    cmcc.runAction()
-    weixin_send_msg('\n'.join(cmcc.weixin), openid)
-    save_log(cmcc.weixin)
+    if not today_in_log():
+        cmccValue = jsonValue['CMCC']
+        cmcc = CMCC(sessionid, cmccValue)
+        cmcc.runAction()
+        weixin_send_msg('\n'.join(cmcc.weixin), openid)
+        save_log(cmcc.weixin)
 
     # 比思签到+赚取每日金币
     hkpicValue = jsonValue['HKPIC']

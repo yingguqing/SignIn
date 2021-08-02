@@ -70,10 +70,21 @@ def random_num_string(randomlength=32):
     return random_str
 
 
+# 今天的日期是否在日志里
+def today_in_log():
+    path = get_running_path("log.txt")
+    if not os.path.exists(path):
+        return False
+    t = time.strftime("%Y-%m-%d", time.localtime())
+    with open(path, 'r') as f:
+        text = f.read()
+        f.close()
+        return text.find(t) > -1
+
+
 # 保存日志到文件中
 def save_log(texts):
-    fold = os.path.abspath('.')
-    path = os.path.join(fold, "log.txt")
+    path = get_running_path("log.txt")
     with open(path, 'a+', encoding='utf-8') as f:
         f.seek(0)
         if type(texts) is list:
@@ -145,6 +156,7 @@ def save_file(text, name):
     with open(path, 'a+') as f:
         f.write(text)
         f.flush()
+        f.close()
 
 
 # 读取相应的cookie
@@ -158,6 +170,7 @@ def load_cookies(key, xor_key, default):
             jsonData = f.read()
             if jsonData:
                 all_cookies = json.loads(jsonData)
+            f.close()
     if key in all_cookies.keys():
         value = all_cookies[key]
     else:
@@ -181,6 +194,7 @@ def save_cookies(key, xor_key, cookies):
     with open(path, 'w') as f:
         f.write(json.dumps(all_cookies))   # 重写数据
         f.flush()
+        f.close()
 
 
 def xor(text, key, encrty):

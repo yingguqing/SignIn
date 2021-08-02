@@ -265,8 +265,6 @@ class HKPIC(Network):
                 
         # 提取板块下所有的帖子链接
         spans = soup.find_all('a', onclick='atarget(this)')
-        # 对帖子随机排序
-        spans = shuffle(spans) if spans else spans
         # 板块内的贴子数(每个版块内最多回复3次)
         forum_reply_time = 0
         for span in spans:
