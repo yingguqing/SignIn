@@ -149,7 +149,7 @@ class HKPIC(Network):
         save_log([f'金钱：{self.my_money}'])
 
         # 删除自己空间留言所产生的动态
-        self.delAllLeavMessageDynamic()
+        # self.delAllLeavMessageDynamic()
 
     # 获取比思域名
     def getHost(self):
@@ -358,6 +358,7 @@ class HKPIC(Network):
             print('他人id为空')
             return
 
+        self.myMoney()
         api_param = 'mod=spacecp&ac=comment&inajax=1'
         url = self.encapsulateURL('home.php', api_param)
         refer = quote(f'home.php?mod=space&uid={uid}', 'utf-8')
@@ -395,6 +396,8 @@ class HKPIC(Network):
         html = self.request(url, params)
         if html.find('操作成功') > -1:
             print('删除留言成功')
+            time.sleep(2)
+            self.myMoney()
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
             items = re.findall(pattern, html)
