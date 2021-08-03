@@ -72,6 +72,12 @@ class CMCC(Network):
             return
 
         print(jsonValue)
+        desc = jsonValue
+        if type(jsonValue) is not dict:
+            jsonValue = {
+                'result': '001',
+                'desc': desc
+            }
         allKeys = jsonValue.keys()
         if 'isDraw' in allKeys:
             isDraw = valueForKey(jsonValue, 'isDraw')
