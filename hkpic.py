@@ -4,7 +4,7 @@
 
 import json
 from network import Network
-from common import load_values, print_sleep, save_values, save_log, valueForKey, random_all_string, save_file
+from common import load_values, print_sleep, save_values, save_log, valueForKey, random_all_string
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -34,9 +34,7 @@ class HKPIC(Network):
         # 网络请求所要用到的cookie
         self.cookies = ''
         # 读取本地cookie值
-        self.cookie_dit = load_values(self.cookies_key, self.xor, {})
-        # 将cookie初始化成已保存的值
-        self.response_cookies({})
+        self.cookie_dit = {}
         # 别人空间地址
         self.user_href = ''
         # 自己的空间地址
@@ -60,7 +58,7 @@ class HKPIC(Network):
             'DNT': '1',
             'Proxy-Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Referer': self.fullURL('plugin.php?id=k_pwchangetip:tip')
+            'Referer': self.fullURL('forum.php')
         }
         # 帖子较多的板块
         self.all_fid = [2, 10, 11, 18, 20, 31, 42, 50, 79, 117, 123, 135, 142, 153, 239, 313, 398, 445, 454, 474, 776, 924]
@@ -104,9 +102,6 @@ class HKPIC(Network):
             values.append(f'{key}={value}')
         self.cookies = '; '.join(values)
 
-        # 将cookie加密保存到本地文件中
-        save_values(self.cookies_key, self.xor, json.dumps(self.cookie_dit))
-
     # 开始入口
     def runAction(self):
 
@@ -114,7 +109,7 @@ class HKPIC(Network):
         self.getHost()
 
         # 访问首页得到可用域名
-        if not self.forum(True):
+        if not self.forum():
             print('没有可用域名')
             return
 
@@ -187,15 +182,10 @@ class HKPIC(Network):
             print('获取域名失败')
 
     # 访问首页得到可用域名
-    def forum(self, check_host=False):
-        hosts = self.all_host
-        if check_host:
-            print('访问首页')
-            self.host = ''
-        else:
-            host = [self.host]
+    def forum(self):
+        print('访问首页')
 
-        for host in hosts:
+        for host in self.all_host:
             url = self.fullURL('forum.php', host)
             html = self.request(url, post=False)
 
@@ -204,31 +194,12 @@ class HKPIC(Network):
                 time.sleep(1)
                 continue
 
-            save_file(html, 'a.html')
             if html is not None and html.find('比思論壇') > -1:
                 self.host = host
                 self.headers['Origin'] = host
-                self.headers['Referer'] = self.fullURL('plugin.php?id=k_pwchangetip:tip')
-                soup = BeautifulSoup(html, 'html.parser')
-                # 读取首页的用户名，如果存在，表示cookie还能用
-                span = soup.find('a', title='訪問我的空間')
-                if span:
-                    # 提取自己的空间地址
-                    self.my_zone_url = self.fullURL(span['href']) if span.has_attr('href') else ''
-                    print(self.my_zone_url)
-                    self.my_uid = self.getUid(self.my_zone_url)
-                    self.is_login = span.text == self.username
-                    if self.is_login:
-                        self.need_sign_in = html.find('簽到領獎!') > -1
-                        # 提取formhash
-                        span = soup.find('input', attrs={'name': 'formhash'})
-                        if span and span.has_attr('value'):
-                            self.formhash = span['value']
-
-                if not self.is_login:
-                    print('登录过期，需要重新登录')
-
+                self.headers['Referer'] = self.fullURL('forum.php')
                 return True
+
         return False
 
     # 登录
@@ -240,13 +211,33 @@ class HKPIC(Network):
         url = self.encapsulateURL('member.php', api_param)
         # &cookietime=2592000
         params = f'fastloginfield=username&username={self.username}&password={self.password}&cookietime=2592000&quickforward=yes&handlekey=ls'
-        jsonString = self.request(url, params)
-        tip = self.fullURL('plugin.php?id=k_pwchangetip:tip')
-        result = jsonString.find(tip) > -1
+        html = self.request(url, params)
+
+        home = self.fullURL('forum.php')
+
+        if html.find(f'window.location.href=\'{home}\'') < 0:
+            if show:
+                print('登录失败')
+            return
+
+        html = self.request(home, post=False)
+        soup = BeautifulSoup(html, 'html.parser')
+        # 读取首页的用户名，如果存在，表示cookie还能用
+        span = soup.find('a', title='訪問我的空間')
+        if span:
+            # 提取自己的空间地址
+            self.my_zone_url = self.fullURL(span['href']) if span.has_attr('href') else ''
+            print(self.my_zone_url)
+            self.my_uid = self.getUid(self.my_zone_url)
+            self.is_login = span.text == self.username
+            if self.is_login:
+                self.need_sign_in = html.find('簽到領獎!') > -1
+                # 提取formhash
+                span = soup.find('input', attrs={'name': 'formhash'})
+                if span and span.has_attr('value'):
+                    self.formhash = span['value']
         if show:
-            print('用户名登录成功' if result else f'登录失败\n{jsonString}')
-        self.forum()
-        return result
+            print('用户名登录成功' if self.is_login else f'登录失败')
 
     # 签到
     def signIn(self):
@@ -546,7 +537,6 @@ class HKPIC(Network):
             html = self.request(url, post=False)
 
         if html:
-            save_file(html, 'a.html')
             html = html.replace('\n', '')
             pattern = re.compile(r'</a>:\s*<span>\s*(.*?)\s*</span>\s*</dd>\s*<dd\s+class\s*=\s*".*?"\s+id="(.*?)"\s+style\s*=\s*"display:none;"\s*>', re.S)
             recordids = re.findall(pattern, html)
@@ -629,7 +619,7 @@ class HKPIC(Network):
             else:
                 print(f'金钱：+{self.my_money - money_history}')
             
-            print_sleep(80)
+            print_sleep(90)
         else:
             print_sleep(5)
             print('发表日志失败')
@@ -647,7 +637,6 @@ class HKPIC(Network):
             api_params = 'mod=space&do=blog&view=me'
             url = self.encapsulateURL('home.php', api_params)
             html = self.request(url, post=False)
-            # save_file(html, 'a.html')
             pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>', re.S)
             ids = re.findall(pattern, html)
             for id in ids:

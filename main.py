@@ -5,10 +5,8 @@ from cmcc import CMCC
 from hkpic import HKPIC
 import sys
 import json
-from common import weixin_send_msg, save_log, today_in_log, get_running_path
+from common import weixin_send_msg, save_log, today_in_log
 import time
-from config import HKpicConfig
-from bs4 import BeautifulSoup
 
 
 if __name__ == "__main__":

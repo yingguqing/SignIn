@@ -177,7 +177,7 @@ def save_file(text, name):
     LOCK.release()
 
 
-# 读取相应的数据
+# 读取相应的数据(xor_key为空时，不加密)
 def load_values(key, xor_key, default):
     LOCK.acquire()
     try:
@@ -207,7 +207,7 @@ def load_values(key, xor_key, default):
       LOCK.release() 
 
 
-# 写入数据
+# 写入数据(xor_key为空时，不加密)
 def save_values(key, xor_key, values):
     LOCK.acquire()
     path = get_running_path('config.json')
@@ -220,6 +220,7 @@ def save_values(key, xor_key, values):
     LOCK.release() 
 
 
+# xor加解密
 def xor(text, key, encrty):
     if not text or not key:
         return text
