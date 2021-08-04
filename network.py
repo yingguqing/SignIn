@@ -11,7 +11,7 @@ from common import valueForKey
 class Network:
 
     # 准备微信推送的消息
-    weixin = [time.strftime("%Y-%m-%d", time.localtime())]
+    weixin = []
 
     def __init__(self, jsonValue):
         self.host = valueForKey(jsonValue, 'host')
@@ -34,20 +34,20 @@ class Network:
         if headers is not None:
             url_headers = {**url_headers, **headers}
 
-        if self.cookies:
-            url_headers['Cookie'] = self.cookies
+        url_headers['Cookie'] = self.cookies if self.cookies else ''
 
         requests.packages.urllib3.disable_warnings()
-        # requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
-        text = ''
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
         try:
             # requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
             if post:
+                params = self.format(params, url_headers)
                 res = requests.post(url=url, data=params, headers=url_headers, verify=self.verify)
             else:
                 res = requests.get(url=url, headers=url_headers, verify=self.verify)
 
             res.encoding = 'utf-8'
+
             # 保存cookie
             if is_save_cookies:
                 self.response_cookies(res.cookies)
@@ -83,13 +83,57 @@ class Network:
         if not params:
             return url
 
-        query = ''
+        query = self.paramsString(params)
+        return f'{url}?{query}'
+    
+    # 字典参数转成a=1&b=2
+    def paramsString(self, params):
+        result = ''
         if type(params) is dict:
             p = []
             for (key, value) in params.items():
                 p.append('{key}={value}'.format(key=key, value=value))
-            query = '&'.join(p)
-        elif type(params) is str:
-            query = params
+            result = '&'.join(p)
+        else:
+            result = params
+        return result
 
-        return f'{url}?{query}'
+    def format(self, data, headers):
+        """
+        form data
+        :param: data:  {"req":{"cno":"18990876","flag":"Y"},"ts":1,"sig":1,"v": 2.0}
+        :param: boundary: "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        :param: headers: 包含boundary的头信息；如果boundary与headers同时存在以headers为准
+        :return: str
+        :rtype: str
+        """
+
+        if type(data) is str:
+            return data
+
+        boundary = ''
+
+        #从headers中提取boundary信息
+        if "Content-Type" in headers:
+            fd_val = str(headers["Content-Type"])
+            if "boundary" in fd_val:
+                fd_val = fd_val.split(";")[1].strip()
+                boundary = fd_val.split("=")[1].strip()
+
+        if not boundary:
+            return data
+
+        #form-data格式定式
+        jion_str = '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'
+        end_str = "--{}--".format(boundary)
+        args_str = ""
+
+        if not isinstance(data, dict):
+            return data
+
+        for key, value in data.items():
+            args_str = args_str + jion_str.format(boundary, key, value)
+        
+        args_str = args_str + end_str.format(boundary)
+        args_str = args_str.replace("\'", "\"")
+        return args_str.encode('utf-8')

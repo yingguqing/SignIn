@@ -12,9 +12,11 @@ import requests
 import json
 import base64
 import time
+import threading
 
 DEBUG = False
-all_cookies = {}
+all_values = {}
+LOCK = threading.Lock()
 
 
 
@@ -29,8 +31,7 @@ def valueForKey(dic, key, default=None):
     if key not in dic.keys():
         return default
 
-    value = dic[key]
-    return value if value else default
+    return dic[key]
 
 
 # 获取运行目录
@@ -41,11 +42,23 @@ def get_running_path(path=''):
         return os.path.join(os.path.dirname(__file__), path)
 
 
+def random_all_string(randomlength=16):
+    """
+    生成一个指定长度的随机字符串，其中
+    string.digits = 0123456789
+    string.ascii_lowercase = abcdefghigklmnopqrstuvwxyz
+    ascii_uppercase = ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    """
+    str_list = [random.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for i in range(randomlength)]
+    random_str = ''.join(str_list)
+    return random_str
+
+
 def random_string(randomlength=32):
     """
     生成一个指定长度的随机字符串，其中
-    string.digits=0123456789
-    string.ascii_lowercase=abcdefghigklmnopqrstuvwxyz
+    string.digits = 0123456789
+    string.ascii_lowercase = abcdefghigklmnopqrstuvwxyz
     """
     str_list = [random.choice(string.digits + string.ascii_lowercase) for i in range(randomlength)]
     random_str = ''.join(str_list)
@@ -152,52 +165,65 @@ def weixin_send_msg(msg, openid):
 
 # 保存文件
 def save_file(text, name):
+    LOCK.acquire()
     path = get_running_path(name)
+    if os.path.exists(path):
+        os.remove(path)
+
     with open(path, 'a+') as f:
-        f.write(text)
+        f.write(text if text else '')
         f.flush()
         f.close()
+    LOCK.release()
 
 
-# 读取相应的cookie
-def load_cookies(key, xor_key, default):
-    path = get_running_path('cookies.txt')
-    if not os.path.exists(path):
-        return default
-    global all_cookies
-    if not all_cookies:
-        with open(path, 'r') as f:
-            jsonData = f.read()
-            if jsonData:
-                all_cookies = json.loads(jsonData)
-            f.close()
-    if key in all_cookies.keys():
-        value = all_cookies[key]
-    else:
-        return default
-    if value:
-        try:
-            print(xor_key)
-            s = xor(value, xor_key, False)
-            return json.loads(s)
-        except ValueError:
+# 读取相应的数据
+def load_values(key, xor_key, default):
+    LOCK.acquire()
+    try:
+        path = get_running_path('config.json')
+        if not os.path.exists(path):
             return default
-    else:
-        return default
+        global all_values
+        if not all_values:
+            with open(path, 'r') as f:
+                jsonData = f.read()
+                if jsonData:
+                    all_values = json.loads(jsonData)
+                f.close()
+        if key in all_values.keys():
+            value = all_values[key]
+        else:
+            return default
+        if value:
+            try:
+                s = xor(value, xor_key, False)
+                return json.loads(s)
+            except ValueError:
+                return default
+        else:
+            return default
+    finally:
+      LOCK.release() 
 
 
-# 写入cookie
-def save_cookies(key, xor_key, cookies):
-    path = get_running_path('cookies.txt')
-    global all_cookies
-    all_cookies[key] = xor(cookies, xor_key, True)
+# 写入数据
+def save_values(key, xor_key, values):
+    LOCK.acquire()
+    path = get_running_path('config.json')
+    global all_values
+    all_values[key] = xor(values, xor_key, True)
     with open(path, 'w') as f:
-        f.write(json.dumps(all_cookies))   # 重写数据
+        f.write(json.dumps(all_values))   # 重写数据
         f.flush()
         f.close()
+    LOCK.release() 
 
 
 def xor(text, key, encrty):
+    if not text or not key:
+        return text
+
     if not encrty:
         text = str(base64.b64decode(text), "utf-8")
     ml = len(text)

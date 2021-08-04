@@ -8,19 +8,18 @@
 
 name: Upload Python Package
 
-on: [push]
-  #schedule:
-  #         ┌───────────── minute (0 - 59)
-  #         │ ┌───────────── hour (0 - 23)
-  #         │ │ ┌───────────── day of the month (1 - 31)
-  #         │ │ │ ┌───────────── month (1 - 12 or JAN-DEC)
+on: #[push]
+  schedule:
+  #         ┌───────────────────── minute (0 - 59)
+  #         │ ┌─────────────────── hour (0 - 23)
+  #         │ │ ┌───────────────── day of the month (1 - 31)
+  #         │ │ │ ┌─────────────── month (1 - 12 or JAN-DEC)
   #         │ │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
   #         │ │ │ │ │                                   
   #         │ │ │ │ │
   #         │ │ │ │ │
   #         * * * * *
-  # 定时执行，Runs at 00:00 UTC every day
-  #- cron:  '0 0,2 * * *'
+  - cron:  '0 0,2 * * *'
 
 jobs:
   build:
@@ -45,7 +44,7 @@ jobs:
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
          git add README.md
-         git add cookies.txt
+         git add config.json
          git add log.txt
          git commit -m "update readme.md"
          

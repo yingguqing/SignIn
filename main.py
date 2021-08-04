@@ -5,7 +5,10 @@ from cmcc import CMCC
 from hkpic import HKPIC
 import sys
 import json
-from common import weixin_send_msg, save_log, today_in_log
+from common import weixin_send_msg, save_log, today_in_log, get_running_path
+import time
+from config import HKpicConfig
+from bs4 import BeautifulSoup
 
 
 if __name__ == "__main__":
@@ -18,6 +21,7 @@ if __name__ == "__main__":
 
     # 广东移动App签到
     if not today_in_log():
+        save_log(time.strftime("%Y-%m-%d", time.localtime()))
         cmccValue = jsonValue['CMCC']
         cmcc = CMCC(sessionid, cmccValue)
         cmcc.runAction()

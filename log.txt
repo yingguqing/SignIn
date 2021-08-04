@@ -41,3 +41,15 @@
 {"errcode": 45015, "errmsg": "response out of time limit or subscription is canceled rid: 6107613c-7d9d4902-55bc40a1"}
 金钱：283
 金钱：288
+2021-08-03
+移动签到：「域名不通」
+每日抽奖：「域名不通」
+{"errcode": 0, "errmsg": "ok"}
+金钱：335
+2021-08-04
+移动签到：「会话失效」
+每日抽奖：「会话失效」
+{"errcode": 0, "errmsg": "ok"}
+移动签到：「会话失效」
+每日抽奖：「会话失效」
+金钱：361
