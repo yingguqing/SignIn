@@ -8,8 +8,8 @@
 
 name: Upload Python Package
 
-on: [push]
-  #schedule:
+on: #[push]
+  schedule:
   #         ┌───────────────────── minute (0 - 59)
   #         │ ┌─────────────────── hour (0 - 23)
   #         │ │ ┌───────────────── day of the month (1 - 31)
@@ -19,7 +19,7 @@ on: [push]
   #         │ │ │ │ │
   #         │ │ │ │ │
   #         * * * * *
-  #- cron:  '0 15,17,19 * * *'
+  - cron:  '0 15,17,19 * * *'
 
 jobs:
   build:

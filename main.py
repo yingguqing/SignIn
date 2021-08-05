@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
     beijing_now = utc_now.astimezone(SHA_TZ)
-    print(beijing_now)
+    print(f'\n当前北京时间：{beijing_now}\n')
 
     jsonValue = json.loads(sys.argv[1])
     # sessionid = sys.argv[1]
