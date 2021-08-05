@@ -20,11 +20,12 @@ if __name__ == "__main__":
     # 广东移动App签到
     if not today_in_log():
         save_log(time.strftime("%Y-%m-%d", time.localtime()))
-        cmccValue = jsonValue['CMCC']
-        cmcc = CMCC(sessionid, cmccValue)
-        cmcc.runAction()
-        weixin_send_msg('\n'.join(cmcc.weixin), openid)
-        save_log(cmcc.weixin)
+        # 移动app签到停用
+        # cmccValue = jsonValue['CMCC']
+        # cmcc = CMCC(sessionid, cmccValue)
+        # cmcc.runAction()
+        # weixin_send_msg('\n'.join(cmcc.weixin), openid)
+        # save_log(cmcc.weixin)
 
     # 比思签到+赚取每日金币
     hkpicValue = jsonValue['HKPIC']

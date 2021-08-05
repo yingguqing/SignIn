@@ -19,7 +19,6 @@ all_values = {}
 LOCK = threading.Lock()
 
 
-
 # 从字典中获取相应key值的value
 def valueForKey(dic, key, default=None):
     if not dic or not key:
@@ -204,7 +203,7 @@ def load_values(key, xor_key, default):
         else:
             return default
     finally:
-      LOCK.release() 
+        LOCK.release()
 
 
 # 写入数据(xor_key为空时，不加密)
@@ -217,7 +216,7 @@ def save_values(key, xor_key, values):
         f.write(json.dumps(all_values))   # 重写数据
         f.flush()
         f.close()
-    LOCK.release() 
+    LOCK.release()
 
 
 # xor加解密

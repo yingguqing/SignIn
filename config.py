@@ -24,7 +24,8 @@ class Config:
             return
 
         save_values(self.key, '', json.dumps(value))
-        
+
+
 class HKpicConfig(Config):
 
     def __init__(self):
@@ -51,6 +52,10 @@ class HKpicConfig(Config):
         #  分享次数
         self.share_times = valueForKey(dic, 'share_times', 0)
         # -----------以下是固定值------------------
+        # 发表日志失败的次数（3次内重试）
+        self.journal_faild_times = 0
+        # 发表分享失败的次数（3次内重试）
+        self.share_faild_times = 0
         # 本次最大评论次数(有奖次数为15，小时内最大评论数为10)
         self.max_reply_times = 10
         if self.reply_times > 5:
@@ -59,13 +64,13 @@ class HKpicConfig(Config):
         self.max_journal_times = 3
         #  最大分享次数
         self.max_share_times = 3
-    
+
     def canReply(self):
         return self.reply_times < self.max_reply_times
-    
+
     def canJournal(self):
         return self.journal_times < self.max_journal_times
-    
+
     def canShare(self):
         return self.share_times < self.max_share_times
 
