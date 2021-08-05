@@ -15,13 +15,13 @@ from config import HKpicConfig
 
 class HKPIC(Network):
 
-    def __init__(self, jsonValue):
+    def __init__(self, jsonValue, id):
         super().__init__(jsonValue)
         self.all_host = [self.host]
         self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
-        self.config = HKpicConfig(valueForKey(jsonValue, 'id'))
+        self.config = HKpicConfig(id)
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC_COOKIES'
         # 是否需要登录
