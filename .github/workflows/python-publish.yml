@@ -38,7 +38,7 @@ jobs:
 
     - name: Run Python Application  
       run:
-        python main.py ${{ secrets.SessionId  }} ${{ secrets.Config  }}
+        python main.py ${{ secrets.Config  }}
     - name: Commit files
       run: |
          git config --local user.email "yingguqing@gmail.com"

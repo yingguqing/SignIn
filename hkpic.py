@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 # 比思每日签到
 
-import json
 from network import Network
-from common import load_values, print_sleep, save_values, save_log, valueForKey, random_all_string
+from common import print_sleep, save_log, valueForKey, random_all_string
 from bs4 import BeautifulSoup
 import re
 import base64
 from urllib.parse import quote
-from random import choice, randint, shuffle
+from random import choice, randint
 import time
 from config import HKpicConfig
 

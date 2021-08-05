@@ -1,20 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from cmcc import CMCC
 from hkpic import HKPIC
 import sys
 import json
-from common import weixin_send_msg, save_log, today_in_log
+from common import save_log, today_in_log
 import time
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 2:
         sys.exit()
 
+    jsonValue = json.loads(sys.argv[1])
     # sessionid = sys.argv[1]
-    jsonValue = json.loads(sys.argv[2])
     # openid = jsonValue['WeiXinOpenID']
 
     # 广东移动App签到
