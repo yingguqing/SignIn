@@ -137,7 +137,7 @@ class HKPIC(Network):
         # 查询我的金币
         self.myMoney()
         temp = self.my_money - self.config.money
-        if temp > 0:
+        if temp != 0:
             self.config.money = self.my_money
             self.config.save()
             save_log([f'增加：{temp}', f'金钱：{self.my_money}'])
