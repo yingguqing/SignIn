@@ -26,9 +26,13 @@ if __name__ == "__main__":
         # weixin_send_msg('\n'.join(cmcc.weixin), openid)
         # save_log(cmcc.weixin)
 
-    # 比思签到+赚取每日金币
     hkpicValue = jsonValue['HKPIC']
-    hkpic = HKPIC(hkpicValue)
-    print('------------- 比思签到 -------------')
-    hkpic.runAction()
-    print('------------- 比思签到完成 -------------')
+    accounts = hkpicValue["accounts"]
+    hkpicValue.pop('accounts')
+    # 比思签到+赚取每日金币(多账号)
+    for account in accounts:
+        dic = {**hkpicValue, **account}
+        hkpic = HKPIC(dic)
+        print(f'------------- {hkpic.username} 比思签到 -------------')
+        hkpic.runAction()
+        print(f'------------- {hkpic.username} 比思签到完成 -------------')

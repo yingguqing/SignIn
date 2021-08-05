@@ -22,8 +22,6 @@ class HKPIC(Network):
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
         self.config = HKpicConfig()
-        # 加密的key
-        self.xor = valueForKey(jsonValue, 'xor')
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC_COOKIES'
         # 是否需要登录
