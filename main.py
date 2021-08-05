@@ -6,11 +6,24 @@ import sys
 import json
 from common import save_log, today_in_log
 import time
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+
+
+SHA_TZ = timezone(
+    timedelta(hours=8),
+    name='Asia/Shanghai',
+)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit()
+
+    utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
+    beijing_now = utc_now.astimezone(SHA_TZ)
+    print(beijing_now)
 
     jsonValue = json.loads(sys.argv[1])
     # sessionid = sys.argv[1]
@@ -18,7 +31,7 @@ if __name__ == "__main__":
 
     # 广东移动App签到
     if not today_in_log():
-        save_log(time.strftime("%Y-%m-%d", time.localtime()))
+        save_log(beijing_now.date())
         # 移动app签到停用
         # cmccValue = jsonValue['CMCC']
         # cmcc = CMCC(sessionid, cmccValue)
