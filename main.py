@@ -13,9 +13,9 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         sys.exit()
 
-    sessionid = sys.argv[1]
+    # sessionid = sys.argv[1]
     jsonValue = json.loads(sys.argv[2])
-    openid = jsonValue['WeiXinOpenID']
+    # openid = jsonValue['WeiXinOpenID']
 
     # 广东移动App签到
     if not today_in_log():
