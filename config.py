@@ -28,9 +28,9 @@ class Config:
 
 class HKpicConfig(Config):
 
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
-        self.key = 'HKPIC_CONFIG'
+        self.key = f'HKPIC_CONFIG_{id}'
         date = time.strftime("%Y-%m-%d", time.localtime())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)

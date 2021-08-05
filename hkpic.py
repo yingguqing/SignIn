@@ -21,7 +21,7 @@ class HKPIC(Network):
         self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
-        self.config = HKpicConfig()
+        self.config = HKpicConfig(valueForKey(jsonValue, 'id'))
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC_COOKIES'
         # 是否需要登录
@@ -233,7 +233,6 @@ class HKPIC(Network):
             # id比较小的应该是管理员，所以排除
             if uid > 9999 and uid != my_id:
                 self.user_href = self.fullURL(item)
-                print(self.user_href)
                 break
 
     # 签到

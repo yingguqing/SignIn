@@ -42,9 +42,13 @@ if __name__ == "__main__":
     hkpicValue = jsonValue['HKPIC']
     accounts = hkpicValue["accounts"]
     hkpicValue.pop('accounts')
+    id = 1
     # 比思签到+赚取每日金币(多账号)
     for account in accounts:
         dic = {**hkpicValue, **account}
+        # 为账号添加标识
+        dic['id'] = str(id)
+        id += 1
         hkpic = HKPIC(dic)
         print(f'------------- {hkpic.username} 比思签到 -------------')
         hkpic.runAction()
