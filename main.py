@@ -32,8 +32,17 @@ if __name__ == "__main__":
         print(f'------------- {hkpic.username} 比思签到 -------------')
         hkpic.runAction()
         s = time.time() - start
-        print(f'------------- 签到完成,耗时{"%.2f" % s}秒 -------------')
+        min = int(s/60)
+        if min > 0:
+            consume = '%d分%.0f秒' % (min, s - min)
+        else:
+            consume = f'{"%.2f" % s}秒'
+        print(f'------------- 签到完成,耗时{consume} -------------')
         total_time += s
-        # github的Action最长执行时间为60分钟，一个账号所需要时间为25分钟左右。
-        if total_time > 35 * 60:
+        ''' 
+            github的Action最长执行时间为60分钟，一个账号所需要时间为25分钟左右。
+            如果执行时行达到35分钟，就不再执行。下一次执行剩下的账号。
+            可以通过配置Action的循环执行时间，一天最多可以执行24次。
+        '''
+        if total_time > 2100:
             break
