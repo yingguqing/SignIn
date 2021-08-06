@@ -140,6 +140,7 @@ class HKPIC(Network):
         if temp != 0:
             self.config.money = self.my_money
             self.config.save()
+            print(f'增加金币：{temp}')
             save_log([f'增加：{temp}', f'金钱：{self.my_money}'])
 
         # 删除自己空间留言所产生的动态
