@@ -21,6 +21,7 @@ class HKPIC(Network):
         self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
+        self.host_url = valueForKey(jsonValue, 'hostURL', '')
         self.config = HKpicConfig(id)
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC_COOKIES'
@@ -148,10 +149,11 @@ class HKPIC(Network):
 
     # 获取比思域名
     def getHost(self):
-        print('获取比思域名')
-        url = 'https://api.github.com/repos/hkpic-forum/hkpic/contents/README.md'
+        if not self.host_url:
+            return
 
-        req = self.request(url, post=False, is_save_cookies=False)
+        print('获取比思域名')
+        req = self.request(self.host_url, post=False, is_save_cookies=False)
         if type(req) is dict and 'content' in req.keys():
             content = str(base64.b64decode(valueForKey(req, 'content', default='')), 'utf-8')
             if not content:
