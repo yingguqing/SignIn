@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # 比思签到+赚取每日金币(多账号)
     for (id, account) in enumerate(accounts):
         dic = {**hkpicValue, **account}
-        hkpic = HKPIC(dic, id)
+        hkpic = HKPIC(dic, (id + 1))
         print(f'------------- {hkpic.username} 比思签到 -------------')
         hkpic.runAction()
         print(f'------------- {hkpic.username} 比思签到完成 -------------')
