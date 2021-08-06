@@ -28,9 +28,9 @@ class Config:
 
 class HKpicConfig(Config):
 
-    def __init__(self, id):
+    def __init__(self, mark):
         super().__init__()
-        self.key = f'HKPIC_CONFIG_{id}'
+        self.key = f'HKPIC_CONFIG_{mark}'
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
@@ -39,6 +39,8 @@ class HKpicConfig(Config):
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
             dic = {}
+        # 上一次发表评论的时间，因为一个小时内只能发10条
+        self.last_reply_time = valueForKey(dic, 'last_reply_time', 0)
         # 发表评论次数（1小时内限发10次，有奖次数为15次）
         self.reply_times = valueForKey(dic, 'reply_times', 0)
         # 是否访问别人空间
@@ -66,7 +68,10 @@ class HKpicConfig(Config):
         self.max_share_times = 3
 
     def canReply(self):
-        return self.reply_times < self.max_reply_times
+        reply = self.reply_times < self.max_reply_times
+        if reply and self.reply_times == 10:
+            return time.time() - self.last_reply_time > 3600
+        return reply
 
     def canJournal(self):
         return self.journal_times < self.max_journal_times
@@ -83,6 +88,7 @@ class HKpicConfig(Config):
             'is_leave_message': self.is_leave_message,
             'is_record': self.is_record,
             'journal_times': self.journal_times,
-            'share_times': self.share_times
+            'share_times': self.share_times,
+            'last_reply_time': self.last_reply_time
         }
         return values

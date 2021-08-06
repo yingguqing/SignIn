@@ -3,7 +3,7 @@
 # 比思每日签到
 
 from network import Network
-from common import print_sleep, save_log, valueForKey, random_all_string
+from common import print_sleep, valueForKey, random_all_string, xor
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -22,7 +22,9 @@ class HKPIC(Network):
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
         self.host_url = valueForKey(jsonValue, 'hostURL', '')
-        self.config = HKpicConfig(id)
+        self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
+        mark = xor(self.username, self.xor_key, True)
+        self.config = HKpicConfig(mark)
         # cookie保存到本地的Key
         self.cookies_key = 'HKPIC_COOKIES'
         # 是否需要登录
@@ -141,8 +143,7 @@ class HKPIC(Network):
         if temp != 0:
             self.config.money = self.my_money
             self.config.save()
-            print(f'增加金币：{temp}')
-            save_log([f'增加：{temp}', f'金钱：{self.my_money}'])
+            print(f'增加金币：{temp}\n金钱：{self.my_money}')
 
         # 删除自己空间留言所产生的动态
         self.delAllLeavMessageDynamic()
@@ -322,6 +323,7 @@ class HKPIC(Network):
         html = self.request(url, params)
         if html.find('非常感謝，回復發佈成功') > -1:
             self.config.reply_times += 1
+            self.config.last_reply_time = time.time()
             self.config.save()
             print(f'第{self.config.reply_times}条：「{comment}」-> 發佈成功')
             self.myMoney(False)
@@ -337,6 +339,7 @@ class HKPIC(Network):
             return True
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
             print('评论数超过限制')
+            self.config.last_reply_time = time.time()
             self.config.reply_times = 9999
             self.config.save()
             return True

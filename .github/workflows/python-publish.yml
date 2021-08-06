@@ -43,10 +43,8 @@ jobs:
       run: |
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
-         git add README.md
          git add config.json
-         git add log.txt
-         git commit -m "update readme.md"
+         git commit -m "update config.json"
          
     - name: Push changes
       uses:  ad-m/github-push-action@master
