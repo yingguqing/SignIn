@@ -20,6 +20,7 @@ from datetime import timezone
 DEBUG = False
 all_values = {}
 LOCK = threading.Lock()
+OPENID = ''
 
 
 # 获取当前的北京时间
@@ -144,7 +145,16 @@ def get_access_token():
     return access_token
 
 
-def weixin_send_msg(msg, openid):
+def weixin_openid(jsonValue):
+    global OPENID
+    OPENID = valueForKey(jsonValue, 'WeiXinOpenID')
+
+
+def weixin_send_msg(msg):
+    global OPENID
+    if not OPENID:
+        return
+
     access_token = get_access_token()
 
     all_msg = []
@@ -156,7 +166,7 @@ def weixin_send_msg(msg, openid):
         return
 
     body = {
-        "touser": openid,
+        "touser": OPENID,
         "msgtype": "text",
         "text": {
             "content": ' '.join(msg)

@@ -3,7 +3,7 @@
 # 广东移动app每日签到
 
 from network import Network
-from common import random_string, sign, valueForKey
+from common import random_string, sign, valueForKey, weixin_send_msg, save_log
 import time
 import json
 
@@ -105,6 +105,9 @@ class CMCC(Network):
     def runAction(self):
         self.apiSignIn()
         self.draw()
+
+        weixin_send_msg('\n'.join(self.weixin))
+        save_log(self.weixin)
 
     # 每日签到
     def apiSignIn(self):

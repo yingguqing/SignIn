@@ -4,7 +4,7 @@
 from hkpic import HKPIC
 import sys
 import json
-from common import save_log, today_in_log, local_time, load_values
+from common import save_log, today_in_log, local_time, weixin_openid
 
 
 if __name__ == "__main__":
@@ -15,18 +15,12 @@ if __name__ == "__main__":
     print(f'\n当前北京时间：{time}\n')
 
     jsonValue = json.loads(sys.argv[1])
-    # sessionid = sys.argv[1]
-    # openid = jsonValue['WeiXinOpenID']
+    # 读取并设置微信openid（功能暂时没用）
+    weixin_openid(jsonValue)
 
     # 广东移动App签到
     if not today_in_log():
         save_log(local_time().date())
-        # 移动app签到停用
-        # cmccValue = jsonValue['CMCC']
-        # cmcc = CMCC(sessionid, cmccValue)
-        # cmcc.runAction()
-        # weixin_send_msg('\n'.join(cmcc.weixin), openid)
-        # save_log(cmcc.weixin)
 
     hkpicValue = jsonValue['HKPIC']
     accounts = hkpicValue["accounts"]
