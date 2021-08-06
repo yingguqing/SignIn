@@ -3,7 +3,7 @@
 # 配置文件
 
 
-from common import save_values, valueForKey, load_values
+from common import save_values, valueForKey, load_values, local_time
 import json
 import os
 import time
@@ -31,7 +31,7 @@ class HKpicConfig(Config):
     def __init__(self, id):
         super().__init__()
         self.key = f'HKPIC_CONFIG_{id}'
-        date = time.strftime("%Y-%m-%d", time.localtime())
+        date = str(local_time().date())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
         self.date = valueForKey(dic, 'date')

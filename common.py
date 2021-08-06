@@ -13,10 +13,24 @@ import json
 import base64
 import time
 import threading
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 
 DEBUG = False
 all_values = {}
 LOCK = threading.Lock()
+
+
+# 获取当前的北京时间
+def local_time():
+    SHA_TZ = timezone(
+        timedelta(hours=8),
+        name='Asia/Shanghai',
+    )
+    utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
+    beijing_now = utc_now.astimezone(SHA_TZ)
+    return beijing_now
 
 
 # 从字典中获取相应key值的value

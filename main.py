@@ -4,26 +4,15 @@
 from hkpic import HKPIC
 import sys
 import json
-from common import save_log, today_in_log
-import time
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
-
-
-SHA_TZ = timezone(
-    timedelta(hours=8),
-    name='Asia/Shanghai',
-)
+from common import save_log, today_in_log, local_time, load_values
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit()
 
-    utc_now = datetime.utcnow().replace(tzinfo=timezone.utc)
-    beijing_now = utc_now.astimezone(SHA_TZ)
-    print(f'\n当前北京时间：{beijing_now}\n')
+    time = local_time().strftime('%Y-%m-%d %H:%M:%S')
+    print(f'\n当前北京时间：{time}\n')
 
     jsonValue = json.loads(sys.argv[1])
     # sessionid = sys.argv[1]
@@ -31,7 +20,7 @@ if __name__ == "__main__":
 
     # 广东移动App签到
     if not today_in_log():
-        save_log(beijing_now.date())
+        save_log(local_time().date())
         # 移动app签到停用
         # cmccValue = jsonValue['CMCC']
         # cmcc = CMCC(sessionid, cmccValue)
