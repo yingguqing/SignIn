@@ -701,7 +701,6 @@ class HKPIC(Network):
         }
         html = self.request(url, self.paramsString(params), header)
         if html.find('操作成功') > -1:
-            print('发布分享成功')
             self.config.share_times += 1
             self.config.save()
             print_sleep(10)
@@ -712,7 +711,7 @@ class HKPIC(Network):
                 self.config.share_times = 9999
                 self.config.save()
             else:
-                print(f'金钱：+{self.my_money - money_history}')
+                print(f'发布分享成功。金钱：+{self.my_money - money_history}')
 
             # 删除刚发表的分享
             pattern = re.compile(r'\{\s*\'sid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
