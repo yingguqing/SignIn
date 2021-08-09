@@ -15,12 +15,13 @@ from config import HKpicConfig
 
 class HKPIC(Network):
 
-    def __init__(self, jsonValue, id):
+    def __init__(self, jsonValue):
         super().__init__(jsonValue)
         self.all_host = [self.host]
         self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
+        self.nickname = valueForKey(jsonValue, 'nickname', '没有昵称')
         self.host_url = valueForKey(jsonValue, 'hostURL', '')
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)

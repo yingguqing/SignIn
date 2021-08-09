@@ -25,11 +25,11 @@ if __name__ == "__main__":
 
     total_time = 0
     # 比思签到+赚取每日金币(多账号)
-    for (id, account) in enumerate(accounts):
+    for account in accounts:
         start = time.time()
         dic = {**hkpicValue, **account}
-        hkpic = HKPIC(dic, (id + 1))
-        print(f'------------- {hkpic.username} 比思签到 -------------')
+        hkpic = HKPIC(dic)
+        print(f'------------- {hkpic.nickname} 比思签到 -------------')
         hkpic.runAction()
         s = time.time() - start
         min = int(s/60)
