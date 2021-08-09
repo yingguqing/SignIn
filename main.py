@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from hkpic import HKPIC
-from common import save_log, today_in_log, local_time, weixin_openid
+from common import local_time, weixin_openid
 import sys
 import json
 import time
@@ -39,7 +39,7 @@ if __name__ == "__main__":
             consume = f'{"%.2f" % s}秒'
         print(f'------------- 签到完成,耗时{consume} -------------')
         total_time += s
-        ''' 
+        '''
             github的Action最长执行时间为60分钟，一个账号所需要时间为25分钟左右。
             如果执行时行达到35分钟，就不再执行。下一次执行剩下的账号。
             可以通过配置Action的循环执行时间，一天最多可以执行24次。

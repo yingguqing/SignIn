@@ -14,22 +14,17 @@ from config import HKpicConfig
 
 
 class HKPIC(Network):
-
     def __init__(self, jsonValue):
         super().__init__(jsonValue)
         self.all_host = [self.host]
         self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
-        self.nickname = valueForKey(jsonValue, 'nickname', '没有昵称')
+        self.nickname = valueForKey(jsonValue, 'nickname', '无昵称')
         self.host_url = valueForKey(jsonValue, 'hostURL', '')
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)
         self.config = HKpicConfig(mark)
-        # cookie保存到本地的Key
-        self.cookies_key = 'HKPIC_COOKIES'
-        # 是否需要登录
-        self.is_login = False
         # 需要签到
         self.need_sign_in = True
         # 网络请求所要用到的cookie
@@ -50,9 +45,11 @@ class HKPIC(Network):
         # 基本的请求头，特殊情况时，在请求上使用header参数来特殊处理
         self.headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Accept':
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'Accept-Encoding': 'gzip, deflate',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 GDMobile/8.0.4',
+            'User-Agent':
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 GDMobile/8.0.4',
             'Content-Type': 'application/x-www-form-urlencoded',
             'Origin': self.host,
             'Cache-Control': 'max-age=0',
@@ -64,34 +61,37 @@ class HKPIC(Network):
         # 帖子较多的板块
         self.all_fid = [2, 10, 11, 18, 20, 31, 42, 50, 79, 117, 123, 135, 142, 153, 239, 313, 398, 445, 454, 474, 776, 924]
         # 所有评论内容，随机使用
-        self.comments = ['走过了年少，脚起了水泡。', '人生自古谁无死，啊个拉屎不用纸！', '如果跟导师讲不清楚，那么就把他搞胡涂吧！',
-                         '不要在一棵树上吊死，在附近几棵树上多试试死几次。', '老天，你让夏天和冬天同房了吧？生出这鬼天气！',
-                         '恋爱就是无数个饭局，结婚就是一个饭局。', '男人靠的住，母猪能上树！',
-                         '天塌下来你顶着，我垫着！', '美女未抱身先走，常使色狼泪满襟。', '穿别人的鞋，走自己的路，让他们找去吧。',
-                         '怀揣两块，胸怀500万！', '鸳鸳相抱何时了，鸯在一边看热闹。', '丑，但是丑的特别，也就是特别的丑！',
-                         '自从我变成了狗屎，就再也没有人踩在我头上了。', '我怀疑楼主用的是金山快译且额外附带了中对中翻译。',
-                         '流氓不可怕，就怕流氓有文化。', '听君一席话，省我十本书！', '如果有一双眼睛陪我一同哭泣，就值得我为生命受苦。',
-                         '人生重要的不是所站的位置，而是所朝的方向！', '内练一口气，外练一口屁。', '找不到恐龙，就用蜥蜴顶。',
-                         '女，喜甜食，甚胖！该女有一癖好：痛恨蚂蚁，见必杀之。问其故曰：这小东西，那么爱吃甜食，腰还那么细！',
-                         '不在放荡中变坏，就在沉默中变态！', '只要不下流，我们就是主流！', '月经不仅仅是女人的痛苦，也是男人的痛苦。',
-                         '佛曰，色即是空，空即是色！今晚，偶想空一下。', '勿以坑小而不灌，勿以坑大而灌之。', '读书读到抽筋处，文思方能如尿崩！',
-                         '睡眠是一门艺术——谁也无法阻挡我追求艺术的脚步！', '人生不能像做菜、把所有的料都准备好才下锅！', '锻炼肌肉，防止挨揍！',
-                         '我妈常说，我们家要是没有电话就不会这么穷。', '我不在江湖，但江湖中有我的传说。', '我喜欢孩子，更喜欢造孩子的过程！',
-                         '时间永远是旁观者，所有的过程和结果，都需要我们自己承担。', '其实我是一个天才，可惜天妒英才！', '站的更高，尿的更远。',
-                         '漏洞与补丁齐飞，蓝屏共死机一色！', '比我有才的都没我帅，比我帅的都没我有才！', '我身在江湖，江湖里却没有我得传说。',
-                         '有来有往，你帮我挖坑，我买一送一，填埋加烧纸。', '所有的男人生来平等，结婚的除外。', '不在课堂上沉睡，就在酒桌上埋醉。',
-                         '只有假货是真的，别的都是假的！', '男人有冲动可能是爱你，也可能是不爱，但没有冲动肯定是不爱！', '我在马路边丢了一分钱！',
-                         '商女不知亡国恨、妓女不懂婚外情。', '脱了衣服我是禽兽，穿上衣服我是衣冠禽兽！', '你的丑和你的脸没有关系。',
-                         '路边的野花不要，踩。', '长得真有创意，活得真有勇气！',  '走自己的路，让别人打车去吧。', '如果恐龙是人，那人是什么？'
-                         '男人与女人，终究也只是欲望的动物吧！真的可以因为爱而结合吗？对不起，我也不知道。', '有事秘书干，没事干秘书！',
-                         '关羽五绺长髯，风度翩翩，手提青龙偃月刀，江湖人送绰号——刀郎。', '解释就系掩饰，掩饰等于无出色，无出色不如回家休息！',
-                         '俺从不写措字，但俺写通假字！', '生我之前谁是我，生我之后我是谁？', '我靠！看来医生是都疯了！要不怎么让他出院了！',
-                         '勃起不是万能的，但不能勃起却是万万都不能的！', '沒有激情的亲吻，哪來床上的翻滾？', '做爱做的事，交配交的人。',
-                         '有时候，你必须跌到你从未经历的谷底，才能再次站在你从未到达的高峰。', '避孕的效果：不成功，便成“人”。',
-                         '与时俱进，你我共赴高潮！', '恐龙说：“遇到色狼，不慌不忙；遇到禽兽，慢慢享受。', '生，容易。活，容易。生活，不容易。',
-                         '人家解释，我想，这世界上又要多我这一个疯子了。', '长大了娶唐僧做老公，能玩就玩一玩，不能玩就把他吃掉。',
-                         '此地禁止大小便，违者没收工具。', '昨天，系花对我笑了一下，乐得我晚上直数羊，一只羊，两只羊，三只羊。',
-                         '打破老婆终身制，实行小姨股份制。引入小姐竞争制，推广情人合同制。', '要是我灌水，就骂我“三个代表”没学好吧。']
+        self.comments = [
+            '走过了年少，脚起了水泡。', '人生自古谁无死，啊个拉屎不用纸！', '如果跟导师讲不清楚，那么就把他搞胡涂吧！',
+            '不要在一棵树上吊死，在附近几棵树上多试试死几次。', '老天，你让夏天和冬天同房了吧？生出这鬼天气！',
+            '怀揣两块，胸怀500万！', '恋爱就是无数个饭局，结婚就是一个饭局。', '男人靠的住，母猪能上树！',
+            '要是我灌水，就骂我“三个代表”没学好吧。', '天塌下来你顶着，我垫着！', '美女未抱身先走，常使色狼泪满襟。',
+            '穿别人的鞋，走自己的路，让他们找去吧。', '自从我变成了狗屎，就再也没有人踩在我头上了。',
+            '我怀疑楼主用的是金山快译且额外附带了中对中翻译。', '丑，但是丑的特别，也就是特别的丑！', '路边的野花不要，踩。',
+            '流氓不可怕，就怕流氓有文化。', '听君一席话，省我十本书！', '如果有一双眼睛陪我一同哭泣，就值得我为生命受苦。',
+            '生我之前谁是我，生我之后我是谁？', '人生重要的不是所站的位置，而是所朝的方向！', '内练一口气，外练一口屁。',
+            '找不到恐龙，就用蜥蜴顶。', '俺从不写措字，但俺写通假字！',
+            '女，喜甜食，甚胖！该女有一癖好：痛恨蚂蚁，见必杀之。问其故曰：这小东西，那么爱吃甜食，腰还那么细！',
+            '不在放荡中变坏，就在沉默中变态！', '只要不下流，我们就是主流！', '月经不仅仅是女人的痛苦，也是男人的痛苦。',
+            '佛曰，色即是空，空即是色！今晚，偶想空一下。', '勿以坑小而不灌，勿以坑大而灌之。', '读书读到抽筋处，文思方能如尿崩！',
+            '睡眠是一门艺术——谁也无法阻挡我追求艺术的脚步！', '人生不能像做菜、把所有的料都准备好才下锅！', '锻炼肌肉，防止挨揍！',
+            '我妈常说，我们家要是没有电话就不会这么穷。', '我不在江湖，但江湖中有我的传说。', '我喜欢孩子，更喜欢造孩子的过程！',
+            '时间永远是旁观者，所有的过程和结果，都需要我们自己承担。', '其实我是一个天才，可惜天妒英才！', '站的更高，尿的更远。',
+            '漏洞与补丁齐飞，蓝屏共死机一色！', '比我有才的都没我帅，比我帅的都没我有才！', '我身在江湖，江湖里却没有我得传说。',
+            '有来有往，你帮我挖坑，我买一送一，填埋加烧纸。', '所有的男人生来平等，结婚的除外。', '不在课堂上沉睡，就在酒桌上埋醉。',
+            '只有假货是真的，别的都是假的！', '男人有冲动可能是爱你，也可能是不爱，但没有冲动肯定是不爱！', '我在马路边丢了一分钱！',
+            '商女不知亡国恨、妓女不懂婚外情。', '脱了衣服我是禽兽，穿上衣服我是衣冠禽兽！', '你的丑和你的脸没有关系。',
+            '鸳鸳相抱何时了，鸯在一边看热闹。', '长得真有创意，活得真有勇气！', '走自己的路，让别人打车去吧。',
+            '如果恐龙是人，那人是什么？'
+            '男人与女人，终究也只是欲望的动物吧！真的可以因为爱而结合吗？对不起，我也不知道。', '有事秘书干，没事干秘书！',
+            '关羽五绺长髯，风度翩翩，手提青龙偃月刀，江湖人送绰号——刀郎。', '解释就系掩饰，掩饰等于无出色，无出色不如回家休息！',
+            '勃起不是万能的，但不能勃起却是万万都不能的！', '沒有激情的亲吻，哪來床上的翻滾？', '做爱做的事，交配交的人。',
+            '有时候，你必须跌到你从未经历的谷底，才能再次站在你从未到达的高峰。', '避孕的效果：不成功，便成“人”。',
+            '与时俱进，你我共赴高潮！', '恐龙说：“遇到色狼，不慌不忙；遇到禽兽，慢慢享受。', '生，容易。活，容易。生活，不容易。',
+            '人家解释，我想，这世界上又要多我这一个疯子了。', '长大了娶唐僧做老公，能玩就玩一玩，不能玩就把他吃掉。',
+            '此地禁止大小便，违者没收工具。', '昨天，系花对我笑了一下，乐得我晚上直数羊，一只羊，两只羊，三只羊。',
+            '我靠！看来医生是都疯了！要不怎么让他出院了！', '打破老婆终身制，实行小姨股份制。引入小姐竞争制，推广情人合同制。'
+        ]
 
     # 保存cookie
     def response_cookies(self, cookies):
@@ -211,8 +211,8 @@ class HKPIC(Network):
             # 提取自己的空间地址
             self.my_zone_url = self.fullURL(span['href']) if span.has_attr('href') else ''
             self.my_uid = self.getUid(self.my_zone_url)
-            self.is_login = span.text == self.username
-            if self.is_login:
+            login_success = span.text == self.username
+            if login_success:
                 self.need_sign_in = html.find('簽到領獎!') > -1
                 # 提取formhash
                 span = soup.find('input', attrs={'name': 'formhash'})
@@ -220,7 +220,7 @@ class HKPIC(Network):
                     self.formhash = span['value']
 
         if show:
-            print('登录成功' if self.is_login else f'登录失败')
+            print('登录成功' if login_success else f'登录失败')
 
         if self.user_href:
             return
@@ -506,9 +506,7 @@ class HKPIC(Network):
         refer = f'home.php?mod=space&uid={self.my_uid}&do=doing&view=me&from=space'
         api_param = 'mod=spacecp&ac=doing&view=me'
         url = self.encapsulateURL('home.php', api_param)
-        header = {
-            'Referer': self.fullURL(refer)
-        }
+        header = {'Referer': self.fullURL(refer)}
         refer = quote(refer, 'utf-8')
         comment = choice(self.comments)
         message = quote(comment, 'utf-8')
@@ -547,8 +545,10 @@ class HKPIC(Network):
         if not id or id.find('_') < 0:
             return
         a = id.split('_')
+
         if not a or len(a) != 2:
             return
+
         start = a[0]
         end = a[1]
 
@@ -584,8 +584,10 @@ class HKPIC(Network):
         api_params = 'mod=spacecp&ac=blog&blogid='
         url = self.encapsulateURL('home.php', api_params)
         header = {
-            'Referer': self.fullURL(f'home.php?mod=space&uid={self.my_uid}&do=blog&view=me'),
-            'Content-Type': f'multipart/form-data; boundary=----WebKitFormBoundary{random_all_string()}'
+            'Referer':
+            self.fullURL(f'home.php?mod=space&uid={self.my_uid}&do=blog&view=me'),
+            'Content-Type':
+            f'multipart/form-data; boundary=----WebKitFormBoundary{random_all_string()}'
         }
         params = {
             'subject': title,
@@ -696,9 +698,7 @@ class HKPIC(Network):
             'formhash': self.formhash,
             'handlekey': 'shareadd'
         }
-        header = {
-            'Referer': self.fullURL(referer)
-        }
+        header = {'Referer': self.fullURL(referer)}
         html = self.request(url, self.paramsString(params), header)
         if html.find('操作成功') > -1:
             print('发布分享成功')
