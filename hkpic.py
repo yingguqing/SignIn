@@ -27,8 +27,6 @@ class HKPIC(Network):
         self.config = HKpicConfig(mark)
         # 需要签到
         self.need_sign_in = True
-        # 网络请求所要用到的cookie
-        self.cookies = ''
         # 读取本地cookie值
         self.cookie_dit = {}
         # 别人空间地址
@@ -56,7 +54,7 @@ class HKPIC(Network):
             'DNT': '1',
             'Proxy-Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Referer': self.fullURL('forum.php')
+            'Referer': self.encapsulateURL('forum.php')
         }
         # 帖子较多的板块
         self.all_fid = [2, 10, 11, 18, 20, 31, 42, 50, 79, 117, 123, 135, 142, 153, 239, 313, 398, 445, 454, 474, 776, 924]
@@ -175,7 +173,7 @@ class HKPIC(Network):
         print('访问首页')
 
         for host in self.all_host:
-            url = self.fullURL('forum.php', host)
+            url = self.encapsulateURL('forum.php', host=host)
             html = self.request(url, post=False)
 
             if html == '域名不通':
@@ -186,7 +184,7 @@ class HKPIC(Network):
             if html is not None and html.find('比思論壇') > -1:
                 self.host = host
                 self.headers['Origin'] = host
-                self.headers['Referer'] = self.fullURL('forum.php')
+                self.headers['Referer'] = self.encapsulateURL('forum.php')
                 return True
 
         return False
@@ -202,14 +200,14 @@ class HKPIC(Network):
         params = f'fastloginfield=username&username={self.username}&password={self.password}&cookietime=2592000&quickforward=yes&handlekey=ls'
         self.request(url, params)
 
-        url = self.fullURL('forum.php')
+        url = self.encapsulateURL('forum.php')
         html = self.request(url, post=False)
         soup = BeautifulSoup(html, 'html.parser')
         # 读取首页的用户名，如果存在，表示登录成功
         span = soup.find('a', title='訪問我的空間')
         if span:
             # 提取自己的空间地址
-            self.my_zone_url = self.fullURL(span['href']) if span.has_attr('href') else ''
+            self.my_zone_url = self.encapsulateURL(span['href']) if span.has_attr('href') else ''
             self.my_uid = self.getUid(self.my_zone_url)
             login_success = span.text == self.username
             if login_success:
@@ -237,7 +235,7 @@ class HKPIC(Network):
 
             # id比较小的应该是管理员，所以排除
             if uid > 9999 and uid != my_id:
-                self.user_href = self.fullURL(item)
+                self.user_href = self.encapsulateURL(item)
                 break
 
     # 签到
@@ -269,7 +267,7 @@ class HKPIC(Network):
         # 页码
         page = randint(3, 10)
         api = f'forum-{fid}-{page}.html'
-        url = self.fullURL(api)
+        url = self.encapsulateURL(api)
         html = self.request(url, post=False)
 
         if first_time:
@@ -311,7 +309,7 @@ class HKPIC(Network):
             print('帖子id不存在')
             return False
 
-        url = self.fullURL(f'thread-{tid}-1-1.html')
+        url = self.encapsulateURL(f'thread-{tid}-1-1.html')
         print(f'进入帖子：{url}')
         # 发表评论前的金币数
         money_history = self.my_money
@@ -331,7 +329,7 @@ class HKPIC(Network):
             if money_history == self.my_money:
                 # 如果发表评论后，金币数不增加，就不再发表评论
                 print('评论达到每日上限。不再发表评论。')
-                self.config.reply_times = 99
+                self.config.reply_times = 9999
                 self.config.save()
             elif self.config.canReply():
                 print(f'金钱：+{self.my_money - money_history}')
@@ -506,7 +504,9 @@ class HKPIC(Network):
         refer = f'home.php?mod=space&uid={self.my_uid}&do=doing&view=me&from=space'
         api_param = 'mod=spacecp&ac=doing&view=me'
         url = self.encapsulateURL('home.php', api_param)
-        header = {'Referer': self.fullURL(refer)}
+        header = {
+            'Referer': self.encapsulateURL(refer)
+        }
         refer = quote(refer, 'utf-8')
         comment = choice(self.comments)
         message = quote(comment, 'utf-8')
@@ -556,7 +556,7 @@ class HKPIC(Network):
         url = self.encapsulateURL('home.php', api_params)
         self.request(url, post=False)
 
-        referer = self.fullURL(f'home.php?mod=space&do=doing&view=me')
+        referer = self.encapsulateURL(f'home.php?mod=space&do=doing&view=me')
         api_params = f'mod=spacecp&ac=doing&op=delete&doid={end}&id=0'
         url = self.encapsulateURL('home.php', api_params)
         referer = quote(url, 'utf-8')
@@ -584,10 +584,8 @@ class HKPIC(Network):
         api_params = 'mod=spacecp&ac=blog&blogid='
         url = self.encapsulateURL('home.php', api_params)
         header = {
-            'Referer':
-            self.fullURL(f'home.php?mod=space&uid={self.my_uid}&do=blog&view=me'),
-            'Content-Type':
-            f'multipart/form-data; boundary=----WebKitFormBoundary{random_all_string()}'
+            'Referer': self.encapsulateURL(f'home.php?mod=space&uid={self.my_uid}&do=blog&view=me'),
+            'Content-Type': f'multipart/form-data; boundary=----WebKitFormBoundary{random_all_string()}'
         }
         params = {
             'subject': title,
@@ -614,7 +612,7 @@ class HKPIC(Network):
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
                 print('发表日志达到每日上限。')
-                self.config.journal_times = 99
+                self.config.journal_times = 9999
                 self.config.save()
             else:
                 print(f'金钱：+{self.my_money - money_history}')
@@ -656,7 +654,7 @@ class HKPIC(Network):
 
         api_params = f'mod=spacecp&ac=blog&op=delete&blogid={blogid}'
         url = self.encapsulateURL('home.php', api_params)
-        referer = self.fullURL('home.php?mod=space&do=blog&view=me')
+        referer = self.encapsulateURL('home.php?mod=space&do=blog&view=me')
         params = {
             'referer': quote(referer, 'utf-8'),
             'deletesubmit': 'true',
@@ -698,7 +696,9 @@ class HKPIC(Network):
             'formhash': self.formhash,
             'handlekey': 'shareadd'
         }
-        header = {'Referer': self.fullURL(referer)}
+        header = {
+            'Referer': self.encapsulateURL(referer)
+        }
         html = self.request(url, self.paramsString(params), header)
         if html.find('操作成功') > -1:
             print('发布分享成功')
@@ -709,7 +709,7 @@ class HKPIC(Network):
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
                 print('发表分享达到每日上限。')
-                self.config.share_times = 99
+                self.config.share_times = 9999
                 self.config.save()
             else:
                 print(f'金钱：+{self.my_money - money_history}')
@@ -742,7 +742,7 @@ class HKPIC(Network):
         api_params = f'mod=spacecp&ac=share&op=delete&sid={sid}&type=&inajax=1'
         url = self.encapsulateURL('home.php', api_params)
         params = {
-            'referer': quote(self.fullURL('home.php?mod=space&do=share&view=me'), 'utf-8'),
+            'referer': quote(self.encapsulateURL('home.php?mod=space&do=share&view=me'), 'utf-8'),
             'deletesubmit': 'true',
             'formhash': self.formhash,
             'handlekey': f's_{sid}_delete'

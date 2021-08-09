@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-
 import requests
-from urllib.parse import urljoin
-import time
+from urllib.parse import urljoin, quote
 from common import valueForKey
 
 
@@ -16,9 +14,8 @@ class Network:
     def __init__(self, jsonValue):
         self.host = valueForKey(jsonValue, 'host')
         self.verify = True
+        # 网络请求所要用到的cookie
         self.cookies = ''
-        # 重试次数
-        self.retime = 0
         self.headers = {
             'Accept-Language': 'zh-cn',
             'Accept': 'application/json, text/plain, */*',
@@ -39,9 +36,8 @@ class Network:
         requests.packages.urllib3.disable_warnings()
         requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
         try:
-            # requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
             if post:
-                params = self.format(params, url_headers)
+                params = self.formatBoundary(params, url_headers)
                 res = requests.post(url=url, data=params, headers=url_headers, verify=self.verify)
             else:
                 res = requests.get(url=url, headers=url_headers, verify=self.verify)
@@ -54,7 +50,7 @@ class Network:
 
             try:
                 return res.json()
-            except ValueError:  
+            except ValueError:
                 return res.text
             finally:
                 res.close()
@@ -69,36 +65,35 @@ class Network:
     def response_cookies(self, cookies):
         pass
 
-    # 补全链接
-    def fullURL(self, href, host=None):
+    # 请求的url补全
+    def encapsulateURL(self, api, params=None, host=None):
         host = self.host if not host else host
-        if href.startswith(host):
-            return href
-        else:
-            return urljoin(host, href)
 
-    # 请求的url封装
-    def encapsulateURL(self, api, params):
-        url = urljoin(self.host, api)
+        if api.startswith(host):
+            url = api
+        else:
+            url = urljoin(host, api)
+
         if not params:
             return url
 
         query = self.paramsString(params)
         return f'{url}?{query}'
-    
+
     # 字典参数转成a=1&b=2
     def paramsString(self, params):
         result = ''
-        if type(params) is dict:
-            p = []
-            for (key, value) in params.items():
-                p.append('{key}={value}'.format(key=key, value=value))
-            result = '&'.join(p)
-        else:
-            result = params
+        if params:
+            if type(params) is dict:
+                p = []
+                for (key, value) in params.items():
+                    p.append('{key}={value}'.format(key=key, value=quote(value)))
+                result = '&'.join(p)
+            else:
+                result = params
         return result
 
-    def format(self, data, headers):
+    def formatBoundary(self, data, headers):
         """
         form data
         :param: data:  {"req":{"cno":"18990876","flag":"Y"},"ts":1,"sig":1,"v": 2.0}
@@ -113,7 +108,7 @@ class Network:
 
         boundary = ''
 
-        #从headers中提取boundary信息
+        # 从headers中提取boundary信息
         if "Content-Type" in headers:
             fd_val = str(headers["Content-Type"])
             if "boundary" in fd_val:
@@ -123,7 +118,7 @@ class Network:
         if not boundary:
             return data
 
-        #form-data格式定式
+        # form-data格式定式
         jion_str = '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'
         end_str = "--{}--".format(boundary)
         args_str = ""
@@ -133,7 +128,7 @@ class Network:
 
         for key, value in data.items():
             args_str = args_str + jion_str.format(boundary, key, value)
-        
+
         args_str = args_str + end_str.format(boundary)
         args_str = args_str.replace("\'", "\"")
         return args_str.encode('utf-8')
