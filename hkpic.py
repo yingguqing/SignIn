@@ -340,8 +340,7 @@ class HKPIC(Network):
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
             print('评论数超过限制')
             self.config.last_reply_time = time.time()
-            self.config.reply_times = 9999
-            self.config.save()
+            self.config.max_reply_times = self.config.reply_times
             return True
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
