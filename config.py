@@ -70,6 +70,7 @@ class HKpicConfig(Config):
     def canReply(self):
         reply = self.reply_times < self.max_reply_times
         if reply and self.reply_times == 10:
+            # 一个小时内，同一个账号，发表评论数最大为10
             return time.time() - self.last_reply_time > 3600
         return reply
 
