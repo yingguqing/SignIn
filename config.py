@@ -23,7 +23,7 @@ class Config:
         if value is None:
             return
 
-        save_values(self.key, '', json.dumps(value))
+        save_values(self.key, '', value)
 
 
 class HKpicConfig(Config):

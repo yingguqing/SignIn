@@ -214,16 +214,14 @@ def load_values(key, xor_key, default):
                 if jsonData:
                     all_values = json.loads(jsonData)
                 f.close()
+
         if key in all_values.keys():
             value = all_values[key]
         else:
             return default
+
         if value:
-            try:
-                s = xor(value, xor_key, False)
-                return json.loads(s)
-            except ValueError:
-                return default
+            return xor(value, xor_key, False)
         else:
             return default
     finally:
