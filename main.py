@@ -30,7 +30,7 @@ if __name__ == "__main__":
         dic = {**hkpicValue, **account}
         hkpic = HKPIC(dic)
         print(f'------------- {hkpic.nickname} 比思签到 -------------')
-        hkpic.runAction()
+        hkpic.delJournal()
         # 统计执行时长
         s = time.time() - start
         min = int(s/60)

@@ -3,7 +3,7 @@
 # 比思每日签到
 
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, save_file
+from common import print_sleep, valueForKey, random_all_string, xor
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -532,8 +532,7 @@ class HKPIC(Network):
             url = self.encapsulateURL('home.php', api_params)
             html = self.request(url, post=False)
 
-        html = html.replace('\n', '')
-        pattern = re.compile(r'<span>\s*(.*?)\s*</span>\s*</dd>\s*<dd\s+class\s*=\s*".*?"\s+id="(.*?)"\s+style\s*=\s*"display:none;"\s*>', re.S)
+        pattern = re.compile(r'<span>\s*(.*?)\s*</span>\s*</dd>\s*<dd\s+class\s*=\s*".*?"\s+id="(.*?)"\s+style\s*=\s*"display:none;"\s*>', re.I)
         recordids = re.findall(pattern, html)
         all_ids = []
         for id in recordids:
@@ -546,6 +545,7 @@ class HKPIC(Network):
     def delRecord(self, all_ids=None):
 
         if all_ids is None:
+            self.login()
             all_ids = self.findAllRecord()
 
         if all_ids:
@@ -616,7 +616,6 @@ class HKPIC(Network):
             'blogsubmit': 'true'
         }
         html = self.request(url, params, header)
-        print('发表日志成功' if html.find(title) > -1 else '发表日志失败')
         if html.find(title) > -1:
             self.config.journal_times += 1
             self.config.save()
@@ -633,6 +632,7 @@ class HKPIC(Network):
             print_sleep(90)
         elif self.config.journal_faild_times < 3:
             self.config.journal_faild_times += 1
+            print(f'发表日志失败，重试中。。。{self.config.journal_faild_times}')
             print_sleep(90)
         else:
             print('发表日志失败')
@@ -652,19 +652,18 @@ class HKPIC(Network):
             api_params = f'mod=space&uid={self.my_uid}&do=blog&view=me&from=space'
             url = self.encapsulateURL('home.php', api_params)
             html = self.request(url, post=False)
-            pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>', re.S)
+            pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>', re.I)
             ids = re.findall(pattern, html)
             for id in ids:
+                print(id)
                 if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
                     all_blogids.append(id[1])
-            if all_blogids:
-                blogid = all_blogids[0] if not blogid else blogid
-            else:
-                print('没有需要删除的日志')
-                return
 
-        if not blogid:
-            print('日志id为空')
+        if all_blogids:
+            blogid = all_blogids[0]
+            all_blogids.pop(0)
+        else:
+            print('没有需要删除的日志')
             return
 
         api_params = f'mod=spacecp&ac=blog&op=delete&blogid={blogid}'
@@ -677,12 +676,9 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        if all_blogids:
-            all_blogids.remove(blogid)
-
-        if all_blogids:
-            print_sleep(15)
-            self.delJournal(all_blogids)
+        print('删除日志成功')
+        print_sleep(15)
+        self.delJournal(all_blogids)
 
     # 发布一个分享
     def share(self):
