@@ -279,6 +279,23 @@ def print_sleep(secs, interval=10):
         count += 1
 
 
+def print_info(message):
+    i = random.randint(34, 37)
+    print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=i))
+
+
+def print_warn(message):
+    print('\033[7;30;33m{message}\033[0m'.format(message=message))
+
+
+def print_error(message):
+    print('\033[7;30;31m{message}\033[0m'.format(message=message))
+
+
+def print_success(message):
+    print('\033[7;30;32m{message}\033[0m'.format(message=message))
+
+
 def int_overflow(val):
     maxint = 2147483647
     if not -maxint-1 <= val <= maxint:
