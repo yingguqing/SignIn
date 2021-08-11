@@ -537,7 +537,6 @@ class HKPIC(Network):
         all_ids = []
         for id in recordids:
             if id and id[0] in self.comments:
-                print(id)
                 all_ids.append(id[1])
         return all_ids
 
@@ -550,7 +549,6 @@ class HKPIC(Network):
 
         if all_ids:
             id = all_ids[0]
-            print(id)
         else:
             return
 
@@ -655,7 +653,6 @@ class HKPIC(Network):
             pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>', re.I)
             ids = re.findall(pattern, html)
             for id in ids:
-                print(id)
                 if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
                     all_blogids.append(id[1])
 
