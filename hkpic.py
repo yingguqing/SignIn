@@ -250,7 +250,7 @@ class HKPIC(Network):
         url = self.encapsulateURL('plugin.php', api_param)
         params = f'formhash={self.formhash}&qdxq=kx'
         html = self.request(url, params)
-        pattern = re.compile(r'<div\s+class\s*=\s*"c"\s*>\W*(.*?)\W*<\s*/\s*div\s*>', re.S)
+        pattern = re.compile(r'<div\s+class\s*=\s*"c"\s*>\W*(.*?)\W*<\s*/\s*div\s*>', re.I)
         items = re.findall(pattern, html)
         if items:
             print(items[0])
@@ -344,7 +344,7 @@ class HKPIC(Network):
             self.config.max_reply_times = self.config.reply_times
             return True
         else:
-            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print('\n'.join([comment] + items) if items else html)
             # 评论有时间间隔限制
@@ -403,7 +403,7 @@ class HKPIC(Network):
                 self.deleteMessage(cid)
             print_sleep(60)
         else:
-            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
             print('留言失败')
@@ -429,7 +429,7 @@ class HKPIC(Network):
             time.sleep(2)
             self.myMoney()
         else:
-            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
             print('删除留言失败')
@@ -439,7 +439,7 @@ class HKPIC(Network):
         if not self.my_zone_url:
             return
         html = self.request(self.my_zone_url, post=False)
-        pattern = re.compile(r'<li>金錢:\s*<a href=".*?">(\d+)</a>', re.S)
+        pattern = re.compile(r'<li>金錢:\s*<a href=".*?">(\d+)</a>', re.I)
         items = re.findall(pattern, html)
         if items:
             money = int(items[0])
@@ -489,7 +489,7 @@ class HKPIC(Network):
         if html.find('操作成功') > -1:
             print('一条删除动态成功')
         else:
-            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
             print('删除动态失败')
@@ -730,7 +730,7 @@ class HKPIC(Network):
                 self.delShare(sid)
             print_sleep(50)
         else:
-            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
             print('发布分享失败')
@@ -759,7 +759,7 @@ class HKPIC(Network):
         if html.find('操作成功') > -1:
             print('删除分享成功')
         else:
-            pattern = re.compile(r'\[CDATA\[(.*?)<', re.S)
+            pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print('\n'.join(items) if items else html)
             print('删除分享失败')
