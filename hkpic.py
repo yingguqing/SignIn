@@ -654,6 +654,7 @@ class HKPIC(Network):
             ids = re.findall(pattern, html)
             for id in ids:
                 if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
+                    print(f'日志：{id[2]}->「{id[1]}」')
                     all_blogids.append(id[1])
 
         if all_blogids:
@@ -673,7 +674,7 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        print('删除日志成功')
+        print(f'删除日志成功:「{blogid}」')
         print_sleep(15)
         self.delJournal(all_blogids)
 
