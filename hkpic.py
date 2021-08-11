@@ -675,7 +675,7 @@ class HKPIC(Network):
         }
         self.request(url, self.paramsString(params))
         print_success(f'删除日志成功:「{blogid}」')
-        print_sleep(30)
+        print_sleep(10)
         self.delJournal()
 
     # 发布一个分享
