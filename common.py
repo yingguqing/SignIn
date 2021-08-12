@@ -279,9 +279,11 @@ def print_sleep(secs, interval=10):
         count += 1
 
 
-def print_info(message):
-    i = random.randint(34, 37)
-    print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=i))
+def print_info(message, index=None):
+    # 34（蓝色）、35（洋 红）、36（青色）、37（白色）
+    if index is None or index < 34 or index > 37:
+        index = random.randint(34, 37)
+    print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=index))
 
 
 def print_warn(message):

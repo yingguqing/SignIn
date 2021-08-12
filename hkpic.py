@@ -649,7 +649,7 @@ class HKPIC(Network):
         ids = re.findall(pattern, html)
         for id in ids:
             if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
-                print_success(f'日志：{id[1]}->「{id[2]}」')
+                print_info(f'日志：{id[1]}->「{id[2]}」', 37)
                 all_blogids.append(id[1])
         return all_blogids
 
