@@ -684,10 +684,12 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        print_sleep(10)
+        print_sleep(5)
         all_blogids = self.allJournals()
-        title = '成功' if blogid not in all_blogids else '失败'
-        print_success(f'日志删除{title}:「{blogid}」')
+        if blogid not in all_blogids:
+            print_success(f'日志删除成功:「{blogid}」')
+        else:
+            print_error(f'日志删除失败:「{blogid}」')
         self.delJournal(all_blogids=all_blogids, del_time=del_time+1)
 
     # 发布一个分享
