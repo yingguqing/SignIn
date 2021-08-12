@@ -734,7 +734,7 @@ class HKPIC(Network):
                 self.config.share_times = 9999
                 self.config.save()
             else:
-                print_info(f'发布分享成功。金钱：+{self.my_money - money_history}')
+                print_success(f'发布分享成功。金钱：+{self.my_money - money_history}')
 
             # 删除刚发表的分享
             pattern = re.compile(r'\{\s*\'sid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
