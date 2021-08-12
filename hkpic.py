@@ -3,7 +3,7 @@
 # 比思每日签到
 
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, print_success, print_info, print_warn, print_error
+from common import print_sleep, valueForKey, random_all_string, xor, print_success, print_info, print_warn, print_error, save_file
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -385,7 +385,6 @@ class HKPIC(Network):
             print_error('他人id为空')
             return
 
-        self.myMoney()
         api_param = 'mod=spacecp&ac=comment&inajax=1'
         url = self.encapsulateURL('home.php', api_param)
         refer = quote(f'home.php?mod=space&uid={uid}', 'utf-8')
@@ -427,7 +426,6 @@ class HKPIC(Network):
         if html.find('操作成功') > -1:
             print_success('删除留言成功')
             time.sleep(2)
-            self.myMoney()
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
@@ -541,11 +539,10 @@ class HKPIC(Network):
         return all_ids
 
     # 删除记录
-    def delRecord(self, all_ids=None):
+    def delRecord(self):
 
-        if all_ids is None:
-            self.login()
-            all_ids = self.findAllRecord()
+        self.login()
+        all_ids = self.findAllRecord()
 
         if all_ids:
             id = all_ids[0]
@@ -640,22 +637,34 @@ class HKPIC(Network):
         if self.config.canJournal():
             self.journal()
 
+    # 查询自己所有脚本发表的日志
+    def allJournals(self):
+        all_blogids = []
+        api_params = f'mod=space&uid={self.my_uid}&do=blog&view=me&from=space'
+        url = self.encapsulateURL('home.php', api_params)
+
+        html = self.request(url, post=False)
+        save_file(html, 'a.html')
+        pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>')
+        ids = re.findall(pattern, html)
+        for id in ids:
+            if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
+                print_success(f'日志：{id[1]}->「{id[2]}」')
+                all_blogids.append(id[1])
+        return all_blogids
+
     # 删除日志
-    def delJournal(self, all_blogids=None):
+    def delJournal(self, all_blogids=None, del_time=0):
+
+        if del_time > 5:
+            return
 
         blogid = None
         # 先查出所有脚本发表的日志
         if all_blogids is None:
-            all_blogids = []
-            api_params = f'mod=space&uid={self.my_uid}&do=blog&view=me&from=space'
-            url = self.encapsulateURL('home.php', api_params)
-            html = self.request(url, post=False)
-            pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>', re.I)
-            ids = re.findall(pattern, html)
-            for id in ids:
-                if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
-                    print_success(f'日志：{id[1]}->「{id[2]}」')
-                    all_blogids.append(id[1])
+            all_blogids = self.allJournals()
+        else:
+            return
 
         if all_blogids:
             blogid = all_blogids[0]
@@ -664,6 +673,7 @@ class HKPIC(Network):
             print_error('没有需要删除的日志')
             return
 
+        self.login()
         api_params = f'mod=spacecp&ac=blog&op=delete&blogid={blogid}'
         url = self.encapsulateURL('home.php', api_params)
         referer = self.encapsulateURL('home.php?mod=space&do=blog&view=me')
@@ -674,9 +684,11 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        print_success(f'删除日志成功:「{blogid}」')
         print_sleep(10)
-        self.delJournal()
+        all_blogids = self.allJournals()
+        title = '成功' if blogid not in all_blogids else '失败'
+        print_success(f'日志删除{title}:「{blogid}」')
+        self.delJournal(all_blogids=all_blogids, del_time=del_time+1)
 
     # 发布一个分享
     def share(self):

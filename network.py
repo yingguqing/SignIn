@@ -93,6 +93,14 @@ class Network:
                 result = params
         return result
 
+    # 设置请求的referer，自动添加域名
+    def setReferer(self, referer):
+        if referer.startswith(self.host):
+            url = referer
+        else:
+            url = urljoin(self.host, referer)
+        self.headers['Referer'] = url
+
     def formatBoundary(self, data, headers):
         """
         form data
