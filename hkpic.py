@@ -165,7 +165,7 @@ class HKPIC(Network):
             pattern = re.compile(r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:[\w\d]+|([^[:punct:]\s]|/)))', re.S)
             all = re.findall(pattern, content)
             for h in all:
-                if type(h) is tuple and h:
+                if type(h) is tuple and h and h[0] not in self.all_host:
                     self.all_host.append(h[0])
             print_info(f'域名：{len(self.all_host)} 个')
         else:
