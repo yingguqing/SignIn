@@ -273,7 +273,9 @@ def print_sleep(secs, interval=10):
                 consume = '%d分%.0f秒' % (min, TOTALSLEEPTIME - min*60)
             else:
                 consume = f'{"%.0f" % TOTALSLEEPTIME}秒'
-            print_info(f'休息：{consume}', 35)
+
+            if TOTALSLEEPTIME > 0:
+                print_info(f'休息：{consume}', 35)
         else:
             TOTALSLEEPTIME = 0
         return
@@ -311,6 +313,7 @@ def print_success(message):
     print('\033[7;30;32m{message}\033[0m'.format(message=message))
 
 
+# ----------------下面是移动签到所使用到的方法，已废弃-----------------------------------------------------------------------------------------------
 def int_overflow(val):
     maxint = 2147483647
     if not -maxint-1 <= val <= maxint:
