@@ -148,6 +148,9 @@ class HKPIC(Network):
         else:
             print_info(f'金钱：{self.my_money}')
 
+        # 显示总休息时长
+        print_sleep(0)
+
     # 获取比思域名
     def getHost(self):
         if not self.host_url:
@@ -178,7 +181,7 @@ class HKPIC(Network):
 
             if html == '域名不通':
                 print_error(f'{host} 请求失败，切换下一个域名')
-                time.sleep(1)
+                print_sleep(1)
                 continue
 
             if html is not None and html.find('比思論壇') > -1:
@@ -443,7 +446,7 @@ class HKPIC(Network):
         html = self.request(url, params)
         if html.find('操作成功') > -1:
             print_success('删除留言成功')
-            time.sleep(2)
+            print_sleep(2)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)

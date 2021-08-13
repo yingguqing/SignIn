@@ -18,6 +18,8 @@ from datetime import timedelta
 from datetime import timezone
 
 DEBUG = False
+# 记录一下总的休息时长
+TOTALSLEEPTIME = 0
 all_values = {}
 LOCK = threading.Lock()
 OPENID = ''
@@ -263,7 +265,17 @@ def xor(text, key, encrty):
 
 # 休息提示
 def print_sleep(secs, interval=10):
+    global TOTALSLEEPTIME
     if secs <= 0:
+        if secs == 0:
+            min = int(TOTALSLEEPTIME/60)
+            if min > 0:
+                consume = '%d分%.0f秒' % (min, TOTALSLEEPTIME - min*60)
+            else:
+                consume = f'{"%.0f" % TOTALSLEEPTIME}秒'
+            print_info(f'休息：{consume}', 35)
+        else:
+            TOTALSLEEPTIME = 0
         return
 
     global DEBUG
