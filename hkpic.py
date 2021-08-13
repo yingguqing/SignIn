@@ -112,8 +112,6 @@ class HKPIC(Network):
             print_error('没有可用域名')
             return
 
-        print_info(f'域名:{self.host}')
-
         # 自动登录
         self.login(True)
 
@@ -169,6 +167,7 @@ class HKPIC(Network):
             for h in all:
                 if type(h) is tuple and h:
                     self.all_host.append(h[0])
+            print_info(f'域名：{len(self.all_host)} 个')
         else:
             print_error('获取域名失败')
 
@@ -188,6 +187,7 @@ class HKPIC(Network):
                 self.host = host
                 self.headers['Origin'] = host
                 self.headers['Referer'] = self.encapsulateURL('forum.php')
+                print_info(f'域名:{self.host}')
                 return True
 
         return False
