@@ -54,10 +54,6 @@ class HKpicConfig(Config):
         #  分享次数
         self.share_times = valueForKey(dic, 'share_times', 0)
         # -----------以下是固定值------------------
-        # 发表日志失败的次数（3次内重试）
-        self.journal_faild_times = 0
-        # 发表分享失败的次数（3次内重试）
-        self.share_faild_times = 0
         # 本次最大评论次数(有奖次数为15，小时内最大评论数为10)
         self.max_reply_times = 10
         if self.reply_times > 5:
@@ -67,6 +63,7 @@ class HKpicConfig(Config):
         #  最大分享次数
         self.max_share_times = 3
 
+    # 是否需要发表评论
     def canReply(self):
         reply = self.reply_times < self.max_reply_times
         if reply and self.reply_times == 10:
@@ -74,9 +71,11 @@ class HKpicConfig(Config):
             return time.time() - self.last_reply_time > 3600
         return reply
 
+    # 是否需要发表日志
     def canJournal(self):
         return self.journal_times < self.max_journal_times
 
+    # 是否需要发表分享
     def canShare(self):
         return self.share_times < self.max_share_times
 

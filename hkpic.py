@@ -108,7 +108,7 @@ class HKPIC(Network):
         self.getHost()
 
         # 访问首页得到可用域名
-        if not self.forum():
+        if not self.checkHost():
             print_error('没有可用域名')
             return
 
@@ -138,16 +138,18 @@ class HKPIC(Network):
         # 发表分享
         self.share()
 
+        # 删除自己空间留言所产生的动态
+        self.delAllLeavMessageDynamic()
+
         # 查询我的金币
-        self.myMoney()
+        self.myMoney(False)
         temp = self.my_money - self.config.money
         if temp != 0:
             self.config.money = self.my_money
             self.config.save()
             print_info(f'增加金币：{temp}\n金钱：{self.my_money}')
-
-        # 删除自己空间留言所产生的动态
-        self.delAllLeavMessageDynamic()
+        else:
+            print_info(f'金钱：{self.my_money}')
 
     # 获取比思域名
     def getHost(self):
@@ -170,13 +172,12 @@ class HKPIC(Network):
         else:
             print_error('获取域名失败')
 
-    # 访问首页得到可用域名
-    def forum(self):
-        print_info('访问首页')
-
+    # 测试域名
+    def checkHost(self):
+        print_info('测试域名')
         for host in self.all_host:
             url = self.encapsulateURL('forum.php', host=host)
-            html = self.request(url, post=False)
+            html = self.forum(host=host, check_host=True)
 
             if html == '域名不通':
                 print_error(f'{host} 请求失败，切换下一个域名')
@@ -191,54 +192,74 @@ class HKPIC(Network):
 
         return False
 
+    # 访问首页
+    def forum(self, host=None, check_host=False):
+
+        host = host if host else self.host
+        url = self.encapsulateURL('forum.php', host=host)
+        html = self.request(url, post=False)
+
+        if check_host:
+            return html
+
+        if not self.formhash:
+            # 提取formhash
+            pattern = re.compile(r'formhash=(\w+)')
+            items = re.findall(pattern, html)
+            if items and len(items[0]) > 3:
+                self.formhash = items[0]
+
+        if not self.my_zone_url:
+            soup = BeautifulSoup(html, 'html.parser')
+            # 读取首页的用户名，如果存在，表示登录成功
+            span = soup.find('a', title='訪問我的空間')
+            if span:
+                # 提取自己的空间地址
+                self.my_zone_url = self.encapsulateURL(span['href']) if span.has_attr('href') else ''
+                self.my_uid = self.getUid(self.my_zone_url)
+                login_success = span.text == self.username
+                if login_success:
+                    self.need_sign_in = html.find('簽到領獎!') > -1
+                    # 提取formhash
+                    if not self.formhash:
+                        span = soup.find('input', attrs={'name': 'formhash'})
+                        self.formhash = span['value'] if span and span.has_attr('value') else ''
+
+        if not self.user_href:
+            # 没有别人空间地址时，提取首页随便一个人非自己的空间地址
+            pattern = re.compile(r'"(space-uid-\d{5,}.html)"', re.S)
+            items = re.findall(pattern, html)
+            my_id = int(self.my_uid) if self.my_uid else 0
+            for item in items:
+                id = self.getUid(item)
+                uid = int(id) if id else 0
+                if not uid:
+                    continue
+
+                # id比较小的应该是管理员，所以排除
+                if uid > 9999 and uid != my_id:
+                    self.user_href = self.encapsulateURL(item)
+                    break
+
     # 登录
     def login(self, show=False):
         # 需要登录时，把cookie清空
         self.cookie_dit = {}
         self.cookies = ''
+        self.formhash = ''
         api_param = 'mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes&inajax=1'
         url = self.encapsulateURL('member.php', api_param)
         # &cookietime=2592000
         params = f'fastloginfield=username&username={self.username}&password={self.password}&cookietime=2592000&quickforward=yes&handlekey=ls'
         self.request(url, params)
 
-        url = self.encapsulateURL('forum.php')
-        html = self.request(url, post=False)
-        soup = BeautifulSoup(html, 'html.parser')
-        # 读取首页的用户名，如果存在，表示登录成功
-        span = soup.find('a', title='訪問我的空間')
-        if span:
-            # 提取自己的空间地址
-            self.my_zone_url = self.encapsulateURL(span['href']) if span.has_attr('href') else ''
-            self.my_uid = self.getUid(self.my_zone_url)
-            login_success = span.text == self.username
-            if login_success:
-                self.need_sign_in = html.find('簽到領獎!') > -1
-                # 提取formhash
-                span = soup.find('input', attrs={'name': 'formhash'})
-                if span and span.has_attr('value'):
-                    self.formhash = span['value']
+        # 访问首页抓取相关数据
+        self.forum()
 
-        if show:
-            print_success('登录成功' if login_success else f'登录失败')
-
-        if self.user_href:
+        if not show:
             return
 
-        # 没有别人空间地址时，提取首页随便一个人非自己的空间地址
-        pattern = re.compile(r'"(space-uid-\d{5,}.html)"', re.S)
-        items = re.findall(pattern, html)
-        my_id = int(self.my_uid) if self.my_uid else 0
-        for item in items:
-            id = self.getUid(item)
-            uid = int(id) if id else 0
-            if not uid:
-                continue
-
-            # id比较小的应该是管理员，所以排除
-            if uid > 9999 and uid != my_id:
-                self.user_href = self.encapsulateURL(item)
-                break
+        print_success('登录成功' if self.formhash else f'登录失败')
 
     # 签到
     def signIn(self):
@@ -573,15 +594,16 @@ class HKPIC(Network):
         self.request(url, params)
 
     # 发表日志
-    def journal(self, money_history=None):
+    def journal(self, money_history=None, faild_times=0):
 
         if not self.config.canJournal():
             return
 
         self.login()
-        # 发表前的金币数
-        self.myMoney(False)
-        money_history = self.my_money
+        if not money_history:
+            # 发表前的金币数
+            self.myMoney(False)
+            money_history = self.my_money
 
         title = choice(self.comments)
         comments = []
@@ -625,9 +647,9 @@ class HKPIC(Network):
                 print_info(f'金钱：+{self.my_money - money_history}')
 
             print_sleep(90)
-        elif self.config.journal_faild_times < 3:
-            self.config.journal_faild_times += 1
-            print_warn(f'发表日志失败，重试中。。。{self.config.journal_faild_times}')
+        elif faild_times < 3:
+            faild_times += 1
+            print_warn(f'发表日志失败，重试中。。。{faild_times}')
             print_sleep(90)
         else:
             print_error('发表日志失败')
@@ -635,7 +657,7 @@ class HKPIC(Network):
 
         # 发表有时间间隔限制
         if self.config.canJournal():
-            self.journal()
+            self.journal(money_history=self.my_money, faild_times=faild_times)
 
     # 查询自己所有脚本发表的日志
     def allJournals(self):
@@ -693,7 +715,7 @@ class HKPIC(Network):
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
     # 发布一个分享
-    def share(self):
+    def share(self, faild_times=0):
 
         if not self.config.canShare():
             return
@@ -748,13 +770,13 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('发布分享失败')
-            if self.config.share_faild_times < 3:
-                self.config.share_faild_times += 1
+            if faild_times < 3:
+                faild_times += 1
             else:
                 return
 
         if self.config.canShare():
-            self.share()
+            self.share(faild_times)
 
     # 删除一条分享
     def delShare(self, sid):
