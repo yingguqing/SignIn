@@ -175,7 +175,6 @@ class HKPIC(Network):
     def checkHost(self):
         print_info('测试域名')
         for host in self.all_host:
-            url = self.encapsulateURL('forum.php', host=host)
             html = self.forum(host=host, check_host=True)
 
             if html == '域名不通':
