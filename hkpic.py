@@ -352,8 +352,7 @@ class HKPIC(Network):
                 print_warn('评论达到每日上限。不再发表评论。')
                 self.config.reply_times = 9999
                 self.config.save()
-            elif self.config.canReply():
-                print_info(f'金钱：+{self.my_money - money_history}')
+
             # 评论有时间间隔限制
             print_sleep(60)
             return True
@@ -641,8 +640,6 @@ class HKPIC(Network):
                 print_warn('发表日志达到每日上限。')
                 self.config.journal_times = 9999
                 self.config.save()
-            else:
-                print_info(f'金钱：+{self.my_money - money_history}')
 
             print_sleep(90)
         elif faild_times < 3:
@@ -754,7 +751,7 @@ class HKPIC(Network):
                 self.config.share_times = 9999
                 self.config.save()
             else:
-                print_success(f'发布分享成功。金钱：+{self.my_money - money_history}')
+                print_success('发布分享成功。')
 
             # 删除刚发表的分享
             pattern = re.compile(r'\{\s*\'sid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
