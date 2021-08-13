@@ -150,6 +150,8 @@ class HKPIC(Network):
 
         # 显示总休息时长
         print_sleep(0)
+        # 清空统计的休息时长
+        print_sleep(-1)
 
     # 获取比思域名
     def getHost(self):
