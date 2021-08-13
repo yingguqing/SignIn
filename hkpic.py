@@ -3,7 +3,7 @@
 # 比思每日签到
 
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, print_success, print_info, print_warn, print_error, save_file
+from common import print_sleep, valueForKey, random_all_string, xor, print_success, print_info, print_warn, print_error
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -644,11 +644,10 @@ class HKPIC(Network):
         url = self.encapsulateURL('home.php', api_params)
 
         html = self.request(url, post=False)
-        save_file(html, 'a.html')
         pattern = re.compile(r'<a\s+href\s*=\s*"blog-(\d+)-(\d+).html"\s+target\s*=\s*"_blank"\s*>\s*(.*?)\s*</a>')
         ids = re.findall(pattern, html)
         for id in ids:
-            if id and id[0] == str(self.my_uid) and id[2].startswith('我的日志'):
+            if id and id[2].startswith('我的日志'):
                 print_info(f'日志：{id[1]}->「{id[2]}」', 37)
                 all_blogids.append(id[1])
         return all_blogids
@@ -689,8 +688,9 @@ class HKPIC(Network):
         if blogid not in all_blogids:
             print_success(f'日志删除成功:「{blogid}」')
         else:
+            del_time += 1
             print_error(f'日志删除失败:「{blogid}」')
-        self.delJournal(all_blogids=all_blogids, del_time=del_time+1)
+        self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
     # 发布一个分享
     def share(self):
