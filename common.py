@@ -278,6 +278,7 @@ def print_sleep(secs, interval=10):
             TOTALSLEEPTIME = 0
         return
 
+    TOTALSLEEPTIME += secs
     global DEBUG
     if not DEBUG:
         time.sleep(secs)
