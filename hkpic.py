@@ -20,10 +20,10 @@ class HKPIC(Network):
         self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
-        self.nickname = valueForKey(jsonValue, 'nickname', '无昵称')
         self.host_url = valueForKey(jsonValue, 'hostURL', '')
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)
+        self.nickname = valueForKey(jsonValue, 'nickname', mark)
         self.config = HKpicConfig(mark)
         # 需要签到
         self.need_sign_in = True
