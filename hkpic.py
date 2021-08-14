@@ -684,8 +684,6 @@ class HKPIC(Network):
         # 先查出所有脚本发表的日志
         if all_blogids is None:
             all_blogids = self.allJournals()
-        else:
-            return
 
         if all_blogids:
             blogid = all_blogids[0]
