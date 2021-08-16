@@ -58,15 +58,15 @@ class PicType(Enum):
 
     def maxSleepTime(self):
         if self is PicType.Reply:
-            return 60
+            return 50
         elif self is PicType.LeaveMessage:
-            return 60
+            return 50
         elif self is PicType.Record:
-            return 90
+            return 80
         elif self is PicType.Journal:
-            return 90
+            return 80
         elif self is PicType.Share:
-            return 60
+            return 50
         else:
             return 0
 
@@ -82,15 +82,15 @@ class HKpicConfig(Config):
         self.date = valueForKey(dic, 'date')
         self.sleep_time_step = 5
         # 发表评论后的休息时间
-        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime())
+        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime()) - 10
         # 发表留言后的休息时间
-        self.leave_message_sleep_time = valueForKey(self.public_config, 'leave_message_sleep_time', PicType.LeaveMessage.maxSleepTime())
+        self.leave_message_sleep_time = valueForKey(self.public_config, 'leave_message_sleep_time', PicType.LeaveMessage.maxSleepTime()) - 10
         # 发表记录后的休息时间
-        self.record_sleep_time = valueForKey(self.public_config, 'record_sleep_time', PicType.Record.maxSleepTime())
+        self.record_sleep_time = valueForKey(self.public_config, 'record_sleep_time', PicType.Record.maxSleepTime()) - 10
         # 发表日志后的休息时间
-        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime())
+        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime()) - 10
         # 发表分享后的休息时间
-        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime())
+        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime()) - 10
         if self.date != date:
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
