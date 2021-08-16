@@ -16,6 +16,8 @@ import threading
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from enum import Enum
+
 
 DEBUG = False
 # 记录一下总的休息时长
@@ -294,10 +296,25 @@ def print_sleep(secs, interval=10):
         count += 1
 
 
+# 打印info的颜色
+class PrintColor(Enum):
+    # 蓝色
+    Blue = 34
+    # 洋红
+    Magenta = 35
+    # 青色
+    Cyan = 36
+    # 白色
+    White = 37
+
+
 def print_info(message, index=None):
-    # 34（蓝色）、35（洋红）、36（青色）、37（白色）
+    if isinstance(index, PrintColor):
+        index = index.value
+
     if index is None or index < 34 or index > 37:
         index = random.randint(34, 37)
+
     print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=index))
 
 

@@ -3,7 +3,7 @@
 # 比思每日签到
 
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, print_success, print_info, print_warn, print_error
+from common import print_sleep, valueForKey, random_all_string, xor, print_success, print_info, print_warn, print_error, PrintColor
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -25,6 +25,7 @@ class HKPIC(Network):
         mark = xor(self.username, self.xor_key, True)
         self.nickname = valueForKey(jsonValue, 'nickname', mark)
         self.config = HKpicConfig(mark)
+        self.config.savePublicConfig()
         # 需要签到
         self.need_sign_in = True
         # 读取本地cookie值
@@ -359,7 +360,7 @@ class HKPIC(Network):
                 self.config.save()
 
             # 评论有时间间隔限制
-            print_sleep(60)
+            self.config.sleep(HKpicConfig.PicType.Reply)
             return True
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
             print_warn('评论数超过限制')
@@ -372,7 +373,7 @@ class HKPIC(Network):
             print_error('\n'.join([comment] + items) if items else html)
             # 评论有时间间隔限制
             if self.config.canReply():
-                print_sleep(60)
+                self.config.increaseSleepTime(HKpicConfig.PicType.Reply)
             return False
 
     # 从空间链接中获取用户id
@@ -423,12 +424,13 @@ class HKPIC(Network):
             if items:
                 cid = items[0]
                 self.deleteMessage(cid)
-            print_sleep(60)
+            self.config.sleep(HKpicConfig.PicType.LeaveMessage)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('留言失败')
+            self.config.increaseSleepTime(HKpicConfig.PicType.LeaveMessage)
 
     # 删除留言
     def deleteMessage(self, cid):
@@ -539,9 +541,10 @@ class HKPIC(Network):
             print_success(f'记录：「{comment}」-> 发表成功')
             self.config.is_record = False
             self.config.save()
-            print_sleep(90)
+            self.config.sleep(HKpicConfig.PicType.Record)
         else:
             print_error('发表记录失败')
+            self.config.increaseSleepTime(HKpicConfig.PicType.Record)
 
     # 通过查询所有记录id
     def findAllRecord(self, html=None):
@@ -646,11 +649,11 @@ class HKPIC(Network):
                 self.config.journal_times = 9999
                 self.config.save()
 
-            print_sleep(90)
-        elif faild_times < 3:
+            self.config.sleep(HKpicConfig.PicType.Journal)
+        elif faild_times < 5:
             faild_times += 1
             print_warn(f'发表日志失败，重试中。。。{faild_times}')
-            print_sleep(90)
+            self.config.increaseSleepTime(HKpicConfig.PicType.Journal)
         else:
             print_error('发表日志失败')
             return
@@ -660,7 +663,7 @@ class HKPIC(Network):
             self.journal(money_history=self.my_money, faild_times=faild_times)
 
     # 查询自己所有脚本发表的日志
-    def allJournals(self):
+    def allJournals(self, is_show):
         all_blogids = []
         api_params = f'mod=space&uid={self.my_uid}&do=blog&view=me&from=space'
         url = self.encapsulateURL('home.php', api_params)
@@ -670,7 +673,8 @@ class HKPIC(Network):
         ids = re.findall(pattern, html)
         for id in ids:
             if id and id[2].startswith('我的日志'):
-                print_info(f'日志：{id[1]}->「{id[2]}」', 37)
+                if is_show:
+                    print_info(f'日志：{id[1]}->「{id[2]}」', PrintColor.White)
                 all_blogids.append(id[1])
         return all_blogids
 
@@ -683,7 +687,7 @@ class HKPIC(Network):
         blogid = None
         # 先查出所有脚本发表的日志
         if all_blogids is None:
-            all_blogids = self.allJournals()
+            all_blogids = self.allJournals(True)
 
         if all_blogids:
             blogid = all_blogids[0]
@@ -703,8 +707,8 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        print_sleep(5)
-        all_blogids = self.allJournals()
+        print_sleep(2)
+        all_blogids = self.allJournals(False)
         if blogid not in all_blogids:
             print_success(f'日志删除成功:「{blogid}」')
         else:
@@ -746,7 +750,6 @@ class HKPIC(Network):
         if html.find('操作成功') > -1:
             self.config.share_times += 1
             self.config.save()
-            print_sleep(10)
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
@@ -762,13 +765,14 @@ class HKPIC(Network):
             if items:
                 sid = items[0]
                 self.delShare(sid)
-            print_sleep(50)
+            self.config.sleep(HKpicConfig.PicType.Share)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('发布分享失败')
-            if faild_times < 3:
+            self.config.increaseSleepTime(HKpicConfig.PicType.Share)
+            if faild_times < 5:
                 faild_times += 1
             else:
                 return

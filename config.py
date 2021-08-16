@@ -3,14 +3,17 @@
 # 配置文件
 
 
-from common import save_values, valueForKey, load_values, local_time
-import json
-import os
+import enum
+from common import save_values, valueForKey, load_values, local_time, print_sleep
 import time
+from enum import Enum, auto
 
 
 class Config:
     key = ''
+
+    def __init__(self):
+        self.public_config = load_values('PUBLIC_CONFIG', '', {})
 
     # 配置参数封装成字典，子类实现
     def configValue(self):
@@ -25,8 +28,27 @@ class Config:
 
         save_values(self.key, '', value)
 
+    # 保存公共配置数据
+    def savePublicConfig(self):
+        if not self.public_config:
+            return
+        save_values('PUBLIC_CONFIG', '', self.public_config)
+
 
 class HKpicConfig(Config):
+
+    # 比思发表类型
+    class PicType(Enum):
+        # 评论
+        Reply = auto()
+        # 留言
+        LeaveMessage = auto()
+        # 记录
+        Record = auto()
+        # 日志
+        Journal = auto()
+        # 分享
+        Share = auto()
 
     def __init__(self, mark):
         super().__init__()
@@ -35,6 +57,17 @@ class HKpicConfig(Config):
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
         self.date = valueForKey(dic, 'date')
+        self.sleep_time_step = 5
+        # 发表评论后的休息时间
+        self.reply_sleep_time = valueForKey(dic, 'reply_sleep_time', 50)
+        # 发表留言后的休息时间
+        self.leave_message_sleep_time = valueForKey(dic, 'leave_message_sleep_time', 50)
+        # 发表记录后的休息时间
+        self.record_sleep_time = valueForKey(dic, 'record_sleep_time', 80)
+        # 发表日志后的休息时间
+        self.journal_sleep_time = valueForKey(dic, 'journal_sleep_time', 80)
+        # 发表分享后的休息时间
+        self.share_sleep_time = valueForKey(dic, 'share_sleep_time', 50)
         if self.date != date:
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
@@ -79,6 +112,41 @@ class HKpicConfig(Config):
     def canShare(self):
         return self.share_times < self.max_share_times
 
+    # 按类型自动休息
+    def sleep(self, type):
+        if not isinstance(type, HKpicConfig.PicType):
+            return
+
+        if type is HKpicConfig.PicType.Reply:
+            print_sleep(self.reply_sleep_time)
+        elif type is HKpicConfig.PicType.LeaveMessage:
+            print_sleep(self.leave_message_sleep_time)
+        elif type is HKpicConfig.PicType.Record:
+            print_sleep(self.record_sleep_time)
+        elif type is HKpicConfig.PicType.Journal:
+            print_sleep(self.journal_sleep_time)
+        elif type is HKpicConfig.PicType.Share:
+            print_sleep(self.share_sleep_time)
+
+    # 增加休息时长
+    def increaseSleepTime(self, type):
+        if type is HKpicConfig.PicType.Reply:
+            self.reply_sleep_time += self.sleep_time_step
+            print_sleep(self.reply_sleep_time)
+        elif type is HKpicConfig.PicType.LeaveMessage:
+            self.leave_message_sleep_time += self.sleep_time_step
+            print_sleep(self.leave_message_sleep_time)
+        elif type is HKpicConfig.PicType.Record:
+            self.record_sleep_time += self.sleep_time_step
+            print_sleep(self.record_sleep_time)
+        elif type is HKpicConfig.PicType.Journal:
+            self.journal_sleep_time += self.sleep_time_step
+            print_sleep(self.journal_sleep_time)
+        elif type is HKpicConfig.PicType.Share:
+            self.share_sleep_time += self.sleep_time_step
+            print_sleep(self.share_sleep_time)
+        self.savePublicConfig()
+
     def configValue(self):
         values = {
             'money': self.money,
@@ -92,3 +160,11 @@ class HKpicConfig(Config):
             'last_reply_time': self.last_reply_time
         }
         return values
+
+    def savePublicConfig(self):
+        self.public_config['reply_sleep_time'] = self.reply_sleep_time
+        self.public_config['leave_message_sleep_time'] = self.leave_message_sleep_time
+        self.public_config['record_sleep_time'] = self.record_sleep_time
+        self.public_config['journal_sleep_time'] = self.journal_sleep_time
+        self.public_config['share_sleep_time'] = self.share_sleep_time
+        super().savePublicConfig()
