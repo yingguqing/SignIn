@@ -4,7 +4,7 @@
 
 
 import enum
-from common import save_values, valueForKey, load_values, local_time, print_sleep
+from common import save_values, valueForKey, load_values, local_time, print_sleep, print_error
 import time
 from enum import Enum, auto
 
@@ -35,20 +35,30 @@ class Config:
         save_values('PUBLIC_CONFIG', '', self.public_config)
 
 
-class HKpicConfig(Config):
+# 比思发表类型
+class PicType(Enum):
+    Reply = auto()
+    LeaveMessage = auto()
+    Record = auto()
+    Journal = auto()
+    Share = auto()
 
-    # 比思发表类型
-    class PicType(Enum):
-        # 评论
-        Reply = auto()
-        # 留言
-        LeaveMessage = auto()
-        # 记录
-        Record = auto()
-        # 日志
-        Journal = auto()
-        # 分享
-        Share = auto()
+    def __str__(self):
+        if self is PicType.Reply:
+            return '评论'
+        elif self is PicType.LeaveMessage:
+            return '留言'
+        elif self is PicType.Record:
+            return '记录'
+        elif self is PicType.Journal:
+            return '日志'
+        elif self is PicType.Share:
+            return '分享'
+        else:
+            return '未知'
+
+
+class HKpicConfig(Config):
 
     def __init__(self, mark):
         super().__init__()
@@ -114,37 +124,43 @@ class HKpicConfig(Config):
 
     # 按类型自动休息
     def sleep(self, type):
-        if not isinstance(type, HKpicConfig.PicType):
+        if not isinstance(type, PicType):
             return
 
-        if type is HKpicConfig.PicType.Reply:
+        if type is PicType.Reply:
             print_sleep(self.reply_sleep_time)
-        elif type is HKpicConfig.PicType.LeaveMessage:
+        elif type is PicType.LeaveMessage:
             print_sleep(self.leave_message_sleep_time)
-        elif type is HKpicConfig.PicType.Record:
+        elif type is PicType.Record:
             print_sleep(self.record_sleep_time)
-        elif type is HKpicConfig.PicType.Journal:
+        elif type is PicType.Journal:
             print_sleep(self.journal_sleep_time)
-        elif type is HKpicConfig.PicType.Share:
+        elif type is PicType.Share:
             print_sleep(self.share_sleep_time)
 
     # 增加休息时长
     def increaseSleepTime(self, type):
-        if type is HKpicConfig.PicType.Reply:
+        if type is PicType.Reply:
             self.reply_sleep_time += self.sleep_time_step
+            print_error(f'{str(type)} 休息时间延长到{self.reply_sleep_time}秒')
             print_sleep(self.reply_sleep_time)
-        elif type is HKpicConfig.PicType.LeaveMessage:
+        elif type is PicType.LeaveMessage:
             self.leave_message_sleep_time += self.sleep_time_step
+            print_error(f'{str(type)} 休息时间延长到{self.leave_message_sleep_time}秒')
             print_sleep(self.leave_message_sleep_time)
-        elif type is HKpicConfig.PicType.Record:
+        elif type is PicType.Record:
             self.record_sleep_time += self.sleep_time_step
+            print_error(f'{str(type)} 休息时间延长到{self.record_sleep_time}秒')
             print_sleep(self.record_sleep_time)
-        elif type is HKpicConfig.PicType.Journal:
+        elif type is PicType.Journal:
             self.journal_sleep_time += self.sleep_time_step
+            print_error(f'{str(type)} 休息时间延长到{self.journal_sleep_time}秒')
             print_sleep(self.journal_sleep_time)
-        elif type is HKpicConfig.PicType.Share:
+        elif type is PicType.Share:
             self.share_sleep_time += self.sleep_time_step
+            print_error(f'{str(type)} 休息时间延长到{self.share_sleep_time}秒')
             print_sleep(self.share_sleep_time)
+
         self.savePublicConfig()
 
     def configValue(self):

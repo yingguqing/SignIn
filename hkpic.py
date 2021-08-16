@@ -10,7 +10,7 @@ import base64
 from urllib.parse import quote
 from random import choice, randint
 import time
-from config import HKpicConfig
+from config import HKpicConfig, PicType
 
 
 class HKPIC(Network):
@@ -360,7 +360,7 @@ class HKPIC(Network):
                 self.config.save()
 
             # 评论有时间间隔限制
-            self.config.sleep(HKpicConfig.PicType.Reply)
+            self.config.sleep(PicType.Reply)
             return True
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
             print_warn('评论数超过限制')
@@ -373,7 +373,7 @@ class HKPIC(Network):
             print_error('\n'.join([comment] + items) if items else html)
             # 评论有时间间隔限制
             if self.config.canReply():
-                self.config.increaseSleepTime(HKpicConfig.PicType.Reply)
+                self.config.increaseSleepTime(PicType.Reply)
             return False
 
     # 从空间链接中获取用户id
@@ -424,13 +424,13 @@ class HKPIC(Network):
             if items:
                 cid = items[0]
                 self.deleteMessage(cid)
-            self.config.sleep(HKpicConfig.PicType.LeaveMessage)
+            self.config.sleep(PicType.LeaveMessage)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('留言失败')
-            self.config.increaseSleepTime(HKpicConfig.PicType.LeaveMessage)
+            self.config.increaseSleepTime(PicType.LeaveMessage)
 
     # 删除留言
     def deleteMessage(self, cid):
@@ -541,10 +541,10 @@ class HKPIC(Network):
             print_success(f'记录：「{comment}」-> 发表成功')
             self.config.is_record = False
             self.config.save()
-            self.config.sleep(HKpicConfig.PicType.Record)
+            self.config.sleep(PicType.Record)
         else:
             print_error('发表记录失败')
-            self.config.increaseSleepTime(HKpicConfig.PicType.Record)
+            self.config.increaseSleepTime(PicType.Record)
 
     # 通过查询所有记录id
     def findAllRecord(self, html=None):
@@ -649,11 +649,11 @@ class HKPIC(Network):
                 self.config.journal_times = 9999
                 self.config.save()
 
-            self.config.sleep(HKpicConfig.PicType.Journal)
+            self.config.sleep(PicType.Journal)
         elif faild_times < 5:
             faild_times += 1
             print_warn(f'发表日志失败，重试中。。。{faild_times}')
-            self.config.increaseSleepTime(HKpicConfig.PicType.Journal)
+            self.config.increaseSleepTime(PicType.Journal)
         else:
             print_error('发表日志失败')
             return
@@ -765,13 +765,13 @@ class HKPIC(Network):
             if items:
                 sid = items[0]
                 self.delShare(sid)
-            self.config.sleep(HKpicConfig.PicType.Share)
+            self.config.sleep(PicType.Share)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('发布分享失败')
-            self.config.increaseSleepTime(HKpicConfig.PicType.Share)
+            self.config.increaseSleepTime(PicType.Share)
             if faild_times < 5:
                 faild_times += 1
             else:
