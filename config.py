@@ -3,7 +3,6 @@
 # 配置文件
 
 
-import enum
 from common import save_values, valueForKey, load_values, local_time, print_sleep, print_error
 import time
 from enum import Enum, auto
@@ -56,6 +55,20 @@ class PicType(Enum):
             return '分享'
         else:
             return '未知'
+
+    def maxSleepTime(self):
+        if self is PicType.Reply:
+            return 60
+        elif self is PicType.LeaveMessage:
+            return 60
+        elif self is PicType.Record:
+            return 90
+        elif self is PicType.Journal:
+            return 90
+        elif self is PicType.Share:
+            return 60
+        else:
+            return 0
 
 
 class HKpicConfig(Config):
@@ -142,22 +155,27 @@ class HKpicConfig(Config):
     def increaseSleepTime(self, type):
         if type is PicType.Reply:
             self.reply_sleep_time += self.sleep_time_step
+            self.reply_sleep_time = min(self.reply_sleep_time, type.maxSleepTime())
             print_error(f'{str(type)} 休息时间延长到{self.reply_sleep_time}秒')
             print_sleep(self.reply_sleep_time)
         elif type is PicType.LeaveMessage:
             self.leave_message_sleep_time += self.sleep_time_step
+            self.leave_message_sleep_time = min(self.leave_message_sleep_time, type.maxSleepTime())
             print_error(f'{str(type)} 休息时间延长到{self.leave_message_sleep_time}秒')
             print_sleep(self.leave_message_sleep_time)
         elif type is PicType.Record:
             self.record_sleep_time += self.sleep_time_step
+            self.record_sleep_time = min(self.record_sleep_time, type.maxSleepTime())
             print_error(f'{str(type)} 休息时间延长到{self.record_sleep_time}秒')
             print_sleep(self.record_sleep_time)
         elif type is PicType.Journal:
             self.journal_sleep_time += self.sleep_time_step
+            self.journal_sleep_time = min(self.journal_sleep_time, type.maxSleepTime())
             print_error(f'{str(type)} 休息时间延长到{self.journal_sleep_time}秒')
             print_sleep(self.journal_sleep_time)
         elif type is PicType.Share:
             self.share_sleep_time += self.sleep_time_step
+            self.share_sleep_time = min(self.share_sleep_time, type.maxSleepTime())
             print_error(f'{str(type)} 休息时间延长到{self.share_sleep_time}秒')
             print_sleep(self.share_sleep_time)
 
