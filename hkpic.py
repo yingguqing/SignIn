@@ -401,7 +401,7 @@ class HKPIC(Network):
             print_error('别人空间地址为空')
 
     # 留言
-    def leavMessage(self, uid):
+    def leavMessage(self, uid, fail_time):
         if not self.config.is_leave_message:
             return
 
@@ -430,7 +430,8 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('留言失败')
-            self.config.increaseSleepTime(PicType.LeaveMessage)
+            if self.config.increaseSleepTime(PicType.LeaveMessage) and fail_time < 5:
+                self.leavMessage(uid, fail_time+1)
 
     # 删除留言
     def deleteMessage(self, cid):
@@ -518,7 +519,7 @@ class HKPIC(Network):
             print_error('删除动态失败')
 
     # 发表一条记录
-    def record(self):
+    def record(self, fail_time):
 
         if not self.config.is_record:
             return
@@ -544,7 +545,8 @@ class HKPIC(Network):
             self.config.sleep(PicType.Record)
         else:
             print_error('发表记录失败')
-            self.config.increaseSleepTime(PicType.Record)
+            if self.config.increaseSleepTime(PicType.Record) and fail_time < 5:
+                self.record(fail_time+1)
 
     # 通过查询所有记录id
     def findAllRecord(self, html=None):
@@ -651,9 +653,9 @@ class HKPIC(Network):
 
             self.config.sleep(PicType.Journal)
         elif faild_times < 5:
-            faild_times += 1
+            if self.config.increaseSleepTime(PicType.Journal):
+                faild_times += 1
             print_warn(f'发表日志失败，重试中。。。{faild_times}')
-            self.config.increaseSleepTime(PicType.Journal)
         else:
             print_error('发表日志失败')
             return
@@ -771,11 +773,10 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error('发布分享失败')
-            self.config.increaseSleepTime(PicType.Share)
-            if faild_times < 5:
-                faild_times += 1
-            else:
+            if faild_times >= 5:
                 return
+            if self.config.increaseSleepTime(PicType.Share):
+                faild_times += 1
 
         if self.config.canShare():
             self.share(faild_times)
