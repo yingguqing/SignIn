@@ -40,7 +40,7 @@ class HKPIC(Network):
         self.my_money = 0
         # 发表评论等所要用的
         self.formhash = ''
-        # 记录是否发表了内容，因为上一个操作是发表内容，下一个发表需要休息
+        # 记录日志是否发表了，如果发表了就需要休息
         self.is_send = False
         # 基本的请求头，特殊情况时，在请求上使用header参数来特殊处理
         self.headers = {
@@ -402,7 +402,7 @@ class HKPIC(Network):
             print_error('别人空间地址为空')
 
     # 留言
-    def leavMessage(self, uid, fail_time=0):
+    def leavMessage(self, uid, fail_time=-1):
         if not self.config.is_leave_message:
             return
 
@@ -410,8 +410,8 @@ class HKPIC(Network):
             print_error('他人id为空')
             return
 
-        if self.is_send:
-            self.is_send = False
+        if faild_times < 0:
+            faild_times = 0
             self.config.sleep(PicType.LeaveMessage)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.LeaveMessage):
@@ -425,7 +425,6 @@ class HKPIC(Network):
         message = quote('留个言，赚个金币。', 'utf-8')
         params = f'message={message}&refer={refer}&id={uid}&idtype=uid&commentsubmit=true&handlekey=commentwall_{uid}&formhash={self.formhash}'
         html = self.request(url, params)
-        self.is_send = True
         if html.find('操作成功') > -1:
             print_success('留言成功')
             self.config.is_leave_message = False
@@ -529,7 +528,7 @@ class HKPIC(Network):
             print_error('删除动态失败')
 
     # 发表一条记录
-    def record(self, fail_time=0):
+    def record(self, fail_time=-1):
 
         if not self.config.is_record:
             return
@@ -537,8 +536,8 @@ class HKPIC(Network):
         if not self.my_uid:
             return
 
-        if self.is_send:
-            self.is_send = False
+        if faild_times < 0:
+            faild_times = 0
             self.config.sleep(PicType.Record)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Record):
@@ -557,7 +556,6 @@ class HKPIC(Network):
         message = quote(comment, 'utf-8')
         params = f'message={message}&add=&refer={refer}&topicid=&addsubmit=true&formhash={self.formhash}'
         html = self.request(url, params, header)
-        self.is_send = True
         if html.find(comment) > -1:
             print_success(f'记录：「{comment}」-> 发表成功')
             self.config.is_record = False
@@ -619,13 +617,13 @@ class HKPIC(Network):
         self.request(url, params)
 
     # 发表日志
-    def journal(self, money_history=None, faild_times=0):
+    def journal(self, money_history=None, faild_times=-1):
 
         if not self.config.canJournal():
             return
 
-        if self.is_send:
-            self.is_send = False
+        if faild_times < 0:
+            faild_times = 0
             self.config.sleep(PicType.Journal)
         elif faild_times < 5:
             if self.config.increaseSleepTime(PicType.Journal):
@@ -668,7 +666,6 @@ class HKPIC(Network):
             'blogsubmit': 'true'
         }
         html = self.request(url, params, header)
-        self.is_send = True
         if html.find(title) > -1:
             self.config.journal_times += 1
             self.config.save()
@@ -739,13 +736,13 @@ class HKPIC(Network):
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
     # 发布一个分享
-    def share(self, faild_times=0):
+    def share(self, faild_times=-1):
 
         if not self.config.canShare():
             return
 
-        if self.is_send:
-            self.is_send = False
+        if faild_times < 0:
+            faild_times = 0
             self.config.sleep(PicType.Share)
         elif faild_times < 5:
             if self.config.increaseSleepTime(PicType.Share):
