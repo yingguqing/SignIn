@@ -1,20 +1,20 @@
 {
     "HKPIC_CONFIG_CwIrVVUsQy8LFA==": {
-        "money": 859,
-        "date": "2021-08-17",
-        "reply_times": 15,
+        "money": 904,
+        "date": "2021-08-18",
+        "reply_times": 9999,
         "is_visit_other_zone": false,
         "is_leave_message": false,
         "is_record": false,
         "journal_times": 3,
         "share_times": 3,
-        "last_reply_time": 1629141718.8378842
+        "last_reply_time": 1629250776.011936
     },
     "PUBLIC_CONFIG": {
         "reply_sleep_time": 50,
-        "leave_message_sleep_time": 10,
-        "record_sleep_time": 40,
-        "journal_sleep_time": 40,
-        "share_sleep_time": 10
+        "leave_message_sleep_time": 40,
+        "record_sleep_time": 41,
+        "journal_sleep_time": 42,
+        "share_sleep_time": 5
     }
 }
