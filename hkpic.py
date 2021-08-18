@@ -631,6 +631,7 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.Journal):
                 faild_times += 1
         else:
+            print_error('发表日志失败')
             return
 
         self.login()
@@ -678,11 +679,6 @@ class HKPIC(Network):
                 print_warn('发表日志达到每日上限。')
                 self.config.journal_times = 9999
                 self.config.save()
-        elif faild_times < 5:
-            print_warn('发表日志失败，重试中。。。')
-        else:
-            print_error('发表日志失败')
-            return
 
         # 发表有时间间隔限制
         if self.config.canJournal():
