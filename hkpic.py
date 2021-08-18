@@ -401,7 +401,7 @@ class HKPIC(Network):
             print_error('别人空间地址为空')
 
     # 留言
-    def leavMessage(self, uid, fail_time):
+    def leavMessage(self, uid, fail_time=0):
         if not self.config.is_leave_message:
             return
 
@@ -519,7 +519,7 @@ class HKPIC(Network):
             print_error('删除动态失败')
 
     # 发表一条记录
-    def record(self, fail_time):
+    def record(self, fail_time=0):
 
         if not self.config.is_record:
             return
