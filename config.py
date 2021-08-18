@@ -171,7 +171,7 @@ class HKpicConfig(Config):
             print_error(f'{str(type)} 休息时间延长到{self.record_sleep_time}秒')
             print_sleep(self.record_sleep_time)
         elif type is PicType.Journal:
-            self.journal_sleep_time += 1
+            self.journal_sleep_time += 5
             self.journal_sleep_time = min(self.journal_sleep_time, type.maxSleepTime())
             is_max = self.journal_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.journal_sleep_time}秒')
