@@ -338,7 +338,6 @@ class HKPIC(Network):
             return False
 
         if self.is_send:
-            self.is_send = False
             # 评论有时间间隔限制
             self.config.sleep(PicType.Reply)
 
@@ -412,7 +411,8 @@ class HKPIC(Network):
 
         if fail_time < 0 and self.is_send:
             fail_time = 0
-            self.config.sleep(PicType.LeaveMessage)
+            if self.is_send:
+                self.config.sleep(PicType.LeaveMessage)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.LeaveMessage):
                 fail_time += 1
@@ -538,7 +538,8 @@ class HKPIC(Network):
 
         if fail_time < 0 and self.is_send:
             fail_time = 0
-            self.config.sleep(PicType.Record)
+            if self.is_send:
+                self.config.sleep(PicType.Record)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Record):
                 fail_time += 1
@@ -625,7 +626,8 @@ class HKPIC(Network):
 
         if fail_time < 0 and self.is_send:
             fail_time = 0
-            self.config.sleep(PicType.Journal)
+            if self.is_send:
+                self.config.sleep(PicType.Journal)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Journal):
                 fail_time += 1
@@ -745,7 +747,8 @@ class HKPIC(Network):
 
         if fail_time < 0 and self.is_send:
             fail_time = 0
-            self.config.sleep(PicType.Share)
+            if self.is_send:
+                self.config.sleep(PicType.Share)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Share):
                 fail_time += 1
