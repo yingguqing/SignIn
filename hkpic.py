@@ -410,8 +410,8 @@ class HKPIC(Network):
             print_error('他人id为空')
             return
 
-        if faild_times < 0:
-            faild_times = 0
+        if fail_time < 0 and self.is_send:
+            fail_time = 0
             self.config.sleep(PicType.LeaveMessage)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.LeaveMessage):
@@ -425,6 +425,7 @@ class HKPIC(Network):
         message = quote('留个言，赚个金币。', 'utf-8')
         params = f'message={message}&refer={refer}&id={uid}&idtype=uid&commentsubmit=true&handlekey=commentwall_{uid}&formhash={self.formhash}'
         html = self.request(url, params)
+        self.is_send = True
         if html.find('操作成功') > -1:
             print_success('留言成功')
             self.config.is_leave_message = False
@@ -434,7 +435,6 @@ class HKPIC(Network):
             if items:
                 cid = items[0]
                 self.deleteMessage(cid)
-            # self.config.sleep(PicType.LeaveMessage)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
@@ -536,8 +536,8 @@ class HKPIC(Network):
         if not self.my_uid:
             return
 
-        if faild_times < 0:
-            faild_times = 0
+        if fail_time < 0 and self.is_send:
+            fail_time = 0
             self.config.sleep(PicType.Record)
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Record):
@@ -556,6 +556,7 @@ class HKPIC(Network):
         message = quote(comment, 'utf-8')
         params = f'message={message}&add=&refer={refer}&topicid=&addsubmit=true&formhash={self.formhash}'
         html = self.request(url, params, header)
+        self.is_send = True
         if html.find(comment) > -1:
             print_success(f'记录：「{comment}」-> 发表成功')
             self.config.is_record = False
@@ -617,17 +618,17 @@ class HKPIC(Network):
         self.request(url, params)
 
     # 发表日志
-    def journal(self, money_history=None, faild_times=-1):
+    def journal(self, money_history=None, fail_time=-1):
 
         if not self.config.canJournal():
             return
 
-        if faild_times < 0:
-            faild_times = 0
+        if fail_time < 0 and self.is_send:
+            fail_time = 0
             self.config.sleep(PicType.Journal)
-        elif faild_times < 5:
+        elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Journal):
-                faild_times += 1
+                fail_time += 1
         else:
             print_error('发表日志失败')
             return
@@ -666,6 +667,7 @@ class HKPIC(Network):
             'blogsubmit': 'true'
         }
         html = self.request(url, params, header)
+        self.is_send = True
         if html.find(title) > -1:
             self.config.journal_times += 1
             self.config.save()
@@ -679,7 +681,7 @@ class HKPIC(Network):
 
         # 发表有时间间隔限制
         if self.config.canJournal():
-            self.journal(money_history=self.my_money, faild_times=faild_times)
+            self.journal(money_history=self.my_money, fail_time=fail_time)
 
     # 查询自己所有脚本发表的日志
     def allJournals(self, is_show):
@@ -736,17 +738,17 @@ class HKPIC(Network):
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
     # 发布一个分享
-    def share(self, faild_times=-1):
+    def share(self, fail_time=-1):
 
         if not self.config.canShare():
             return
 
-        if faild_times < 0:
-            faild_times = 0
+        if fail_time < 0 and self.is_send:
+            fail_time = 0
             self.config.sleep(PicType.Share)
-        elif faild_times < 5:
+        elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Share):
-                faild_times += 1
+                fail_time += 1
         else:
             return
 
@@ -801,7 +803,7 @@ class HKPIC(Network):
             print_error('发布分享失败')
 
         if self.config.canShare():
-            self.share(faild_times)
+            self.share(fail_time)
 
     # 删除一条分享
     def delShare(self, sid):
