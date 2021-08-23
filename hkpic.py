@@ -374,6 +374,7 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join([comment] + items) if items else html)
+            self.config.increaseSleepTime(HKPIC.reply, is_sleep=False)
             return False
 
     # 从空间链接中获取用户id

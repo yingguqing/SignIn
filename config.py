@@ -56,17 +56,18 @@ class PicType(Enum):
         else:
             return '未知'
 
+    # 最大休息时间，肯定会成功的休息时间，比正常休息时长多
     def maxSleepTime(self):
         if self is PicType.Reply:
-            return 55
+            return 60
         elif self is PicType.LeaveMessage:
-            return 55
+            return 60
         elif self is PicType.Record:
-            return 85
+            return 90
         elif self is PicType.Journal:
-            return 85
+            return 90
         elif self is PicType.Share:
-            return 55
+            return 60
         else:
             return 0
 
@@ -81,15 +82,16 @@ class HKpicConfig(Config):
         self.money = valueForKey(dic, 'money', 0)
         self.date = valueForKey(dic, 'date')
         # 发表评论后的休息时间
-        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime())
+        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime()) - 1
         # 发表留言后的休息时间
         self.leave_message_sleep_time = valueForKey(self.public_config, 'leave_message_sleep_time', PicType.LeaveMessage.maxSleepTime())
         # 发表记录后的休息时间
         self.record_sleep_time = valueForKey(self.public_config, 'record_sleep_time', PicType.Record.maxSleepTime())
         # 发表日志后的休息时间
-        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime())
+        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime()) - 1
         # 发表分享后的休息时间
-        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime())
+        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime()) - 1
+        self.savePublicConfig()
         if self.date != date:
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
@@ -151,39 +153,37 @@ class HKpicConfig(Config):
             print_sleep(self.share_sleep_time)
 
     # 增加休息时长
-    def increaseSleepTime(self, type):
+    def increaseSleepTime(self, type, is_sleep: bool = True):
         if type is PicType.Reply:
             self.reply_sleep_time += 1
             self.reply_sleep_time = min(self.reply_sleep_time, type.maxSleepTime())
             is_max = self.reply_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.reply_sleep_time}秒')
-            print_sleep(self.reply_sleep_time)
         elif type is PicType.LeaveMessage:
             self.leave_message_sleep_time += 1
             self.leave_message_sleep_time = min(self.leave_message_sleep_time, type.maxSleepTime())
             is_max = self.leave_message_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.leave_message_sleep_time}秒')
-            print_sleep(self.leave_message_sleep_time)
         elif type is PicType.Record:
             self.record_sleep_time += 1
             self.record_sleep_time = min(self.record_sleep_time, type.maxSleepTime())
             is_max = self.record_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.record_sleep_time}秒')
-            print_sleep(self.record_sleep_time)
         elif type is PicType.Journal:
-            self.journal_sleep_time += 5
+            self.journal_sleep_time += 2
             self.journal_sleep_time = min(self.journal_sleep_time, type.maxSleepTime())
             is_max = self.journal_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.journal_sleep_time}秒')
-            print_sleep(self.journal_sleep_time)
         elif type is PicType.Share:
             self.share_sleep_time += 1
             self.share_sleep_time = min(self.share_sleep_time, type.maxSleepTime())
             is_max = self.share_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.share_sleep_time}秒')
-            print_sleep(self.share_sleep_time)
         else:
             is_max = False
+
+        if is_sleep:
+            self.sleep(type)
 
         self.savePublicConfig()
         return is_max

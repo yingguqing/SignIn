@@ -267,6 +267,9 @@ def xor(text, key, encrty):
 
 # 休息提示
 def print_sleep(secs, interval=10):
+    if secs is None:
+        return
+
     global TOTALSLEEPTIME
     if secs <= 0:
         if secs == 0:
