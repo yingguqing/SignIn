@@ -348,9 +348,8 @@ class HKPIC(Network):
         api_param = f'mod=post&action=reply&fid={fid}&tid={tid}&extra=page%3D1&replysubmit=yes&infloat=yes&handlekey=fastpost&inajax=1'
         url = self.encapsulateURL('forum.php', api_param)
         timestamp = int(time.time())
-        c = quote(comment, 'utf-8')
-        params = f'message={c}&posttime={timestamp}&formhash={self.formhash}&usesig=1&subject=++'
-        # 非常感謝，回復發佈成功
+        m = quote(comment, 'utf-8')
+        params = f'message={m}&posttime={timestamp}&formhash={self.formhash}&usesig=1&subject=++'
         html = self.request(url, params)
         self.is_send = True
         if html.find('非常感謝，回復發佈成功') > -1:

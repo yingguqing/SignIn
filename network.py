@@ -85,9 +85,7 @@ class Network:
         result = ''
         if params:
             if type(params) is dict:
-                p = []
-                for (key, value) in params.items():
-                    p.append('{key}={value}'.format(key=key, value=value))
+                p = list(map(lambda key: f'{key}={params[key]}', params.keys()))
                 result = '&'.join(p)
             else:
                 result = params
