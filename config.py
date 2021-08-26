@@ -63,9 +63,9 @@ class PicType(Enum):
         elif self is PicType.LeaveMessage:
             return 60
         elif self is PicType.Record:
-            return 90
+            return 100
         elif self is PicType.Journal:
-            return 90
+            return 100
         elif self is PicType.Share:
             return 60
         else:
