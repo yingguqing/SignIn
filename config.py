@@ -182,10 +182,11 @@ class HKpicConfig(Config):
         else:
             is_max = False
 
+        self.savePublicConfig()
+
         if is_sleep:
             self.sleep(type)
 
-        self.savePublicConfig()
         return is_max
 
     def configValue(self):
