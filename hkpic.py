@@ -402,7 +402,7 @@ class HKPIC(Network):
             print_error('别人空间地址为空')
 
     # 留言
-    def leavMessage(self, uid, fail_time=-1, is_faild: bool = False):
+    def leavMessage(self, uid, fail_time: int = 0, is_faild: bool = False):
         if not self.config.is_leave_message:
             return
 
@@ -410,12 +410,14 @@ class HKPIC(Network):
             print_error('他人id为空')
             return
 
-        if not is_faild and self.is_send:
-            self.config.sleep(PicType.LeaveMessage)
+        if not is_faild:
+            if self.is_send:
+                self.config.sleep(PicType.LeaveMessage)
         elif is_faild and fail_time < 5:
             if self.config.increaseSleepTime(PicType.LeaveMessage):
                 fail_time += 1
         else:
+            print_error('发表留言失败')
             return
 
         api_param = 'mod=spacecp&ac=comment&inajax=1'
@@ -529,7 +531,7 @@ class HKPIC(Network):
             print_error('删除动态失败')
 
     # 发表一条记录
-    def record(self, fail_time=0, is_faild: bool = False):
+    def record(self, fail_time: int = 0, is_faild: bool = False):
 
         if not self.config.is_record:
             return
@@ -537,12 +539,14 @@ class HKPIC(Network):
         if not self.my_uid:
             return
 
-        if not is_faild and self.is_send:
-            self.config.sleep(PicType.Record)
-        elif is_faild and fail_time < 5:
+        if not is_faild:
+            if self.is_send:
+                self.config.sleep(PicType.Record)
+        elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Record):
                 fail_time += 1
         else:
+            print_error('发表记录失败')
             return
 
         refer = f'home.php?mod=space&uid={self.my_uid}&do=doing&view=me&from=space'
@@ -620,16 +624,20 @@ class HKPIC(Network):
         self.request(url, params)
 
     # 发表日志
-    def journal(self, money_history=None, fail_time=0, is_fail: bool = False):
+    def journal(self, money_history=None, fail_time: int = 0, is_fail: bool = False):
 
         if not self.config.canJournal():
             return
 
-        if not is_fail and self.is_send:
-            self.config.sleep(PicType.Journal)
-        elif is_fail and fail_time < 5:
+        if not is_fail:
+            if self.is_send:
+                self.config.sleep(PicType.Journal)
+        elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Journal):
                 fail_time += 1
+        else:
+            print_error('发表日志失败')
+            return
 
         self.login()
         if not money_history:
@@ -739,17 +747,19 @@ class HKPIC(Network):
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
     # 发布一个分享
-    def share(self, fail_time=0, is_fail: bool = False):
+    def share(self, fail_time: int = 0, is_fail: bool = False):
 
         if not self.config.canShare():
             return
 
-        if not is_fail and self.is_send:
-            self.config.sleep(PicType.Share)
-        elif is_fail and fail_time < 5:
+        if not is_fail:
+            if self.is_send:
+                self.config.sleep(PicType.Share)
+        elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Share):
                 fail_time += 1
         else:
+            print_error('发表分享失败')
             return
 
         self.login()
