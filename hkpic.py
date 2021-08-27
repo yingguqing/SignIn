@@ -300,7 +300,7 @@ class HKPIC(Network):
         html = self.request(url, post=False)
 
         if first_time:
-            print_info('开始评论。\n每次评论需要间隔60秒。')
+            print_info(f'开始评论。\n每次评论需要间隔{self.config.reply_sleep_time}秒。')
             # 第一次时，先获取一下现有金币数
             self.myMoney(False)
 
