@@ -82,7 +82,7 @@ class HKpicConfig(Config):
         self.money = valueForKey(dic, 'money', 0)
         self.date = valueForKey(dic, 'date')
         # 发表评论后的休息时间
-        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime()) - 1
+        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime())
         # 发表留言后的休息时间
         self.leave_message_sleep_time = valueForKey(self.public_config, 'leave_message_sleep_time', PicType.LeaveMessage.maxSleepTime())
         # 发表记录后的休息时间
