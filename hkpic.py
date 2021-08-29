@@ -500,7 +500,6 @@ class HKPIC(Network):
         if feedids:
             print_success(f'{len(feedids)}条动态')
         else:
-            print_error('没有动态需要删除')
             return
 
         for feedid in feedids:
@@ -744,6 +743,8 @@ class HKPIC(Network):
         else:
             del_time += 1
             print_error(f'日志删除失败:「{blogid}」')
+        if not all_blogids:
+            return
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
     # 发布一个分享
