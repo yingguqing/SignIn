@@ -63,11 +63,11 @@ class PicType(Enum):
         elif self is PicType.LeaveMessage:
             return 60
         elif self is PicType.Record:
-            return 100
+            return 90
         elif self is PicType.Journal:
-            return 100
+            return 90
         elif self is PicType.Share:
-            return 60
+            return 20
         else:
             return 0
 
@@ -88,9 +88,9 @@ class HKpicConfig(Config):
         # 发表记录后的休息时间
         self.record_sleep_time = valueForKey(self.public_config, 'record_sleep_time', PicType.Record.maxSleepTime())
         # 发表日志后的休息时间
-        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime()) - 1
+        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime())
         # 发表分享后的休息时间
-        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime()) - 1
+        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime())
         self.savePublicConfig()
         if self.date != date:
             # 如果数据不是今天的，就不读取，使用默认值
