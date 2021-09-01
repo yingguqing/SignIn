@@ -267,7 +267,8 @@ class HKPIC(Network):
         api_param = 'mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes&inajax=1'
         url = self.encapsulateURL('member.php', api_param)
         # &cookietime=2592000
-        params = f'fastloginfield=username&username={self.username}&password={self.password}&cookietime=2592000&quickforward=yes&handlekey=ls'
+        username = quote(self.username, 'utf-8')
+        params = f'fastloginfield=username&username={username}&password={self.password}&cookietime=2592000&quickforward=yes&handlekey=ls'
         self.request(url, params)
 
         # 访问首页抓取相关数据
