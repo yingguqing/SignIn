@@ -107,7 +107,7 @@ class HKPIC(Network):
     # 开始入口
     def runAction(self):
 
-        print(f'------------- {hkpic.nickname} 比思签到 -------------')
+        print(f'------------- {self.nickname} 比思签到 -------------')
         # 获取所有比思域名
         self.getHost()
 
