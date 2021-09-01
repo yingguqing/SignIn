@@ -204,7 +204,7 @@ class HKPIC(Network):
                 self.host = host
                 self.headers['Origin'] = host
                 self.headers['Referer'] = self.encapsulateURL('forum.php')
-                print_info(f'域名:{self.host}')
+                print_info(f'使用域名:{self.host}')
                 return True
 
         return False
