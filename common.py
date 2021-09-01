@@ -330,9 +330,7 @@ def print_error(message):
 
 
 def print_success(message):
-    global DEBUG
-    if DEBUG:
-        print('\033[7;30;32m{message}\033[0m'.format(message=message))
+    print('\033[7;30;32m{message}\033[0m'.format(message=message))
 
 
 # ----------------下面是移动签到所使用到的方法，已废弃-----------------------------------------------------------------------------------------------

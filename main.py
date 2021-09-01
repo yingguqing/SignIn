@@ -37,4 +37,4 @@ if __name__ == "__main__":
             consume = '%d分%.0f秒' % (min, s - min*60)
         else:
             consume = f'{"%.2f" % s}秒'
-        print(f'------------- 签到完成,耗时{consume} -------------')
+        print(f'------------- 签到完成,耗时{consume} -------------\n\n\n\n')
