@@ -311,7 +311,7 @@ class PrintColor(Enum):
     White = 37
 
 
-def print_info(message, index=None):
+def print_info(message, index:PrintColor=None):
     if isinstance(index, PrintColor):
         index = index.value
 

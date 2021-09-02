@@ -388,6 +388,10 @@ class HKPIC(Network):
             print_error('\n'.join([comment] + items) if items else html)
             print_error(f'{self.nickname}:发表评论失败')
             self.config.increaseSleepTime(HKPIC.reply, is_sleep=False)
+            for item in items:
+                if item.find('您目前處於見習期間') > -1:
+                    self.config.reply_times = 888
+                    self.config.save()
             return False
 
     # 从空间链接中获取用户id
