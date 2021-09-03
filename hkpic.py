@@ -725,7 +725,7 @@ class HKPIC(Network):
         for id in ids:
             if id and id[2].startswith('我的日志'):
                 if is_show:
-                    self.print_info(f'日志：{id[1]}->「{id[2]}」', PrintColor.White)
+                    self.print_info(f'日志：{id[1]}->「{id[2]}」', Network.PrintColor.White)
                 all_blogids.append(id[1])
         return all_blogids
 
