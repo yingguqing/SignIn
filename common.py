@@ -16,7 +16,6 @@ import threading
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from enum import Enum
 
 
 DEBUG = False
@@ -67,7 +66,7 @@ def random_all_string(randomlength=16):
     string.ascii_lowercase = abcdefghigklmnopqrstuvwxyz
     ascii_uppercase = ABCDEFGHIJKLMNOPQRSTUVWXYZ
     """
-    str_list = [random.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for i in range(randomlength)]
+    str_list = [random.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for i in range(slength)]
     random_str = ''.join(str_list)
     return random_str
 
@@ -297,40 +296,6 @@ def print_sleep(secs, interval=10):
         if count % interval == 0:
             print(f'休息{secs}， 还剩{secs - count}秒')
         count += 1
-
-
-# 打印info的颜色
-class PrintColor(Enum):
-    # 蓝色
-    Blue = 34
-    # 洋红
-    Magenta = 35
-    # 青色
-    Cyan = 36
-    # 白色
-    White = 37
-
-
-def print_info(message, index: PrintColor = None):
-    if isinstance(index, PrintColor):
-        index = index.value
-
-    if index is None or index < 34 or index > 37:
-        index = random.randint(34, 37)
-
-    print('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=index))
-
-
-def print_warn(message):
-    print('\033[7;30;33m{message}\033[0m'.format(message=message))
-
-
-def print_error(message):
-    print('\033[7;30;31m{message}\033[0m'.format(message=message))
-
-
-def print_success(message):
-    print('\033[7;30;32m{message}\033[0m'.format(message=message))
 
 
 # ----------------下面是移动签到所使用到的方法，已废弃-----------------------------------------------------------------------------------------------

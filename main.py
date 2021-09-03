@@ -3,6 +3,7 @@
 
 from hkpic import HKPIC
 from common import local_time, weixin_openid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import json
 import time
@@ -23,9 +24,13 @@ if __name__ == "__main__":
     accounts = hkpicValue["accounts"]
     hkpicValue.pop('accounts')
 
-    # 比思签到+赚取每日金币(多账号)
-    for account in accounts:
-        start = time.time()
-        dic = {**hkpicValue, **account}
-        hkpic = HKPIC(dic)
-        hkpic.runAction()
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_list = []
+        # 比思签到+赚取每日金币(多账号)
+        for account in accounts:
+            start = time.time()
+            dic = {**hkpicValue, **account}
+            hkpic = HKPIC(dic)
+            # hkpic.runAction()
+            future = executor.submit(hkpic.runAction)
+            future_list.append(future)

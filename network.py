@@ -4,6 +4,8 @@
 import requests
 from urllib.parse import urljoin, quote
 from common import valueForKey
+from enum import Enum
+import random
 
 
 class Network:
@@ -14,8 +16,10 @@ class Network:
     def __init__(self, jsonValue):
         self.host = valueForKey(jsonValue, 'host')
         self.verify = True
+        self.show_print = valueForKey(jsonValue, "showprint", False)
         # 网络请求所要用到的cookie
         self.cookies = ''
+        self.print_array = []
         self.headers = {
             'Accept-Language': 'zh-cn',
             'Accept': 'application/json, text/plain, */*',
@@ -139,3 +143,41 @@ class Network:
         args_str = args_str + end_str.format(boundary)
         args_str = args_str.replace("\'", "\"")
         return args_str.encode('utf-8')
+
+    # 打印info的颜色
+    class PrintColor(Enum):
+        # 蓝色
+        Blue = 34
+        # 洋红
+        Magenta = 35
+        # 青色
+        Cyan = 36
+        # 白色
+        White = 37
+
+    def print_info(self, message, index: PrintColor = None):
+        if isinstance(index, Network.PrintColor):
+            index = index.value
+
+        if index is None or index < 34 or index > 37:
+            index = random.randint(34, 37)
+
+        self.print_normal('\033[7;30;{i}m{message}\033[0m'.format(message=message, i=index))
+
+    def print_warn(self, message):
+        self.print_normal('\033[7;30;33m{message}\033[0m'.format(message=message))
+
+    def print_error(self, message):
+        self.print_normal('\033[7;30;31m{message}\033[0m'.format(message=message))
+
+    def print_success(self, message):
+        self.print_normal('\033[7;30;32m{message}\033[0m'.format(message=message))
+
+    def print_normal(self, message):
+        self.print_array.append(message)
+        if self.show_print:
+            print(message)
+
+    def print_all(self):
+        if not self.show_print:
+            print('\n'.join(self.print_array))

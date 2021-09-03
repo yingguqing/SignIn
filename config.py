@@ -3,7 +3,7 @@
 # 配置文件
 
 
-from common import save_values, valueForKey, load_values, local_time, print_sleep, print_error
+from common import save_values, valueForKey, load_values, local_time, print_sleep
 import time
 from enum import Enum, auto
 
