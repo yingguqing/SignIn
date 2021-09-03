@@ -74,9 +74,10 @@ class PicType(Enum):
 
 class HKpicConfig(Config):
 
-    def __init__(self, mark):
+    def __init__(self, mark, nickname):
         super().__init__()
         self.key = f'HKPIC_CONFIG_{mark}'
+        self.nickname = nickname
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
@@ -193,6 +194,7 @@ class HKpicConfig(Config):
 
     def configValue(self):
         values = {
+            'nickname': self.nickname,
             'money': self.money,
             'date': self.date,
             'reply_times': self.reply_times,

@@ -26,7 +26,7 @@ class HKPIC(Network):
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)
         self.nickname = valueForKey(jsonValue, 'nickname', mark)
-        self.config = HKpicConfig(mark)
+        self.config = HKpicConfig(mark, self.nickname)
         self.config.savePublicConfig()
         # 需要签到
         self.need_sign_in = True
