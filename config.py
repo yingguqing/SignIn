@@ -59,15 +59,15 @@ class PicType(Enum):
     # 最大休息时间，肯定会成功的休息时间，比正常休息时长多
     def maxSleepTime(self):
         if self is PicType.Reply:
-            return 60
+            return 52
         elif self is PicType.LeaveMessage:
-            return 60
+            return 52
         elif self is PicType.Record:
-            return 90
+            return 62
         elif self is PicType.Journal:
-            return 90
+            return 50
         elif self is PicType.Share:
-            return 20
+            return 3
         else:
             return 0
 
@@ -154,6 +154,7 @@ class HKpicConfig(Config):
 
     # 增加休息时长
     def increaseSleepTime(self, type, is_sleep: bool = True):
+        '''
         if type is PicType.Reply:
             self.reply_sleep_time += 1
             self.reply_sleep_time = min(self.reply_sleep_time, type.maxSleepTime())
@@ -170,7 +171,7 @@ class HKpicConfig(Config):
             is_max = self.record_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.record_sleep_time}秒')
         elif type is PicType.Journal:
-            self.journal_sleep_time += 2
+            self.journal_sleep_time += 1
             self.journal_sleep_time = min(self.journal_sleep_time, type.maxSleepTime())
             is_max = self.journal_sleep_time == type.maxSleepTime()
             print_error(f'{str(type)} 休息时间延长到{self.journal_sleep_time}秒')
@@ -181,13 +182,14 @@ class HKpicConfig(Config):
             print_error(f'{str(type)} 休息时间延长到{self.share_sleep_time}秒')
         else:
             is_max = False
+        '''
 
-        self.savePublicConfig()
+        # self.savePublicConfig()
 
         if is_sleep:
             self.sleep(type)
 
-        return is_max
+        return True
 
     def configValue(self):
         values = {

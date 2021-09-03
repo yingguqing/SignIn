@@ -391,6 +391,10 @@ class HKPIC(Network):
             for item in items:
                 if item.find('您目前處於見習期間') > -1:
                     self.config.reply_times = 888
+                    self.config.share_times = 888
+                    self.config.journal_times = 888
+                    self.config.is_leave_message = False
+                    self.config.is_record = False
                     self.config.save()
             return False
 
@@ -831,6 +835,10 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html)
             print_error(f'{self.nickname}:发布分享失败')
+            for item in items:
+                if item.find('您目前沒有權限發佈分享') > -1:
+                    self.config.share_times = 888
+                    self.config.save()
 
         if self.config.canShare():
             self.share(fail_time, is_fail)
