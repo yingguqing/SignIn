@@ -31,6 +31,6 @@ if __name__ == "__main__":
             start = time.time()
             dic = {**hkpicValue, **account}
             hkpic = HKPIC(dic)
-            # hkpic.runAction()
-            future = executor.submit(hkpic.runAction)
-            future_list.append(future)
+            hkpic.runAction()
+            # future = executor.submit(hkpic.runAction)
+            # future_list.append(future)

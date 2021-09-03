@@ -16,7 +16,7 @@ class Network:
     def __init__(self, jsonValue):
         self.host = valueForKey(jsonValue, 'host')
         self.verify = True
-        self.show_print = valueForKey(jsonValue, "showprint", False)
+        self.show_print = valueForKey(jsonValue, "showprint", True)
         # 网络请求所要用到的cookie
         self.cookies = ''
         self.print_array = []
