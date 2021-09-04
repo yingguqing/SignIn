@@ -113,14 +113,14 @@ class HKPIC(Network):
 
             # 访问首页得到可用域名
             if not self.checkHost():
-                print_error(f'{self.nickname}:没有可用域名', self.nickname)
+                print_error('没有可用域名', self.nickname)
                 return
 
             # 自动登录
             self.login(True)
 
             if not self.formhash:
-                print_error(f'{self.nickname}:formhash提取失败', self.nickname)
+                print_error('formhash提取失败', self.nickname)
                 return
 
             # 签到
@@ -154,7 +154,7 @@ class HKPIC(Network):
                 print_info(f'金钱：{self.my_money}', self.nickname)
 
             # 显示总休息时长
-            print_sleep(0)
+            print_sleep(0, self.nickname)
             # 清空统计的休息时长
             print_sleep(-1)
         finally:
@@ -178,7 +178,7 @@ class HKPIC(Network):
         if type(req) is dict and 'content' in req.keys():
             content = str(base64.b64decode(valueForKey(req, 'content', default='')), 'utf-8')
             if not content:
-                print_error(f'{self.nickname}:获取域名失败', self.nickname)
+                print_error('获取域名失败', self.nickname)
                 return
 
             pattern = re.compile(r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:[\w\d]+|([^[:punct:]\s]|/)))', re.S)
@@ -188,7 +188,7 @@ class HKPIC(Network):
                     self.all_host.append(h[0])
             print_info(f'域名：{len(self.all_host)} 个', self.nickname)
         else:
-            print_error(f'{self.nickname}:获取域名失败', self.nickname)
+            print_error('获取域名失败', self.nickname)
 
     # 测试域名
     def checkHost(self):
@@ -197,7 +197,7 @@ class HKPIC(Network):
             html = self.forum(host=host, check_host=True)
 
             if html == '域名不通':
-                print_error(f'{self.nickname}:{host} 请求失败，切换下一个域名', self.nickname)
+                print_error(f'{host} 请求失败，切换下一个域名', self.nickname)
                 print_sleep(1)
                 continue
 
@@ -278,7 +278,7 @@ class HKPIC(Network):
         if not show:
             return
 
-        print_success(('登录成功' if self.formhash else f'登录失败'), self.nickname)
+        print_success('登录成功' if self.formhash else '登录失败', self.nickname)
 
     # 签到
     def signIn(self):
@@ -295,7 +295,7 @@ class HKPIC(Network):
         if items:
             print_success(items[0], self.nickname)
         else:
-            print_error(f'{self.nickname}:签到失败\n{html}', self.nickname)
+            print_error(f'签到失败\n{html}', self.nickname)
 
     # 版块帖子列表
     def forum_list(self, first_time=False):
@@ -348,7 +348,7 @@ class HKPIC(Network):
         items = re.findall(pattern, href)
         tid = items[0] if items else ''
         if not tid:
-            print_error(f'{self.nickname}:帖子id不存在', self.nickname)
+            print_error('帖子id不存在', self.nickname)
             return False
 
         if self.is_send:
@@ -387,7 +387,7 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join([comment] + items) if items else html, self.nickname)
-            print_error(f'{self.nickname}:发表评论失败', self.nickname)
+            print_error('发表评论失败', self.nickname)
             self.config.increaseSleepTime(HKPIC.reply, is_sleep=False)
             for item in items:
                 if item.find('您目前處於見習期間') > -1:
@@ -421,7 +421,7 @@ class HKPIC(Network):
             if uid:
                 self.leavMessage(uid)
         else:
-            print_error(f'{self.nickname}:别人空间地址为空', self.nickname)
+            print_error('别人空间地址为空', self.nickname)
 
     # 留言
     def leavMessage(self, uid, fail_time: int = 0, is_faild: bool = False):
@@ -429,7 +429,7 @@ class HKPIC(Network):
             return
 
         if not uid:
-            print_error(f'{self.nickname}:他人id为空', self.nickname)
+            print_error('他人id为空', self.nickname)
             return
 
         if not is_faild:
@@ -439,7 +439,7 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.LeaveMessage):
                 fail_time += 1
         else:
-            print_error(f'{self.nickname}:发表留言失败', self.nickname)
+            print_error('发表留言失败', self.nickname)
             return
 
         api_param = 'mod=spacecp&ac=comment&inajax=1'
@@ -464,7 +464,15 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.nickname)
-            print_error(f'{self.nickname}:留言失败', self.nickname)
+            print_error('留言失败', self.nickname)
+            for item in items:
+                if item.find('您目前沒有權限進行評論') > -1:
+                    self.config.share_times = 888
+                    self.config.journal_times = 888
+                    self.config.is_leave_message = False
+                    self.config.is_record = False
+                    self.config.save()
+                    return
             self.leavMessage(uid, fail_time, is_faild)
 
     # 删除留言
@@ -490,7 +498,7 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.nickname)
-            print_error(f'{self.nickname}:删除留言失败', self.nickname)
+            print_error('删除留言失败', self.nickname)
 
     # 获取我的金币数
     def myMoney(self, is_print=True):
@@ -505,7 +513,7 @@ class HKPIC(Network):
             if is_print:
                 print_info(f'金钱：{money}', self.nickname)
         else:
-            print_error(f'{self.nickname}:获取金币失败', self.nickname)
+            print_error('获取金币失败', self.nickname)
 
     # 删除自己空间留言所产生的动态
     def delAllLeavMessageDynamic(self):
@@ -549,7 +557,7 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.nickname)
-            print_error(f'{self.nickname}:删除动态失败', self.nickname)
+            print_error('删除动态失败', self.nickname)
 
     # 发表一条记录
     def record(self, fail_time: int = 0, is_faild: bool = False):
@@ -586,7 +594,7 @@ class HKPIC(Network):
             self.config.is_record = False
             self.config.save()
         else:
-            print_error(f'{self.nickname}:发表记录失败', self.nickname)
+            print_error('发表记录失败', self.nickname)
             self.record(fail_time, True)
 
     # 通过查询所有记录id
@@ -633,7 +641,7 @@ class HKPIC(Network):
         url = self.encapsulateURL('home.php', api_params)
         self.request(url, post=False)
 
-        referer = self.encapsulateURL(f'home.php?mod=space&do=doing&view=me')
+        referer = self.encapsulateURL('home.php?mod=space&do=doing&view=me')
         api_params = f'mod=spacecp&ac=doing&op=delete&doid={end}&id=0'
         url = self.encapsulateURL('home.php', api_params)
         referer = self.encapsulateURL('home.php', 'mod=space&do=doing&view=me')
@@ -653,8 +661,9 @@ class HKPIC(Network):
         elif fail_time < 5:
             if self.config.increaseSleepTime(PicType.Journal):
                 fail_time += 1
+                print_error('发表日志失败，准备重试。', self.nickname)
         else:
-            print_error(f'{self.nickname}:发表日志失败', self.nickname)
+            print_error('发表日志失败!!', self.nickname)
             return
 
         self.login()
@@ -741,7 +750,7 @@ class HKPIC(Network):
             blogid = all_blogids[0]
             all_blogids.pop(0)
         else:
-            print_error(f'{self.nickname}:没有需要删除的日志', self.nickname)
+            print_error('没有需要删除的日志', self.nickname)
             return
 
         self.login()
@@ -761,7 +770,7 @@ class HKPIC(Network):
             print_success(f'日志删除成功:「{blogid}」', self.nickname)
         else:
             del_time += 1
-            print_error(f'{self.nickname}:日志删除失败:「{blogid}」', self.nickname)
+            print_error(f'日志删除失败:「{blogid}」', self.nickname)
         if not all_blogids:
             return
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
@@ -831,7 +840,7 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.nickname)
-            print_error(f'{self.nickname}:发布分享失败', self.nickname)
+            print_error('发布分享失败', self.nickname)
             for item in items:
                 if item.find('您目前沒有權限發佈分享') > -1:
                     self.config.share_times = 888
@@ -860,4 +869,4 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.nickname)
-            print_error(f'{self.nickname}:删除分享失败', self.nickname)
+            print_error('删除分享失败', self.nickname)

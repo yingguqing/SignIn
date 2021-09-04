@@ -269,7 +269,7 @@ def xor(text, key, encrty):
 
 
 # 休息提示
-def print_sleep(secs, interval=10):
+def print_sleep(secs, key: str, interval=10):
     if secs is None:
         return
 
@@ -283,7 +283,8 @@ def print_sleep(secs, interval=10):
                 consume = f'{"%.0f" % TOTALSLEEPTIME}秒'
 
             if TOTALSLEEPTIME > 0:
-                print_info(f'休息：{consume}', 35)
+                print_info(f'休息：{consume}', key, PrintColor.Magenta)
+            return
         else:
             TOTALSLEEPTIME = 0
         return
