@@ -33,7 +33,7 @@ class HKPIC(Network):
         # 读取本地cookie值
         self.cookie_dit = {}
         # 别人空间地址
-        self.user_href = ''
+        self.user_href = self.config.user_zone_url
         # 自己的空间地址
         self.my_zone_url = ''
         # 自己的用户id
@@ -206,6 +206,8 @@ class HKPIC(Network):
                 self.headers['Origin'] = host
                 self.headers['Referer'] = self.encapsulateURL('forum.php')
                 print_info(f'使用域名:{self.host}', self.nickname)
+                if self.user_href:
+                    self.user_href = self.encapsulateURL(self.user_href)
                 return True
 
         return False

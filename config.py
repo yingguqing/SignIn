@@ -82,6 +82,7 @@ class HKpicConfig(Config):
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
         self.date = valueForKey(dic, 'date')
+        self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
         # 发表评论后的休息时间
         self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime())
         # 发表留言后的休息时间
@@ -205,6 +206,8 @@ class HKpicConfig(Config):
             'share_times': self.share_times,
             'last_reply_time': self.last_reply_time
         }
+        if self.user_zone_url:
+            values['user_zone_url'] = self.user_zone_url
         return values
 
     def savePublicConfig(self):
