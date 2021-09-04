@@ -66,7 +66,7 @@ def random_all_string(randomlength=16):
     string.ascii_lowercase = abcdefghigklmnopqrstuvwxyz
     ascii_uppercase = ABCDEFGHIJKLMNOPQRSTUVWXYZ
     """
-    str_list = [random.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for i in range(slength)]
+    str_list = [random.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for i in range(randomlength)]
     random_str = ''.join(str_list)
     return random_str
 
