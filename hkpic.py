@@ -237,6 +237,7 @@ class HKPIC(Network):
             if span:
                 # 提取自己的空间地址
                 self.my_zone_url = self.encapsulateURL(span['href']) if span.has_attr('href') else ''
+                print_info(f'我的空间地址:{self.my_zone_url}', self.username)
                 self.my_uid = self.getUid(self.my_zone_url)
                 login_success = span.text == self.username
                 if login_success:
