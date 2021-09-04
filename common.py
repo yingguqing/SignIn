@@ -19,7 +19,7 @@ from datetime import timezone
 from enum import Enum
 
 
-DEBUG = False
+DEBUG = True
 # 所有的输出日志
 ALLPrint = {}
 # 记录一下总的休息时长
@@ -269,7 +269,7 @@ def xor(text, key, encrty):
 
 
 # 休息提示
-def print_sleep(secs, key: str, interval=10):
+def print_sleep(secs, key: str = ''):
     if secs is None:
         return
 
@@ -284,12 +284,14 @@ def print_sleep(secs, key: str, interval=10):
 
             if TOTALSLEEPTIME > 0:
                 print_info(f'休息：{consume}', key, PrintColor.Magenta)
-            return
         else:
             TOTALSLEEPTIME = 0
         return
 
     TOTALSLEEPTIME += secs
+    global DEBUG
+    if DEBUG:
+        print_normal(f'休息{secs}秒', key)
     time.sleep(secs)
 
 
@@ -354,7 +356,7 @@ def print_normal(message: str, key: str = ''):
         prints.append(message)
         ALLPrint[key] = prints
     if DEBUG or not key:
-        print(message)
+        print(f'{key}:{message}')
     LOCK.release()
 
 

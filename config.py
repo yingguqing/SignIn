@@ -74,10 +74,10 @@ class PicType(Enum):
 
 class HKpicConfig(Config):
 
-    def __init__(self, mark, nickname):
+    def __init__(self, mark, username):
         super().__init__()
         self.key = f'HKPIC_CONFIG_{mark}'
-        self.nickname = nickname
+        self.username = username
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
@@ -144,15 +144,15 @@ class HKpicConfig(Config):
             return
 
         if type is PicType.Reply:
-            print_sleep(self.reply_sleep_time)
+            print_sleep(self.reply_sleep_time, self.username)
         elif type is PicType.LeaveMessage:
-            print_sleep(self.leave_message_sleep_time)
+            print_sleep(self.leave_message_sleep_time, self.username)
         elif type is PicType.Record:
-            print_sleep(self.record_sleep_time)
+            print_sleep(self.record_sleep_time, self.username)
         elif type is PicType.Journal:
-            print_sleep(self.journal_sleep_time)
+            print_sleep(self.journal_sleep_time, self.username)
         elif type is PicType.Share:
-            print_sleep(self.share_sleep_time)
+            print_sleep(self.share_sleep_time, self.username)
 
     # 增加休息时长
     def increaseSleepTime(self, type, is_sleep: bool = True):
@@ -195,7 +195,7 @@ class HKpicConfig(Config):
 
     def configValue(self):
         values = {
-            'nickname': self.nickname,
+            'name': self.username,
             'money': self.money,
             'date': self.date,
             'reply_times': self.reply_times,
