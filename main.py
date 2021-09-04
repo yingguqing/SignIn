@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from hkpic import HKPIC
-from common import local_time, weixin_openid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from common import local_time
+from concurrent.futures import ThreadPoolExecutor
 import sys
 import json
 import time
@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     jsonValue = json.loads(sys.argv[1])
     # 读取并设置微信openid（功能暂时没用）
-    weixin_openid(jsonValue)
+    # weixin_openid(jsonValue)
 
     hkpicValue = jsonValue['HKPIC']
     accounts = hkpicValue["accounts"]

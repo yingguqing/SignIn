@@ -567,7 +567,6 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.Record):
                 fail_time += 1
         else:
-            print_error(f'{self.nickname}:发表记录失败', self.nickname)
             return
 
         refer = f'home.php?mod=space&uid={self.my_uid}&do=doing&view=me&from=space'
@@ -583,14 +582,12 @@ class HKPIC(Network):
         html = self.request(url, params, header)
         self.is_send = True
         if html.find(comment) > -1:
-            is_faild = False
             print_success(f'记录：「{comment}」-> 发表成功', self.nickname)
             self.config.is_record = False
             self.config.save()
         else:
             print_error(f'{self.nickname}:发表记录失败', self.nickname)
-            is_faild = True
-            self.record(fail_time, is_faild)
+            self.record(fail_time, True)
 
     # 通过查询所有记录id
     def findAllRecord(self, html=None):
@@ -782,7 +779,6 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.Share):
                 fail_time += 1
         else:
-            print_error(f'{self.nickname}:发表分享失败', self.nickname)
             return
 
         self.login()
