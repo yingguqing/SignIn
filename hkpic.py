@@ -4,7 +4,7 @@
 
 from os import truncate
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, save_file
+from common import print_sleep, valueForKey, random_all_string, xor, print_error, print_info, print_success, print_warn, print_normal, print_all, PrintColor
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -107,20 +107,20 @@ class HKPIC(Network):
     # 开始入口
     def runAction(self):
 
-        self.print_normal(f'------------- {self.nickname} 比思签到 -------------')
+        print_normal(f'------------- {self.nickname} 比思签到 -------------', self.nickname)
         # 获取所有比思域名
         self.getHost()
 
         # 访问首页得到可用域名
         if not self.checkHost():
-            self.print_error(f'{self.nickname}:没有可用域名')
+            print_error(f'{self.nickname}:没有可用域名', self.nickname)
             return
 
         # 自动登录
         self.login(True)
 
         if not self.formhash:
-            self.print_error(f'{self.nickname}:formhash提取失败')
+            print_error(f'{self.nickname}:formhash提取失败', self.nickname)
             return
 
         # 签到
@@ -149,9 +149,9 @@ class HKPIC(Network):
         if temp != 0:
             self.config.money = self.my_money
             self.config.save()
-            self.print_info(f'增加金币：{temp}\n金钱：{self.my_money}')
+            print_info(f'增加金币：{temp}\n金钱：{self.my_money}', self.nickname)
         else:
-            self.print_info(f'金钱：{self.my_money}')
+            print_info(f'金钱：{self.my_money}', self.nickname)
 
         # 显示总休息时长
         print_sleep(0)
@@ -165,20 +165,20 @@ class HKPIC(Network):
             consume = '%d分%.0f秒' % (min, s - min*60)
         else:
             consume = f'{"%.2f" % s}秒'
-        self.print_normal(f'------------- {self.nickname} 签到完成,耗时{consume} -------------\n')
-        self.print_all()
+        print_normal(f'------------- {self.nickname} 签到完成,耗时{consume} -------------\n', self.nickname)
+        print_all(self.nickname)
 
     # 获取比思域名
     def getHost(self):
         if not self.host_url:
             return
 
-        self.print_info('获取比思域名')
+        print_info('获取比思域名', self.nickname)
         req = self.request(self.host_url, post=False, is_save_cookies=False)
         if type(req) is dict and 'content' in req.keys():
             content = str(base64.b64decode(valueForKey(req, 'content', default='')), 'utf-8')
             if not content:
-                self.print_error(f'{self.nickname}:获取域名失败')
+                print_error(f'{self.nickname}:获取域名失败', self.nickname)
                 return
 
             pattern = re.compile(r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:[\w\d]+|([^[:punct:]\s]|/)))', re.S)
@@ -186,18 +186,18 @@ class HKPIC(Network):
             for h in all:
                 if type(h) is tuple and h and h[0] not in self.all_host:
                     self.all_host.append(h[0])
-            self.print_info(f'域名：{len(self.all_host)} 个')
+            print_info(f'域名：{len(self.all_host)} 个', self.nickname)
         else:
-            self.print_error(f'{self.nickname}:获取域名失败')
+            print_error(f'{self.nickname}:获取域名失败', self.nickname)
 
     # 测试域名
     def checkHost(self):
-        self.print_info('测试域名')
+        print_info('测试域名', self.nickname)
         for host in self.all_host:
             html = self.forum(host=host, check_host=True)
 
             if html == '域名不通':
-                self.print_error(f'{self.nickname}:{host} 请求失败，切换下一个域名')
+                print_error(f'{self.nickname}:{host} 请求失败，切换下一个域名', self.nickname)
                 print_sleep(1)
                 continue
 
@@ -205,7 +205,7 @@ class HKPIC(Network):
                 self.host = host
                 self.headers['Origin'] = host
                 self.headers['Referer'] = self.encapsulateURL('forum.php')
-                self.print_info(f'使用域名:{self.host}')
+                print_info(f'使用域名:{self.host}', self.nickname)
                 return True
 
         return False
@@ -278,7 +278,7 @@ class HKPIC(Network):
         if not show:
             return
 
-        self.print_success('登录成功' if self.formhash else f'登录失败')
+        print_success(('登录成功' if self.formhash else f'登录失败'), self.nickname)
 
     # 签到
     def signIn(self):
@@ -293,9 +293,9 @@ class HKPIC(Network):
         pattern = re.compile(r'<div\s+class\s*=\s*"c"\s*>\W*(.*?)\W*<\s*/\s*div\s*>', re.I)
         items = re.findall(pattern, html)
         if items:
-            self.print_success(items[0])
+            print_success(items[0], self.nickname)
         else:
-            self.print_error(f'{self.nickname}:签到失败\n{html}')
+            print_error(f'{self.nickname}:签到失败\n{html}', self.nickname)
 
     # 版块帖子列表
     def forum_list(self, first_time=False):
@@ -313,14 +313,14 @@ class HKPIC(Network):
         html = self.request(url, post=False)
 
         if first_time:
-            self.print_info(f'开始评论。\n每次评论需要间隔{self.config.reply_sleep_time}秒。')
+            print_info(f'开始评论。\n每次评论需要间隔{self.config.reply_sleep_time}秒。', self.nickname)
             # 第一次时，先获取一下现有金币数
             self.myMoney(False)
 
         soup = BeautifulSoup(html, 'html.parser')
         span = soup.find('a', href=f'forum-{fid}-1.html')
         if span and span.text:
-            self.print_info(f'进入版块：{span.text}「{fid}」')
+            print_info(f'进入版块：{span.text}「{fid}」', self.nickname)
 
         # 提取板块下所有的帖子链接
         spans = soup.find_all('a', onclick='atarget(this)')
@@ -348,7 +348,7 @@ class HKPIC(Network):
         items = re.findall(pattern, href)
         tid = items[0] if items else ''
         if not tid:
-            self.print_error(f'{self.nickname}:帖子id不存在')
+            print_error(f'{self.nickname}:帖子id不存在', self.nickname)
             return False
 
         if self.is_send:
@@ -356,7 +356,7 @@ class HKPIC(Network):
             self.config.sleep(PicType.Reply)
 
         url = self.encapsulateURL(f'thread-{tid}-1-1.html')
-        self.print_info(f'进入帖子：{url}')
+        print_info(f'进入帖子：{url}', self.nickname)
         # 发表评论前的金币数
         money_history = self.my_money
         api_param = f'mod=post&action=reply&fid={fid}&tid={tid}&extra=page%3D1&replysubmit=yes&infloat=yes&handlekey=fastpost&inajax=1'
@@ -370,24 +370,24 @@ class HKPIC(Network):
             self.config.reply_times += 1
             self.config.last_reply_time = time.time()
             self.config.save()
-            self.print_success(f'第{self.config.reply_times}条：「{comment}」-> 發佈成功')
+            print_success(f'第{self.config.reply_times}条：「{comment}」-> 發佈成功', self.nickname)
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表评论后，金币数不增加，就不再发表评论
-                self.print_warn('评论达到每日上限。不再发表评论。')
+                print_warn('评论达到每日上限。不再发表评论。', self.nickname)
                 self.config.reply_times = 9999
                 self.config.save()
             return True
         elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
-            self.print_warn('评论数超过限制')
+            print_warn('评论数超过限制', self.nickname)
             self.config.last_reply_time = time.time()
             self.config.max_reply_times = self.config.reply_times
             return True
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.print_error('\n'.join([comment] + items) if items else html)
-            self.print_error(f'{self.nickname}:发表评论失败')
+            print_error('\n'.join([comment] + items) if items else html, self.nickname)
+            print_error(f'{self.nickname}:发表评论失败', self.nickname)
             self.config.increaseSleepTime(HKPIC.reply, is_sleep=False)
             for item in items:
                 if item.find('您目前處於見習期間') > -1:
@@ -413,7 +413,7 @@ class HKPIC(Network):
 
         if self.user_href:
             url = self.user_href
-            self.print_info(f'访问别人空间：{url}')
+            print_info(f'访问别人空间：{url}', self.nickname)
             self.request(url, post=False)
             self.config.is_visit_other_zone = False
             self.config.save()
@@ -421,7 +421,7 @@ class HKPIC(Network):
             if uid:
                 self.leavMessage(uid)
         else:
-            self.print_error(f'{self.nickname}:别人空间地址为空')
+            print_error(f'{self.nickname}:别人空间地址为空', self.nickname)
 
     # 留言
     def leavMessage(self, uid, fail_time: int = 0, is_faild: bool = False):
@@ -429,7 +429,7 @@ class HKPIC(Network):
             return
 
         if not uid:
-            self.print_error(f'{self.nickname}:他人id为空')
+            print_error(f'{self.nickname}:他人id为空', self.nickname)
             return
 
         if not is_faild:
@@ -439,7 +439,7 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.LeaveMessage):
                 fail_time += 1
         else:
-            self.print_error(f'{self.nickname}:发表留言失败')
+            print_error(f'{self.nickname}:发表留言失败', self.nickname)
             return
 
         api_param = 'mod=spacecp&ac=comment&inajax=1'
@@ -451,7 +451,7 @@ class HKPIC(Network):
         self.is_send = True
         if html.find('操作成功') > -1:
             is_faild = False
-            self.print_success('留言成功')
+            print_success('留言成功', self.nickname)
             self.config.is_leave_message = False
             self.config.save()
             pattern = re.compile(r'\{\s*\'cid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
@@ -463,8 +463,8 @@ class HKPIC(Network):
             is_faild = True
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.print_error('\n'.join(items) if items else html)
-            self.print_error(f'{self.nickname}:留言失败')
+            print_error('\n'.join(items) if items else html, self.nickname)
+            print_error(f'{self.nickname}:留言失败', self.nickname)
             self.leavMessage(uid, fail_time, is_faild)
 
     # 删除留言
@@ -484,13 +484,13 @@ class HKPIC(Network):
         params = f'referer={refer}&deletesubmit=true&formhash={self.formhash}&handlekey=c_{cid}_delete'
         html = self.request(url, params)
         if html.find('操作成功') > -1:
-            self.print_success('删除留言成功')
+            print_success('删除留言成功', self.nickname)
             print_sleep(2)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.print_error('\n'.join(items) if items else html)
-            self.print_error(f'{self.nickname}:删除留言失败')
+            print_error('\n'.join(items) if items else html, self.nickname)
+            print_error(f'{self.nickname}:删除留言失败', self.nickname)
 
     # 获取我的金币数
     def myMoney(self, is_print=True):
@@ -503,16 +503,16 @@ class HKPIC(Network):
             money = int(items[0])
             self.my_money = money
             if is_print:
-                self.print_info(f'金钱：{money}')
+                print_info(f'金钱：{money}', self.nickname)
         else:
-            self.print_error(f'{self.nickname}:获取金币失败')
+            print_error(f'{self.nickname}:获取金币失败', self.nickname)
 
     # 删除自己空间留言所产生的动态
     def delAllLeavMessageDynamic(self):
         if not self.my_uid:
             return
 
-        self.print_info('获取留言动态')
+        print_info('获取留言动态', self.nickname)
         api_params = f'mod=space&uid={self.my_uid}&do=home&view=me&from=space'
         url = self.encapsulateURL('home.php', api_params)
 
@@ -520,7 +520,7 @@ class HKPIC(Network):
         pattern = re.compile(r'"home.php\?mod=spacecp&amp;ac=feed&amp;op=menu&amp;feedid=(\d+)"')
         feedids = re.findall(pattern, html)
         if feedids:
-            self.print_success(f'{len(feedids)}条动态')
+            print_success(f'{len(feedids)}条动态', self.nickname)
         else:
             return
 
@@ -544,12 +544,12 @@ class HKPIC(Network):
         params = f'referer={referer}&feedsubmit=true&formhash={self.formhash}'
         html = self.request(url, params)
         if html.find('操作成功') > -1:
-            self.print_success('一条删除动态成功')
+            print_success('一条删除动态成功', self.nickname)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.print_error('\n'.join(items) if items else html)
-            self.print_error(f'{self.nickname}:删除动态失败')
+            print_error('\n'.join(items) if items else html, self.nickname)
+            print_error(f'{self.nickname}:删除动态失败', self.nickname)
 
     # 发表一条记录
     def record(self, fail_time: int = 0, is_faild: bool = False):
@@ -567,7 +567,7 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.Record):
                 fail_time += 1
         else:
-            self.print_error(f'{self.nickname}:发表记录失败')
+            print_error(f'{self.nickname}:发表记录失败', self.nickname)
             return
 
         refer = f'home.php?mod=space&uid={self.my_uid}&do=doing&view=me&from=space'
@@ -584,11 +584,11 @@ class HKPIC(Network):
         self.is_send = True
         if html.find(comment) > -1:
             is_faild = False
-            self.print_success(f'记录：「{comment}」-> 发表成功')
+            print_success(f'记录：「{comment}」-> 发表成功', self.nickname)
             self.config.is_record = False
             self.config.save()
         else:
-            self.print_error(f'{self.nickname}:发表记录失败')
+            print_error(f'{self.nickname}:发表记录失败', self.nickname)
             is_faild = True
             self.record(fail_time, is_faild)
 
@@ -657,7 +657,7 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.Journal):
                 fail_time += 1
         else:
-            self.print_error(f'{self.nickname}:发表日志失败')
+            print_error(f'{self.nickname}:发表日志失败', self.nickname)
             return
 
         self.login()
@@ -699,11 +699,11 @@ class HKPIC(Network):
             is_fail = False
             self.config.journal_times += 1
             self.config.save()
-            self.print_success(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功')
+            print_success(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', self.nickname)
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
-                self.print_warn('发表日志达到每日上限。')
+                print_warn('发表日志达到每日上限。', self.nickname)
                 self.config.journal_times = 9999
                 self.config.save()
         else:
@@ -725,7 +725,7 @@ class HKPIC(Network):
         for id in ids:
             if id and id[2].startswith('我的日志'):
                 if is_show:
-                    self.print_info(f'日志：{id[1]}->「{id[2]}」', Network.PrintColor.White)
+                    print_info(f'日志：{id[1]}->「{id[2]}」', self.nickname, PrintColor.White)
                 all_blogids.append(id[1])
         return all_blogids
 
@@ -744,7 +744,7 @@ class HKPIC(Network):
             blogid = all_blogids[0]
             all_blogids.pop(0)
         else:
-            self.print_error(f'{self.nickname}:没有需要删除的日志')
+            print_error(f'{self.nickname}:没有需要删除的日志', self.nickname)
             return
 
         self.login()
@@ -761,10 +761,10 @@ class HKPIC(Network):
         print_sleep(2)
         all_blogids = self.allJournals(False)
         if blogid not in all_blogids:
-            self.print_success(f'日志删除成功:「{blogid}」')
+            print_success(f'日志删除成功:「{blogid}」', self.nickname)
         else:
             del_time += 1
-            self.print_error(f'{self.nickname}:日志删除失败:「{blogid}」')
+            print_error(f'{self.nickname}:日志删除失败:「{blogid}」', self.nickname)
         if not all_blogids:
             return
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
@@ -782,7 +782,7 @@ class HKPIC(Network):
             if self.config.increaseSleepTime(PicType.Share):
                 fail_time += 1
         else:
-            self.print_error(f'{self.nickname}:发表分享失败')
+            print_error(f'{self.nickname}:发表分享失败', self.nickname)
             return
 
         self.login()
@@ -818,11 +818,11 @@ class HKPIC(Network):
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
-                self.print_warn('发表分享达到每日上限。')
+                print_warn('发表分享达到每日上限。', self.nickname)
                 self.config.share_times = 9999
                 self.config.save()
             else:
-                self.print_success('发布分享成功。')
+                print_success('发布分享成功。', self.nickname)
 
             # 删除刚发表的分享
             pattern = re.compile(r'\{\s*\'sid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
@@ -834,8 +834,8 @@ class HKPIC(Network):
             is_fail = True
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.print_error('\n'.join(items) if items else html)
-            self.print_error(f'{self.nickname}:发布分享失败')
+            print_error('\n'.join(items) if items else html, self.nickname)
+            print_error(f'{self.nickname}:发布分享失败', self.nickname)
             for item in items:
                 if item.find('您目前沒有權限發佈分享') > -1:
                     self.config.share_times = 888
@@ -859,9 +859,9 @@ class HKPIC(Network):
         }
         html = self.request(url, self.paramsString(params))
         if html.find('操作成功') > -1:
-            self.print_success('删除分享成功')
+            print_success('删除分享成功', self.nickname)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.print_error('\n'.join(items) if items else html)
-            self.print_error(f'{self.nickname}:删除分享失败')
+            print_error('\n'.join(items) if items else html, self.nickname)
+            print_error(f'{self.nickname}:删除分享失败', self.nickname)

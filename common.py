@@ -16,9 +16,12 @@ import threading
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from enum import Enum
 
 
 DEBUG = False
+# 所有的输出日志
+ALLPrint = {}
 # 记录一下总的休息时长
 TOTALSLEEPTIME = 0
 all_values = {}
@@ -296,6 +299,68 @@ def print_sleep(secs, interval=10):
         if count % interval == 0:
             print(f'休息{secs}， 还剩{secs - count}秒')
         count += 1
+
+
+# 打印info的颜色
+class PrintColor(Enum):
+    # 蓝色
+    Blue = 34
+    # 洋红
+    Magenta = 35
+    # 青色
+    Cyan = 36
+    # 白色
+    White = 37
+
+
+def print_info(message: str, key: str = '', index: PrintColor = None):
+    if isinstance(index, PrintColor):
+        index = index.value
+
+    if index is None or index < 34 or index > 37:
+        index = random.randint(34, 37)
+
+    text = '\033[7;30;{i}m{message}\033[0m'.format(message=message, i=index)
+    print_normal(text, key)
+
+
+def print_warn(message: str, key: str = ''):
+    text = '\033[7;30;33m{message}\033[0m'.format(message=message)
+    print_normal(text, key)
+
+
+def print_error(message: str, key: str = ''):
+    text = '\033[7;30;31m{message}\033[0m'.format(message=message)
+    print_normal(text, key)
+
+
+def print_success(message: str, key: str = ''):
+    text = '\033[7;30;32m{message}\033[0m'.format(message=message)
+    print_normal(text, key)
+
+
+def print_all(key: str):
+    global DEBUG
+    global ALLPrint
+    if not DEBUG and not key:
+        prints = ALLPrint[key]
+        if not prints:
+            print('\n'.join(prints))
+
+
+def print_normal(message: str, key: str = ''):
+    LOCK.acquire()
+    global DEBUG
+    if not key:
+        global ALLPrint
+        prints = ALLPrint[key]
+        if prints is None:
+            prints = []
+        prints.append(message)
+        ALLPrint[key] = prints
+    if DEBUG or not key:
+        print(message)
+    LOCK.release()
 
 
 # ----------------下面是移动签到所使用到的方法，已废弃-----------------------------------------------------------------------------------------------
