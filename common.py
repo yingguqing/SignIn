@@ -241,7 +241,7 @@ def save_values(key, xor_key, values):
     global all_values
     all_values[key] = xor(values, xor_key, True)
     with open(path, 'w', encoding='utf-8') as f:
-        text = json.dumps(all_values, ensure_ascii=False)
+        text = json.dumps(all_values, ensure_ascii=False, indent=4)
         f.write(text)   # 重写数据
         f.flush()
         f.close()
