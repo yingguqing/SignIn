@@ -215,7 +215,7 @@ def load_values(key, xor_key, default):
             return default
         global all_values
         if not all_values:
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 jsonData = f.read()
                 if jsonData:
                     all_values = json.loads(jsonData)
@@ -240,8 +240,9 @@ def save_values(key, xor_key, values):
     path = get_running_path('config.json')
     global all_values
     all_values[key] = xor(values, xor_key, True)
-    with open(path, 'w') as f:
-        f.write(json.dumps(all_values))   # 重写数据
+    with open(path, 'w', encoding='utf-8') as f:
+        text = json.dumps(all_values, ensure_ascii=False)
+        f.write(text)   # 重写数据
         f.flush()
         f.close()
     LOCK.release()
@@ -342,20 +343,21 @@ def print_success(message: str, key: str = ''):
 def print_all(key: str):
     global DEBUG
     global ALLPrint
-    if not DEBUG and not key:
+    if not DEBUG and key:
         prints = ALLPrint[key]
-        if not prints:
+        if prints:
             print('\n'.join(prints))
 
 
 def print_normal(message: str, key: str = ''):
     LOCK.acquire()
     global DEBUG
-    if not key:
+    if key:
         global ALLPrint
-        prints = ALLPrint[key]
-        if prints is None:
+        if key not in ALLPrint.keys():
             prints = []
+        else:
+            prints = ALLPrint[key]
         prints.append(message)
         ALLPrint[key] = prints
     if DEBUG or not key:

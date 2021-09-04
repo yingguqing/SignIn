@@ -106,67 +106,67 @@ class HKPIC(Network):
 
     # 开始入口
     def runAction(self):
-
         print_normal(f'------------- {self.nickname} 比思签到 -------------', self.nickname)
-        # 获取所有比思域名
-        self.getHost()
+        try:
+            # 获取所有比思域名
+            self.getHost()
 
-        # 访问首页得到可用域名
-        if not self.checkHost():
-            print_error(f'{self.nickname}:没有可用域名', self.nickname)
-            return
+            # 访问首页得到可用域名
+            if not self.checkHost():
+                print_error(f'{self.nickname}:没有可用域名', self.nickname)
+                return
 
-        # 自动登录
-        self.login(True)
+            # 自动登录
+            self.login(True)
 
-        if not self.formhash:
-            print_error(f'{self.nickname}:formhash提取失败', self.nickname)
-            return
+            if not self.formhash:
+                print_error(f'{self.nickname}:formhash提取失败', self.nickname)
+                return
 
-        # 签到
-        self.signIn()
-        # 评论
-        self.forum_list(True)
-        # 访问别人空间并留言
-        self.visitUserZone()
-        # 发表一条记录
-        self.record()
-        # 删除发表的记录
-        self.delRecord()
-        # 发表日志
-        self.journal()
-        # 删除脚本发表的日志
-        self.delJournal()
-        # 发表分享
-        self.share()
+            # 签到
+            self.signIn()
+            # 评论
+            self.forum_list(True)
+            # 访问别人空间并留言
+            self.visitUserZone()
+            # 发表一条记录
+            self.record()
+            # 删除发表的记录
+            self.delRecord()
+            # 发表日志
+            self.journal()
+            # 删除脚本发表的日志
+            self.delJournal()
+            # 发表分享
+            self.share()
 
-        # 删除自己空间留言所产生的动态
-        self.delAllLeavMessageDynamic()
+            # 删除自己空间留言所产生的动态
+            self.delAllLeavMessageDynamic()
 
-        # 查询我的金币
-        self.myMoney(False)
-        temp = self.my_money - self.config.money
-        if temp != 0:
-            self.config.money = self.my_money
-            self.config.save()
-            print_info(f'增加金币：{temp}\n金钱：{self.my_money}', self.nickname)
-        else:
-            print_info(f'金钱：{self.my_money}', self.nickname)
+            # 查询我的金币
+            self.myMoney(False)
+            temp = self.my_money - self.config.money
+            if temp != 0:
+                self.config.money = self.my_money
+                self.config.save()
+                print_info(f'增加金币：{temp}\n金钱：{self.my_money}', self.nickname)
+            else:
+                print_info(f'金钱：{self.my_money}', self.nickname)
 
-        # 显示总休息时长
-        print_sleep(0)
-        # 清空统计的休息时长
-        print_sleep(-1)
-
-        # 统计执行时长
-        s = time.time() - self.start
-        min = int(s/60)
-        if min > 0:
-            consume = '%d分%.0f秒' % (min, s - min*60)
-        else:
-            consume = f'{"%.2f" % s}秒'
-        print_normal(f'------------- {self.nickname} 签到完成,耗时{consume} -------------\n', self.nickname)
-        print_all(self.nickname)
+            # 显示总休息时长
+            print_sleep(0)
+            # 清空统计的休息时长
+            print_sleep(-1)
+        finally:
+            # 统计执行时长
+            s = time.time() - self.start
+            min = int(s/60)
+            if min > 0:
+                consume = '%d分%.0f秒' % (min, s - min*60)
+            else:
+                consume = f'{"%.2f" % s}秒'
+            print_normal(f'------------- {self.nickname} 签到完成,耗时{consume} -------------\n', self.nickname)
+            print_all(self.nickname)
 
     # 获取比思域名
     def getHost(self):

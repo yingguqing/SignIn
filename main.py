@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from hkpic import HKPIC
-from common import local_time, weixin_openid
+from common import local_time, weixin_openid, load_values
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import json
