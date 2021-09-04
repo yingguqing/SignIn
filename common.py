@@ -332,12 +332,14 @@ def print_success(message: str, key: str = ''):
 
 
 def print_all(key: str):
+    LOCK.acquire()
     global DEBUG
     global ALLPrint
     if not DEBUG and key:
         prints = ALLPrint[key]
         if prints:
             print('\n'.join(prints))
+    LOCK.release()
 
 
 def print_normal(message: str, key: str = ''):
