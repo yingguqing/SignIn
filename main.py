@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from hkpic import HKPIC
-from common import local_time
-from concurrent.futures import ThreadPoolExecutor
+from common import local_time, print_all
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 import json
 import time
@@ -34,3 +34,6 @@ if __name__ == "__main__":
             hkpic.runAction()
             future = executor.submit(hkpic.runAction)
             future_list.append(future)
+        for future in as_completed(future_list):
+            if future.result():
+                print_all(future.result())
