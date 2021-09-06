@@ -4,7 +4,7 @@
 
 from os import error, truncate
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, print_error, print_info, print_success, print_normal, print_all, PrintColor
+from common import print_sleep, valueForKey, random_all_string, xor, print_error, print_info, print_success, print_normal, print_warn, PrintColor
 from bs4 import BeautifulSoup
 import re
 import base64
