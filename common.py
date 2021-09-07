@@ -23,7 +23,7 @@ DEBUG = False
 # 所有的输出日志
 ALLPrint = {}
 # 记录一下总的休息时长
-TOTALSLEEPTIME = 0
+TOTALSLEEPTIME = {}
 all_values = {}
 LOCK = threading.Lock()
 OPENID = ''
@@ -274,21 +274,24 @@ def print_sleep(secs, key: str = ''):
         return
 
     global TOTALSLEEPTIME
-    if secs <= 0:
-        if secs == 0:
-            min = int(TOTALSLEEPTIME/60)
-            if min > 0:
-                consume = '%d分%.0f秒' % (min, TOTALSLEEPTIME - min*60)
-            else:
-                consume = f'{"%.0f" % TOTALSLEEPTIME}秒'
+    total = 0
+    if key in TOTALSLEEPTIME.keys():
+        total = TOTALSLEEPTIME[key]
 
-            if TOTALSLEEPTIME > 0:
+    if secs <= 0:
+        if secs == 0 and total:
+            min = int(total/60)
+            if min > 0:
+                consume = '%d分%.0f秒' % (min, total - min*60)
+            else:
+                consume = f'{"%.0f" % total}秒'
+
+            if total > 0:
                 print_info(f'休息：{consume}', key, PrintColor.Magenta)
-        else:
-            TOTALSLEEPTIME = 0
         return
 
-    TOTALSLEEPTIME += secs
+    total += secs
+    TOTALSLEEPTIME[key] = total
     global DEBUG
     if DEBUG:
         print_normal(f'休息{secs}秒', key)

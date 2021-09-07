@@ -105,8 +105,8 @@ class HKPIC(Network):
 
     # 开始入口
     def runAction(self):
-        print_normal(f'------------- {self.username} 比思签到 -------------', self.username)
         try:
+            print_normal(f'------------- {self.username} 比思签到 -------------', self.username)
             # 获取所有比思域名
             self.getHost()
 
@@ -154,8 +154,6 @@ class HKPIC(Network):
 
             # 显示总休息时长
             print_sleep(0, self.username)
-            # 清空统计的休息时长
-            print_sleep(-1)
         except Exception as e:
             print_error(f'执行发生错误：{e}', self.username)
         finally:
@@ -199,7 +197,7 @@ class HKPIC(Network):
 
             if html == '域名不通':
                 print_error(f'{host} 请求失败，切换下一个域名', self.username)
-                print_sleep(1)
+                print_sleep(1, self.username)
                 continue
 
             if html is not None and html.find('比思論壇') > -1:
@@ -497,7 +495,7 @@ class HKPIC(Network):
         html = self.request(url, params)
         if html.find('操作成功') > -1:
             print_success('删除留言成功', self.username)
-            print_sleep(2)
+            print_sleep(2, self.username)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
@@ -768,7 +766,7 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        print_sleep(2)
+        print_sleep(2, self.username)
         all_blogids = self.allJournals(False)
         if blogid not in all_blogids:
             print_success(f'日志删除成功:「{blogid}」', self.username)
@@ -802,7 +800,7 @@ class HKPIC(Network):
         api_params = f'mod=space&uid={self.my_uid}&do=share&view=me&quickforward=1'
         url = self.encapsulateURL('home.php', api_params)
         self.request(url, post=False)
-        print_sleep(2)
+        print_sleep(2, self.username)
 
         api_params = 'mod=spacecp&ac=share&type=link&view=me&from=&inajax=1'
         url = self.encapsulateURL('home.php', api_params)
