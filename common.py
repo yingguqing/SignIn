@@ -19,7 +19,7 @@ from datetime import timezone
 from enum import Enum
 
 
-DEBUG = False
+DEBUG = True
 # 所有的输出日志
 ALLPrint = {}
 # 记录一下总的休息时长
