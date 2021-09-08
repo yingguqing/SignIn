@@ -41,6 +41,7 @@ class PicType(Enum):
     Record = auto()
     Journal = auto()
     Share = auto()
+    Other = auto()
 
     def __str__(self):
         if self is PicType.Reply:
@@ -53,23 +54,35 @@ class PicType(Enum):
             return '日志'
         elif self is PicType.Share:
             return '分享'
+        elif self is PicType.Other:
+            return '其他'
         else:
             return '未知'
 
-    # 最大休息时间，肯定会成功的休息时间，比正常休息时长多
-    def maxSleepTime(self):
+    def sleepSec(self):
         if self is PicType.Reply:
-            return 52
+            return 49
         elif self is PicType.LeaveMessage:
-            return 52
+            return 48
         elif self is PicType.Record:
-            return 62
+            return 60
         elif self is PicType.Journal:
-            return 50
+            return 49
         elif self is PicType.Share:
             return 3
+        elif self is PicType.Other:
+            return 2
         else:
             return 0
+
+    # 休息时间
+    def sleep(self, key):
+        if not isinstance(self, PicType):
+            return
+        sec: int = self.sleepSec()
+        if sec <= 0:
+            return
+        print_sleep(sec, key)
 
 
 class HKpicConfig(Config):
@@ -83,17 +96,6 @@ class HKpicConfig(Config):
         self.money = valueForKey(dic, 'money', 0)
         self.date = valueForKey(dic, 'date')
         self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
-        # 发表评论后的休息时间
-        self.reply_sleep_time = valueForKey(self.public_config, 'reply_sleep_time', PicType.Reply.maxSleepTime())
-        # 发表留言后的休息时间
-        self.leave_message_sleep_time = valueForKey(self.public_config, 'leave_message_sleep_time', PicType.LeaveMessage.maxSleepTime())
-        # 发表记录后的休息时间
-        self.record_sleep_time = valueForKey(self.public_config, 'record_sleep_time', PicType.Record.maxSleepTime())
-        # 发表日志后的休息时间
-        self.journal_sleep_time = valueForKey(self.public_config, 'journal_sleep_time', PicType.Journal.maxSleepTime())
-        # 发表分享后的休息时间
-        self.share_sleep_time = valueForKey(self.public_config, 'share_sleep_time', PicType.Share.maxSleepTime())
-        self.savePublicConfig()
         if self.date != date:
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
@@ -138,61 +140,6 @@ class HKpicConfig(Config):
     def canShare(self):
         return self.share_times < self.max_share_times
 
-    # 按类型自动休息
-    def sleep(self, type):
-        if not isinstance(type, PicType):
-            return
-
-        if type is PicType.Reply:
-            print_sleep(self.reply_sleep_time, self.username)
-        elif type is PicType.LeaveMessage:
-            print_sleep(self.leave_message_sleep_time, self.username)
-        elif type is PicType.Record:
-            print_sleep(self.record_sleep_time, self.username)
-        elif type is PicType.Journal:
-            print_sleep(self.journal_sleep_time, self.username)
-        elif type is PicType.Share:
-            print_sleep(self.share_sleep_time, self.username)
-
-    # 增加休息时长
-    def increaseSleepTime(self, type, is_sleep: bool = True):
-        '''
-        if type is PicType.Reply:
-            self.reply_sleep_time += 1
-            self.reply_sleep_time = min(self.reply_sleep_time, type.maxSleepTime())
-            is_max = self.reply_sleep_time == type.maxSleepTime()
-            print_error(f'{str(type)} 休息时间延长到{self.reply_sleep_time}秒')
-        elif type is PicType.LeaveMessage:
-            self.leave_message_sleep_time += 1
-            self.leave_message_sleep_time = min(self.leave_message_sleep_time, type.maxSleepTime())
-            is_max = self.leave_message_sleep_time == type.maxSleepTime()
-            print_error(f'{str(type)} 休息时间延长到{self.leave_message_sleep_time}秒')
-        elif type is PicType.Record:
-            self.record_sleep_time += 1
-            self.record_sleep_time = min(self.record_sleep_time, type.maxSleepTime())
-            is_max = self.record_sleep_time == type.maxSleepTime()
-            print_error(f'{str(type)} 休息时间延长到{self.record_sleep_time}秒')
-        elif type is PicType.Journal:
-            self.journal_sleep_time += 1
-            self.journal_sleep_time = min(self.journal_sleep_time, type.maxSleepTime())
-            is_max = self.journal_sleep_time == type.maxSleepTime()
-            print_error(f'{str(type)} 休息时间延长到{self.journal_sleep_time}秒')
-        elif type is PicType.Share:
-            self.share_sleep_time += 1
-            self.share_sleep_time = min(self.share_sleep_time, type.maxSleepTime())
-            is_max = self.share_sleep_time == type.maxSleepTime()
-            print_error(f'{str(type)} 休息时间延长到{self.share_sleep_time}秒')
-        else:
-            is_max = False
-        '''
-
-        # self.savePublicConfig()
-
-        if is_sleep:
-            self.sleep(type)
-
-        return True
-
     def configValue(self):
         values = {
             'name': self.username,
@@ -209,11 +156,3 @@ class HKpicConfig(Config):
         if self.user_zone_url:
             values['user_zone_url'] = self.user_zone_url
         return values
-
-    def savePublicConfig(self):
-        self.public_config['reply_sleep_time'] = self.reply_sleep_time
-        self.public_config['leave_message_sleep_time'] = self.leave_message_sleep_time
-        self.public_config['record_sleep_time'] = self.record_sleep_time
-        self.public_config['journal_sleep_time'] = self.journal_sleep_time
-        self.public_config['share_sleep_time'] = self.share_sleep_time
-        super().savePublicConfig()

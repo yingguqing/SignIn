@@ -197,7 +197,7 @@ class HKPIC(Network):
 
             if html == '域名不通':
                 print_error(f'{host} 请求失败，切换下一个域名', self.username)
-                print_sleep(1, self.username)
+                PicType.Other.sleep(self.username)
                 continue
 
             if html is not None and html.find('比思論壇') > -1:
@@ -315,7 +315,7 @@ class HKPIC(Network):
         html = self.request(url, post=False)
 
         if first_time:
-            print_info(f'开始评论。\n每次评论需要间隔{self.config.reply_sleep_time}秒。', self.username)
+            print_info(f'开始评论。\n每次评论需要间隔{PicType.Reply.sleepSec()}秒。', self.username)
             # 第一次时，先获取一下现有金币数
             self.myMoney(False)
 
@@ -355,7 +355,7 @@ class HKPIC(Network):
 
         if self.is_send:
             # 评论有时间间隔限制
-            self.config.sleep(PicType.Reply)
+            PicType.Reply.sleep(self.username)
 
         url = self.encapsulateURL(f'thread-{tid}-1-1.html')
         print_info(f'进入帖子：{url}', self.username)
@@ -390,7 +390,6 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print_error('\n'.join([comment] + items) if items else html, self.username)
             print_error('发表评论失败', self.username)
-            self.config.increaseSleepTime(HKPIC.reply, is_sleep=False)
             for item in items:
                 if item.find('您目前處於見習期間') > -1:
                     self.config.reply_times = 888
@@ -436,10 +435,10 @@ class HKPIC(Network):
 
         if not is_faild:
             if self.is_send:
-                self.config.sleep(PicType.LeaveMessage)
+                PicType.LeaveMessage.sleep(self.username)
         elif is_faild and fail_time < 5:
-            if self.config.increaseSleepTime(PicType.LeaveMessage):
-                fail_time += 1
+            PicType.LeaveMessage.sleep(self.username)
+            fail_time += 1
         else:
             print_error('发表留言失败', self.username)
             return
@@ -495,7 +494,7 @@ class HKPIC(Network):
         html = self.request(url, params)
         if html.find('操作成功') > -1:
             print_success('删除留言成功', self.username)
-            print_sleep(2, self.username)
+            PicType.Other.sleep(self.username)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
@@ -572,10 +571,10 @@ class HKPIC(Network):
 
         if not is_faild:
             if self.is_send:
-                self.config.sleep(PicType.Record)
+                PicType.Record.sleep(self.username)
         elif fail_time < 5:
-            if self.config.increaseSleepTime(PicType.Record):
-                fail_time += 1
+            PicType.Record.sleep(self.username)
+            fail_time += 1
         else:
             return
 
@@ -659,11 +658,11 @@ class HKPIC(Network):
 
         if not is_fail:
             if self.is_send:
-                self.config.sleep(PicType.Journal)
+                PicType.Journal.sleep(self.username)
         elif fail_time < 5:
-            if self.config.increaseSleepTime(PicType.Journal):
-                fail_time += 1
-                print_error('发表日志失败，准备重试。', self.username)
+            PicType.Journal.sleep(self.username)
+            fail_time += 1
+            print_error('发表日志失败，准备重试。', self.username)
         else:
             print_error('发表日志失败!!', self.username)
             return
@@ -766,7 +765,7 @@ class HKPIC(Network):
             'btnsubmit': 'true'
         }
         self.request(url, self.paramsString(params))
-        print_sleep(2, self.username)
+        PicType.Other.sleep(self.username)
         all_blogids = self.allJournals(False)
         if blogid not in all_blogids:
             print_success(f'日志删除成功:「{blogid}」', self.username)
@@ -785,10 +784,10 @@ class HKPIC(Network):
 
         if not is_fail:
             if self.is_send:
-                self.config.sleep(PicType.Share)
+                PicType.Share.sleep(self.username)
         elif fail_time < 5:
-            if self.config.increaseSleepTime(PicType.Share):
-                fail_time += 1
+            PicType.Share.sleep(self.username)
+            fail_time += 1
         else:
             return
 
@@ -800,7 +799,7 @@ class HKPIC(Network):
         api_params = f'mod=space&uid={self.my_uid}&do=share&view=me&quickforward=1'
         url = self.encapsulateURL('home.php', api_params)
         self.request(url, post=False)
-        print_sleep(2, self.username)
+        PicType.Other.sleep(self.username)
 
         api_params = 'mod=spacecp&ac=share&type=link&view=me&from=&inajax=1'
         url = self.encapsulateURL('home.php', api_params)

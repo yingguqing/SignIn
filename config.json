@@ -14,48 +14,41 @@
     },
     "HKPIC_CONFIG_5byD5ayP5rmA": {
         "name": "影孤清",
-        "money": 67,
+        "money": 70,
         "date": "2021-09-08",
         "is_visit_other_zone": false,
-        "reply_times": 3,
+        "reply_times": 6,
         "is_leave_message": false,
         "is_record": false,
         "journal_times": 888,
         "share_times": 888,
-        "last_reply_time": 1631045660.1396542,
+        "last_reply_time": 1631087198.179092,
         "user_zone_url": "space-uid-562776.html"
     },
     "HKPIC_CONFIG_6I285b+u5Ly26ZiG": {
         "name": "茎待佳阴",
-        "money": 164,
+        "money": 167,
         "date": "2021-09-08",
         "is_visit_other_zone": false,
-        "reply_times": 3,
+        "reply_times": 6,
         "is_leave_message": false,
         "is_record": false,
         "journal_times": 888,
         "share_times": 888,
-        "last_reply_time": 1631045658.9135487,
+        "last_reply_time": 1631087198.189539,
         "user_zone_url": "space-uid-4070019.html"
     },
     "HKPIC_CONFIG_5p265Lmh6KS65qWO": {
         "name": "月上西楼",
-        "money": 165,
+        "money": 168,
         "date": "2021-09-08",
         "is_visit_other_zone": false,
-        "reply_times": 3,
+        "reply_times": 6,
         "is_leave_message": false,
         "is_record": false,
         "journal_times": 888,
         "share_times": 888,
-        "last_reply_time": 1631045659.122085,
+        "last_reply_time": 1631087183.302947,
         "user_zone_url": "space-uid-4069658.html"
-    },
-    "PUBLIC_CONFIG": {
-        "reply_sleep_time": 50,
-        "leave_message_sleep_time": 48,
-        "record_sleep_time": 60,
-        "journal_sleep_time": 49,
-        "share_sleep_time": 2
     }
 }
