@@ -18,15 +18,11 @@ class HKPIC(Network):
     def __init__(self, jsonValue):
         super().__init__(jsonValue)
         self.start = time.time()
-        self.all_host = [self.host]
-        self.index = 0
         self.username = valueForKey(jsonValue, 'username')
         self.password = quote(valueForKey(jsonValue, 'password', default=''))
-        self.host_url = valueForKey(jsonValue, 'hostURL', '')
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)
         self.config = HKpicConfig(mark, self.username)
-        self.config.savePublicConfig()
         # 需要签到
         self.need_sign_in = True
         # 读取本地cookie值
@@ -41,7 +37,7 @@ class HKPIC(Network):
         self.my_money = 0
         # 发表评论等所要用的
         self.formhash = ''
-        # 记录日志是否发表了，如果发表了就需要休息
+        # 记录是否发表了内容，如果发表了就需要休息
         self.is_send = False
         # 基本的请求头，特殊情况时，在请求上使用header参数来特殊处理
         self.headers = {
@@ -107,14 +103,6 @@ class HKPIC(Network):
     def runAction(self):
         try:
             print_normal(f'------------- {self.username} 比思签到 -------------', self.username)
-            # 获取所有比思域名
-            self.getHost()
-
-            # 访问首页得到可用域名
-            if not self.checkHost():
-                print_error('没有可用域名', self.username)
-                return
-
             # 自动登录
             self.login(True)
 
@@ -167,50 +155,6 @@ class HKPIC(Network):
             print_normal(f'------------- {self.username} 签到完成,耗时{consume} -------------\n', self.username)
             # print_all(self.username)
             return self.username
-
-    # 获取比思域名
-    def getHost(self):
-        if not self.host_url:
-            return
-
-        print_info('获取比思域名', self.username)
-        req = self.request(self.host_url, post=False, is_save_cookies=False)
-        if type(req) is dict and 'content' in req.keys():
-            content = str(base64.b64decode(valueForKey(req, 'content', default='')), 'utf-8')
-            if not content:
-                print_error('获取域名失败', self.username)
-                return
-
-            pattern = re.compile(r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:[\w\d]+|([^[:punct:]\s]|/)))', re.S)
-            all = re.findall(pattern, content)
-            for h in all:
-                if type(h) is tuple and h and h[0] not in self.all_host:
-                    self.all_host.append(h[0])
-            print_info(f'域名：{len(self.all_host)} 个', self.username)
-        else:
-            print_error('获取域名失败', self.username)
-
-    # 测试域名
-    def checkHost(self):
-        print_info('测试域名', self.username)
-        for host in self.all_host:
-            html = self.forum(host=host, check_host=True)
-
-            if html == '域名不通':
-                print_error(f'{host} 请求失败，切换下一个域名', self.username)
-                PicType.Other.sleep(self.username)
-                continue
-
-            if html is not None and html.find('比思論壇') > -1:
-                self.host = host
-                self.headers['Origin'] = host
-                self.headers['Referer'] = self.encapsulateURL('forum.php')
-                print_info(f'使用域名:{self.host}', self.username)
-                if self.user_href:
-                    self.user_href = self.encapsulateURL(self.user_href)
-                return True
-
-        return False
 
     # 访问首页
     def forum(self, host=None, check_host=False):

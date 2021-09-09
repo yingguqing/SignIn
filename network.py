@@ -21,7 +21,6 @@ class Network:
     def __init__(self, jsonValue):
         self.host = valueForKey(jsonValue, 'host')
         self.verify = True
-        self.isTimeOut = False
         # 网络请求所要用到的cookie
         self.cookies = ''
         self.headers = {
@@ -35,7 +34,6 @@ class Network:
 
     def request(self, url, params=None, headers=None, post=True, is_save_cookies=True):
         if time.time() - StartTime >= MaxRunTime:
-            self.isTimeOut = True
             raise RuntimeError(f'运行超过{MaxRunTime}秒')
 
         url_headers = self.headers
