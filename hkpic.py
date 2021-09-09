@@ -4,7 +4,7 @@
 
 from os import error, truncate
 from network import Network
-from common import print_sleep, valueForKey, random_all_string, xor, print_error, print_info, print_success, print_normal, print_warn, PrintColor
+from common import print_sleep, valueForKey, random_all_string, xor, print_error, print_info, print_success, print_normal, print_warn, print_all, PrintColor
 from bs4 import BeautifulSoup
 import re
 import base64
@@ -165,6 +165,7 @@ class HKPIC(Network):
             else:
                 consume = f'{"%.2f" % s}秒'
             print_normal(f'------------- {self.username} 签到完成,耗时{consume} -------------\n', self.username)
+            # print_all(self.username)
             return self.username
 
     # 获取比思域名

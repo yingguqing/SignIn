@@ -61,13 +61,13 @@ class PicType(Enum):
 
     def sleepSec(self):
         if self is PicType.Reply:
-            return 49
+            return 51
         elif self is PicType.LeaveMessage:
-            return 48
+            return 51
         elif self is PicType.Record:
-            return 60
+            return 61
         elif self is PicType.Journal:
-            return 49
+            return 51
         elif self is PicType.Share:
             return 3
         elif self is PicType.Other:

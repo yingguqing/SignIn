@@ -3,7 +3,7 @@
 
 from hkpic import HKPIC
 from common import local_time, print_all
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 import sys
 import json
 import time
@@ -34,6 +34,12 @@ if __name__ == "__main__":
             # hkpic.runAction()
             future = executor.submit(hkpic.runAction)
             future_list.append(future)
+
+        # 设置线程的超时时间
+        wait(future_list, timeout=2400)
+
         for future in as_completed(future_list):
             if future.result():
                 print_all(future.result())
+            else:
+                print('没有执行结果')

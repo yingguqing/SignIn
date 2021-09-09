@@ -338,9 +338,8 @@ def print_success(message: str, key: str = ''):
 
 def print_all(key: str):
     LOCK.acquire()
-    global DEBUG
     global ALLPrint
-    if not DEBUG and key:
+    if key and key in ALLPrint.keys():
         prints = ALLPrint[key]
         if prints:
             print('\n'.join(prints))
