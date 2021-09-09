@@ -39,6 +39,7 @@ jobs:
 
     - name: Run Python Application  
       timeout-minutes: 60
+      continue-on-error: true
       run:
         python main.py ${{ secrets.Config  }}
     - name: Commit files
@@ -46,6 +47,7 @@ jobs:
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
          git add config.json
+         git add log.txt
          git commit -m "update config.json"
          
     - name: Push changes

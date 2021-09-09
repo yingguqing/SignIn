@@ -199,7 +199,7 @@ def save_file(text, name):
     if os.path.exists(path):
         os.remove(path)
 
-    with open(path, 'a+') as f:
+    with open(path, 'w') as f:
         f.write(text if text else '')
         f.flush()
         f.close()
@@ -354,6 +354,7 @@ def print_normal(message: str, key: str = ''):
     global DEBUG
     if DEBUG or not key:
         print(f'{key}:{message}')
+        save_log(f'{key}:{message}')
     if key:
         global ALLPrint
         if key not in ALLPrint.keys():

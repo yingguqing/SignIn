@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from hkpic import HKPIC
-from common import local_time, print_all
+from common import local_time, print_all, save_log
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 import sys
 import json
@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
     ltime = local_time().strftime('%Y-%m-%d %H:%M:%S')
     print(f'\n当前北京时间：{ltime}\n')
+    save_log(ltime)
 
     jsonValue = json.loads(sys.argv[1])
     # 读取并设置微信openid（功能暂时没用）
