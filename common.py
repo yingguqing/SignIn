@@ -344,11 +344,16 @@ def print_all(key: str):
         if prints:
             print('\n'.join(prints))
     LOCK.release()
+    if key == 'PrintAll':
+        for key in ALLPrint.keys():
+            print_all(key)
 
 
 def print_normal(message: str, key: str = ''):
     LOCK.acquire()
     global DEBUG
+    if DEBUG or not key:
+        print(f'{key}:{message}')
     if key:
         global ALLPrint
         if key not in ALLPrint.keys():
@@ -357,8 +362,6 @@ def print_normal(message: str, key: str = ''):
             prints = ALLPrint[key]
         prints.append(message)
         ALLPrint[key] = prints
-    if DEBUG or not key:
-        print(f'{key}:{message}')
     LOCK.release()
 
 
