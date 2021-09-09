@@ -38,6 +38,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Python Application  
+      timeout-minutes: 60
       run:
         python main.py ${{ secrets.Config  }}
     - name: Commit files
