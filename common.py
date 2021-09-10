@@ -19,7 +19,7 @@ from datetime import timezone
 from enum import Enum
 
 
-DEBUG = True
+DEBUG = False
 # 所有的输出日志
 ALLPrint = {}
 # 记录一下总的休息时长
@@ -351,10 +351,10 @@ def print_all(key: str):
 
 def print_normal(message: str, key: str = ''):
     LOCK.acquire()
+    save_log(f'{key}:{message}')
     global DEBUG
     if DEBUG or not key:
         print(f'{key}:{message}')
-        save_log(f'{key}:{message}')
     if key:
         global ALLPrint
         if key not in ALLPrint.keys():

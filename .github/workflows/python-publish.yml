@@ -9,8 +9,8 @@
 name: 签到
 
 on: #[push]
-  workflow_dispatch
-  # schedule:
+  #workflow_dispatch
+  schedule:
   #         ┌───────────────────── minute (0 - 59)
   #         │ ┌─────────────────── hour (0 - 23)
   #         │ │ ┌───────────────── day of the month (1 - 31)
@@ -20,7 +20,7 @@ on: #[push]
   #         │ │ │ │ │
   #         │ │ │ │ │
   #         * * * * *
-  # - cron:  '0 17,20,22 * * *'
+  - cron:  '0 17,20,22 * * *'
 
 jobs:
   build:
