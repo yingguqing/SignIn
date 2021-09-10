@@ -28,7 +28,7 @@ class HKPIC(Network):
         # 读取本地cookie值
         self.cookie_dit = {}
         # 别人空间地址
-        self.user_href = self.config.user_zone_url
+        self.user_href = self.encapsulateURL(self.config.user_zone_url)
         # 自己的空间地址
         self.my_zone_url = ''
         # 自己的用户id
@@ -42,11 +42,9 @@ class HKPIC(Network):
         # 基本的请求头，特殊情况时，在请求上使用header参数来特殊处理
         self.headers = {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7',
-            'Accept':
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'Accept-Encoding': 'gzip, deflate',
-            'User-Agent':
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 GDMobile/8.0.4',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 GDMobile/8.0.4',
             'Content-Type': 'application/x-www-form-urlencoded',
             'Origin': self.host,
             'Cache-Control': 'max-age=0',
