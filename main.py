@@ -32,15 +32,15 @@ if __name__ == "__main__":
             start = time.time()
             dic = {**hkpicValue, **account}
             hkpic = HKPIC(dic)
-            # hkpic.runAction()
-            future = executor.submit(hkpic.runAction)
-            future_list.append(future)
+            hkpic.runAction()
+            # future = executor.submit(hkpic.runAction)
+            # future_list.append(future)
 
         # 设置线程的超时时间
-        wait(future_list, timeout=2400)
+        # wait(future_list, timeout=2400)
 
-        for future in as_completed(future_list):
-            if future.result():
-                print_all(future.result())
-            else:
-                print('没有执行结果')
+        # for future in as_completed(future_list):
+        #     if future.result():
+        #         print_all(future.result())
+        #     else:
+        #         print('没有执行结果')
