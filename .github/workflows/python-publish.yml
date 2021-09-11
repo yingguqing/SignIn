@@ -38,7 +38,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Python Application  
-      timeout-minutes: 60
+      timeout-minutes: 120
       continue-on-error: true
       run:
         python main.py ${{ secrets.Config  }}
