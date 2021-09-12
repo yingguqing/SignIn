@@ -151,8 +151,7 @@ class HKPIC(Network):
             else:
                 consume = f'{"%.2f" % s}秒'
             print_normal(f'------------- {self.username} 签到完成,耗时{consume} -------------\n', self.username)
-            # print_all(self.username)
-            return self.username
+            print_all(self.username)
 
     # 访问首页
     def forum(self, host=None, check_host=False):
