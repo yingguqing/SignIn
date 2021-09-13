@@ -6,7 +6,6 @@ from common import local_time, save_log
 from concurrent.futures import ThreadPoolExecutor
 import sys
 import json
-import time
 
 
 if __name__ == "__main__":
@@ -29,7 +28,6 @@ if __name__ == "__main__":
         future_list = []
         # 比思签到+赚取每日金币(多账号)
         for account in accounts:
-            start = time.time()
             dic = {**hkpicValue, **account}
             hkpic = HKPIC(dic)
             hkpic.runAction()

@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: 签到
+name: 自动签到
 
 on: #[push]
   #workflow_dispatch
@@ -47,7 +47,6 @@ jobs:
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
          git add config.json
-         git add log.txt
          git commit -m "update config.json"
          
     - name: Push changes

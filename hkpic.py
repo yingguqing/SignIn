@@ -103,11 +103,6 @@ class HKPIC(Network):
             print_normal(f'------------- {self.username} 比思签到 -------------', self.username)
             # 自动登录
             self.login(True)
-
-            if not self.formhash:
-                print_error('formhash提取失败', self.username)
-                return
-
             # 签到
             self.signIn()
             # 评论
@@ -124,10 +119,8 @@ class HKPIC(Network):
             self.delJournal()
             # 发表分享
             self.share()
-
             # 删除自己空间留言所产生的动态
             self.delAllLeavMessageDynamic()
-
             # 查询我的金币
             self.myMoney(False)
             temp = self.my_money - self.config.money
@@ -169,6 +162,9 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             if items and len(items[0]) > 3:
                 self.formhash = items[0]
+
+            if not self.formhash:
+                raise RuntimeError('formhash提取失败')
 
         if not self.my_zone_url:
             soup = BeautifulSoup(html, 'html.parser')
@@ -407,7 +403,6 @@ class HKPIC(Network):
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.username)
-            print_error(f'留言第{fail_time+1}次失败', self.username)
             for item in items:
                 if item.find('您目前沒有權限進行評論') > -1:
                     self.config.share_times = 888
@@ -416,6 +411,7 @@ class HKPIC(Network):
                     self.config.is_record = False
                     self.config.save()
                     return
+            print_error(f'留言第{fail_time+1}次失败', self.username)
             self.leavMessage(uid, fail_time, is_faild)
 
     # 删除留言
@@ -463,7 +459,6 @@ class HKPIC(Network):
         if not self.my_uid:
             return
 
-        print_info('获取留言动态', self.username)
         api_params = f'mod=space&uid={self.my_uid}&do=home&view=me&from=space'
         url = self.encapsulateURL('home.php', api_params)
 
@@ -689,12 +684,11 @@ class HKPIC(Network):
         if all_blogids is None:
             all_blogids = self.allJournals(True)
 
-        if all_blogids:
-            blogid = all_blogids[0]
-            all_blogids.pop(0)
-        else:
-            print_error('没有需要删除的日志', self.username)
+        if not all_blogids:
             return
+
+        blogid = all_blogids[0]
+        all_blogids.pop(0)
 
         self.login()
         api_params = f'mod=spacecp&ac=blog&op=delete&blogid={blogid}'
