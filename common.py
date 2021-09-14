@@ -337,20 +337,21 @@ def print_success(message: str, key: str = ''):
 
 
 def print_all(key: str):
-    LOCK.acquire()
+    # LOCK.acquire()
     global ALLPrint
     if key and key in ALLPrint.keys():
         prints = ALLPrint[key]
         if prints:
             print('\n'.join(prints))
-    LOCK.release()
+        return
+    # LOCK.release()
     if key == 'PrintAll':
         for key in ALLPrint.keys():
             print_all(key)
 
 
 def print_normal(message: str, key: str = ''):
-    LOCK.acquire()
+    # LOCK.acquire()
     save_log(f'{key}:{message}')
     global DEBUG
     if DEBUG or not key:
@@ -363,7 +364,7 @@ def print_normal(message: str, key: str = ''):
             prints = ALLPrint[key]
         prints.append(message)
         ALLPrint[key] = prints
-    LOCK.release()
+    # LOCK.release()
 
 
 # ----------------下面是移动签到所使用到的方法，已废弃-----------------------------------------------------------------------------------------------
