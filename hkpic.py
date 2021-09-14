@@ -177,7 +177,7 @@ class HKPIC(Network):
                 self.my_uid = self.getUid(self.my_zone_url)
                 login_success = span.text == self.username
                 if login_success:
-                    self.need_sign_in = html.find('簽到領獎!') > -1
+                    self.need_sign_in = '簽到領獎!' in html
                     # 提取formhash
                     if not self.formhash:
                         span = soup.find('input', attrs={'name': 'formhash'})
@@ -306,7 +306,7 @@ class HKPIC(Network):
         params = f'message={m}&posttime={timestamp}&formhash={self.formhash}&usesig=1&subject=++'
         html = self.request(url, params)
         self.is_send = True
-        if html.find('非常感謝，回復發佈成功') > -1:
+        if '非常感謝，回復發佈成功' in html:
             self.config.reply_times += 1
             self.config.last_reply_time = time.time()
             self.config.save()
@@ -318,7 +318,7 @@ class HKPIC(Network):
                 self.config.reply_times = 9999
                 self.config.save()
             return True
-        elif html.find('抱歉，您所在的用戶組每小時限制發回帖') > -1:
+        elif '抱歉，您所在的用戶組每小時限制發回帖' in html:
             print_warn('评论数超过限制', self.username)
             self.config.last_reply_time = time.time()
             self.config.max_reply_times = self.config.reply_times
@@ -329,7 +329,7 @@ class HKPIC(Network):
             print_error('\n'.join([comment] + items) if items else html, self.username)
             print_error('发表评论失败', self.username)
             for item in items:
-                if item.find('您目前處於見習期間') > -1:
+                if '您目前處於見習期間' in item:
                     self.config.reply_times = 888
                     self.config.share_times = 888
                     self.config.journal_times = 888
@@ -388,7 +388,7 @@ class HKPIC(Network):
         params = f'message={message}&refer={refer}&id={uid}&idtype=uid&commentsubmit=true&handlekey=commentwall_{uid}&formhash={self.formhash}'
         html = self.request(url, params)
         self.is_send = True
-        if html.find('操作成功') > -1:
+        if '操作成功' in html:
             is_faild = False
             print_success('留言成功', self.username)
             self.config.is_leave_message = False
@@ -404,7 +404,7 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             print_error('\n'.join(items) if items else html, self.username)
             for item in items:
-                if item.find('您目前沒有權限進行評論') > -1:
+                if '您目前沒有權限進行評論' in item:
                     self.config.share_times = 888
                     self.config.journal_times = 888
                     self.config.is_leave_message = False
@@ -430,7 +430,7 @@ class HKPIC(Network):
         refer = quote(self.user_href, 'utf-8')
         params = f'referer={refer}&deletesubmit=true&formhash={self.formhash}&handlekey=c_{cid}_delete'
         html = self.request(url, params)
-        if html.find('操作成功') > -1:
+        if '操作成功' in html:
             print_success('删除留言成功', self.username)
             PicType.Other.sleep(self.username)
         else:
@@ -489,7 +489,7 @@ class HKPIC(Network):
         referer = quote(url, 'utf-8')
         params = f'referer={referer}&feedsubmit=true&formhash={self.formhash}'
         html = self.request(url, params)
-        if html.find('操作成功') > -1:
+        if '操作成功' in html:
             print_success('一条删除动态成功', self.username)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
@@ -527,7 +527,7 @@ class HKPIC(Network):
         params = f'message={message}&add=&refer={refer}&topicid=&addsubmit=true&formhash={self.formhash}'
         html = self.request(url, params, header)
         self.is_send = True
-        if html.find(comment) > -1:
+        if comment in html:
             print_success(f'记录：「{comment}」-> 发表成功', self.username)
             self.config.is_record = False
             self.config.save()
@@ -564,7 +564,7 @@ class HKPIC(Network):
         else:
             return
 
-        if id.find('_') < 0:
+        if '_' not in id:
             return
 
         a = id.split('_')
@@ -639,7 +639,7 @@ class HKPIC(Network):
         }
         html = self.request(url, params, header)
         self.is_send = True
-        if html.find(title) > -1:
+        if title in html:
             is_fail = False
             self.config.journal_times += 1
             self.config.save()
@@ -753,7 +753,7 @@ class HKPIC(Network):
         }
         html = self.request(url, self.paramsString(params), header)
         self.is_send = True
-        if html.find('操作成功') > -1:
+        if '操作成功' in html:
             is_fail = False
             self.config.share_times += 1
             self.config.save()
@@ -779,7 +779,7 @@ class HKPIC(Network):
             print_error('\n'.join(items) if items else html, self.username)
             print_error(f'发布分享第{fail_time+1}次失败', self.username)
             for item in items:
-                if item.find('您目前沒有權限發佈分享') > -1:
+                if '您目前沒有權限發佈分享' in item:
                     self.config.share_times = 888
                     self.config.save()
 
@@ -800,7 +800,7 @@ class HKPIC(Network):
             'handlekey': f's_{sid}_delete'
         }
         html = self.request(url, self.paramsString(params))
-        if html.find('操作成功') > -1:
+        if '操作成功' in html:
             print_success('删除分享成功', self.username)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
