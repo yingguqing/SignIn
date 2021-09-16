@@ -4,7 +4,7 @@
 
 
 from common import save_values, valueForKey, load_values, local_time, print_sleep
-import time
+from time import time
 from enum import Enum, auto
 
 
@@ -129,7 +129,7 @@ class HKpicConfig(Config):
         reply = self.reply_times < self.max_reply_times
         if reply and self.reply_times == 10:
             # 一个小时内，同一个账号，发表评论数最大为10
-            return time.time() - self.last_reply_time > 3600
+            return time() - self.last_reply_time > 3600
         return reply
 
     # 是否需要发表日志

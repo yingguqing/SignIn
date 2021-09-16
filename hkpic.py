@@ -223,9 +223,12 @@ class HKPIC(Network):
     # 签到
     def signIn(self):
 
+        print_info('开始签到1', self.username)
         if not self.need_sign_in:
+            print_info('开始签到2', self.username)
             return
 
+        print_info('开始签到3', self.username)
         api_param = 'id=dsu_paulsign:sign&operation=qiandao&infloat=1&sign_as=1&inajax=1'
         url = self.encapsulateURL('plugin.php', api_param)
         params = f'formhash={self.formhash}&qdxq=kx'

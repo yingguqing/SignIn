@@ -24,7 +24,7 @@ if __name__ == "__main__":
     accounts = hkpicValue["accounts"]
     hkpicValue.pop('accounts')
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor() as executor:
         future_list = []
         # 比思签到+赚取每日金币(多账号)
         for account in accounts:
