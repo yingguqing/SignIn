@@ -66,8 +66,7 @@ class Network:
                 res.close()
 
         except AttributeError as e:
-            print(e)
-            pass
+            return f'{e}'
         except requests.exceptions.ConnectionError:
             return '域名不通'
 
