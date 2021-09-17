@@ -8,9 +8,9 @@ from common import valueForKey
 import time
 
 # 整个程序的开始时间
-StartTime = time.time()
+# StartTime = time.time()
 # 最大执行时长(单位：秒)
-MaxRunTime = 3600
+# MaxRunTime = 3600
 
 
 class Network:
@@ -33,8 +33,8 @@ class Network:
         }
 
     def request(self, url, params=None, headers=None, post=True, is_save_cookies=True):
-        if time.time() - StartTime >= MaxRunTime:
-            raise RuntimeError(f'运行超过{MaxRunTime}秒')
+        # if time.time() - StartTime >= MaxRunTime:
+        #     raise RuntimeError(f'运行超过{MaxRunTime}秒')
 
         url_headers = self.headers
         # 合并请求头

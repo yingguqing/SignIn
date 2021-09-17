@@ -194,7 +194,7 @@ def weixin_send_msg(msg):
 
 # 保存文件
 def save_file(text, name):
-    LOCK.acquire()
+    # LOCK.acquire()
     path = get_running_path(name)
     if os.path.exists(path):
         os.remove(path)
@@ -203,12 +203,12 @@ def save_file(text, name):
         f.write(text if text else '')
         f.flush()
         f.close()
-    LOCK.release()
+    # LOCK.release()
 
 
 # 读取相应的数据(xor_key为空时，不加密)
 def load_values(key, xor_key, default):
-    LOCK.acquire()
+    # LOCK.acquire()
     try:
         path = get_running_path('config.json')
         if not os.path.exists(path):
@@ -231,12 +231,13 @@ def load_values(key, xor_key, default):
         else:
             return default
     finally:
-        LOCK.release()
+        a = 0
+        # LOCK.release()
 
 
 # 写入数据(xor_key为空时，不加密)
 def save_values(key, xor_key, values):
-    LOCK.acquire()
+    # LOCK.acquire()
     path = get_running_path('config.json')
     global all_values
     all_values[key] = xor(values, xor_key, True)
@@ -245,7 +246,7 @@ def save_values(key, xor_key, values):
         f.write(text)   # 重写数据
         f.flush()
         f.close()
-    LOCK.release()
+    # LOCK.release()
 
 
 # xor加解密
