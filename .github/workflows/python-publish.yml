@@ -9,7 +9,7 @@
 name: 自动签到
 
 on: #[push]
-  #workflow_dispatch
+  workflow_dispatch
   schedule:
   #         ┌───────────────────── minute (0 - 59)
   #         │ ┌─────────────────── hour (0 - 23)
@@ -28,10 +28,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -42,16 +44,18 @@ jobs:
       continue-on-error: true
       run:
         python main.py ${{ secrets.Config  }}
+
     - name: Commit files
-      run: |
-         git config --local user.email "yingguqing@gmail.com"
-         git config --local user.name "yingguqing"
-         git add config.json
-         git add log_5byD5ayP5rmA.txt
-         git add log_5p265Lmh6KS65qWO.txt
-         git add log_6I285b+u5Ly26ZiG.txt
-         git add log_CwIrVVUsQy8LFA==.txt
-         git commit -m "update config.json"
+      uses:  ad-m/github-push-action@master
+      with:
+        author_name: yingguqing
+        author_emal: yingguqing@gmail.com
+        message: "update config.json"
+        add: "config.json"
+        add: "*.txt"
+      env:
+        github_token: ${{ secrets.MY_GIT_TOKEN  }}
+         branch: main
          
     - name: Push changes
       uses:  ad-m/github-push-action@master
