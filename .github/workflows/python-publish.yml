@@ -55,7 +55,6 @@ jobs:
         add: "*.txt"
       env:
         github_token: ${{ secrets.MY_GIT_TOKEN  }}
-         branch: main
          
     - name: Push changes
       uses:  ad-m/github-push-action@master
