@@ -62,7 +62,6 @@ class LogInfo:
             return
 
         ltime = local_time().strftime('%Y-%m-%d %H:%M:%S')
-        print(f'\n当前北京时间：{ltime}\n')
         path = get_running_path(self.logName)
         with open(path, 'a+', encoding='utf-8') as f:
             f.seek(0)

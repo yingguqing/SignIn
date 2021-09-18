@@ -9,8 +9,8 @@
 name: 自动签到
 
 on: #[push]
-  workflow_dispatch
-  #schedule:
+  #workflow_dispatch
+  schedule:
   #         ┌───────────────────── minute (0 - 59)
   #         │ ┌─────────────────── hour (0 - 23)
   #         │ │ ┌───────────────── day of the month (1 - 31)
@@ -20,7 +20,7 @@ on: #[push]
   #         │ │ │ │ │
   #         │ │ │ │ │
   #         * * * * *
-  #- cron:  '0 19,22,23 * * *'
+  - cron:  '0 19,22,23 * * *'
 
 jobs:
   build:
@@ -28,12 +28,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -44,26 +42,17 @@ jobs:
       continue-on-error: true
       run:
         python main.py ${{ secrets.Config  }}
-
+        
     - name: Commit files
-      uses:  ad-m/github-push-action@master
-      with:
-        author_name: yingguqing
-        author_emal: yingguqing@gmail.com
-        message: "update config.json"
-        add: "config.json"
-      env:
-        github_token: ${{ secrets.MY_GIT_TOKEN  }}
-
-    - name: Commit files
-      uses:  ad-m/github-push-action@master
-      with:
-        author_name: yingguqing
-        author_emal: yingguqing@gmail.com
-        message: "update log file"
-        add: "*.txt"
-      env:
-        github_token: ${{ secrets.MY_GIT_TOKEN  }}
+      run: |
+         git config --local user.email "yingguqing@gmail.com"
+         git config --local user.name "yingguqing"
+         git add config.json
+         git add log_5byD5ayP5rmA.txt
+         git add log_5p265Lmh6KS65qWO.txt
+         git add log_6I285b+u5Ly26ZiG.txt
+         git add log_CwIrVVUsQy8LFA==.txt
+         git commit -m "update config.json"
          
     - name: Push changes
       uses:  ad-m/github-push-action@master
