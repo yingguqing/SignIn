@@ -16,14 +16,9 @@ import threading
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from enum import Enum
 
 
 DEBUG = False
-# 所有的输出日志
-ALLPrint = {}
-# 记录一下总的休息时长
-TOTALSLEEPTIME = {}
 all_values = {}
 LOCK = threading.Lock()
 OPENID = ''
@@ -194,7 +189,7 @@ def weixin_send_msg(msg):
 
 # 保存文件
 def save_file(text, name):
-    # LOCK.acquire()
+    LOCK.acquire()
     path = get_running_path(name)
     if os.path.exists(path):
         os.remove(path)
@@ -203,12 +198,12 @@ def save_file(text, name):
         f.write(text if text else '')
         f.flush()
         f.close()
-    # LOCK.release()
+    LOCK.release()
 
 
 # 读取相应的数据(xor_key为空时，不加密)
 def load_values(key, xor_key, default):
-    # LOCK.acquire()
+    LOCK.acquire()
     try:
         path = get_running_path('config.json')
         if not os.path.exists(path):
@@ -231,13 +226,12 @@ def load_values(key, xor_key, default):
         else:
             return default
     finally:
-        a = 0
-        # LOCK.release()
+        LOCK.release()
 
 
 # 写入数据(xor_key为空时，不加密)
 def save_values(key, xor_key, values):
-    # LOCK.acquire()
+    LOCK.acquire()
     path = get_running_path('config.json')
     global all_values
     all_values[key] = xor(values, xor_key, True)
@@ -246,7 +240,7 @@ def save_values(key, xor_key, values):
         f.write(text)   # 重写数据
         f.flush()
         f.close()
-    # LOCK.release()
+    LOCK.release()
 
 
 # xor加解密
@@ -254,118 +248,23 @@ def xor(text, key, encrty):
     if not text or not key:
         return text
 
-    if not encrty:
-        text = str(base64.b64decode(text), "utf-8")
-    ml = len(text)
-    kl = len(key)
-    result = []
-    # 通过取整，求余的方法重新得到key
-    for i in range(ml):
-        # 一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"刚好相反
-        result.append(chr(ord(key[i % kl]) ^ ord(text[i])))
-    result = ''.join(result)
-    if encrty:
-        result = str(base64.b64encode(result.encode("utf-8")), "utf-8")
-    return result
-
-
-# 休息提示
-def print_sleep(secs, key: str = ''):
-    if secs is None:
-        return
-
-    global TOTALSLEEPTIME
-    total = 0
-    if key in TOTALSLEEPTIME.keys():
-        total = TOTALSLEEPTIME[key]
-
-    if secs <= 0:
-        if secs == 0 and total:
-            min = int(total/60)
-            if min > 0:
-                consume = '%d分%.0f秒' % (min, total - min*60)
-            else:
-                consume = f'{"%.0f" % total}秒'
-
-            if total > 0:
-                print_info(f'休息：{consume}', key, PrintColor.Magenta)
-        return
-
-    total += secs
-    TOTALSLEEPTIME[key] = total
-    global DEBUG
-    if DEBUG:
-        print_normal(f'休息{secs}秒', key)
-    time.sleep(secs)
-
-
-# 打印info的颜色
-class PrintColor(Enum):
-    # 蓝色
-    Blue = 34
-    # 洋红
-    Magenta = 35
-    # 青色
-    Cyan = 36
-    # 白色
-    White = 37
-
-
-def print_info(message: str, key: str = '', index: PrintColor = None):
-    if isinstance(index, PrintColor):
-        index = index.value
-
-    if index is None or index < 34 or index > 37:
-        index = random.randint(34, 37)
-
-    text = '\033[7;30;{i}m{message}\033[0m'.format(message=message, i=index)
-    print_normal(text, key)
-
-
-def print_warn(message: str, key: str = ''):
-    text = '\033[7;30;33m{message}\033[0m'.format(message=message)
-    print_normal(text, key)
-
-
-def print_error(message: str, key: str = ''):
-    text = '\033[7;30;31m{message}\033[0m'.format(message=message)
-    print_normal(text, key)
-
-
-def print_success(message: str, key: str = ''):
-    text = '\033[7;30;32m{message}\033[0m'.format(message=message)
-    print_normal(text, key)
-
-
-def print_all(key: str):
-    # LOCK.acquire()
-    global ALLPrint
-    if key and key in ALLPrint.keys():
-        prints = ALLPrint[key]
-        if prints:
-            print('\n'.join(prints))
-        return
-    # LOCK.release()
-    if key == 'PrintAll':
-        for key in ALLPrint.keys():
-            print_all(key)
-
-
-def print_normal(message: str, key: str = ''):
-    # LOCK.acquire()
-    save_log(f'{key}:{message}')
-    global DEBUG
-    if DEBUG or not key:
-        print(f'{key}:{message}')
-    if key:
-        global ALLPrint
-        if key not in ALLPrint.keys():
-            prints = []
-        else:
-            prints = ALLPrint[key]
-        prints.append(message)
-        ALLPrint[key] = prints
-    # LOCK.release()
+    LOCK.acquire()
+    try:
+        if not encrty:
+            text = str(base64.b64decode(text), "utf-8")
+        ml = len(text)
+        kl = len(key)
+        result = []
+        # 通过取整，求余的方法重新得到key
+        for i in range(ml):
+            # 一对一异或操作，得到结果,其中,"ord(char)"得到该字符对应的ASCII码,"chr(int)"刚好相反
+            result.append(chr(ord(key[i % kl]) ^ ord(text[i])))
+        result = ''.join(result)
+        if encrty:
+            result = str(base64.b64encode(result.encode("utf-8")), "utf-8")
+        return result
+    finally:
+        LOCK.release()
 
 
 # ----------------下面是移动签到所使用到的方法，已废弃-----------------------------------------------------------------------------------------------

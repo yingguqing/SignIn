@@ -47,7 +47,10 @@ jobs:
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
          git add config.json
-         git add log.txt
+         git add log_5byD5ayP5rmA.txt
+         git add log_5p265Lmh6KS65qWO.txt
+         git add log_6I285b+u5Ly26ZiG.txt
+         git add log_CwIrVVUsQy8LFA==.txt
          git commit -m "update config.json"
          
     - name: Push changes

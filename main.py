@@ -2,10 +2,17 @@
 # -*- coding: utf-8 -*-
 
 from hkpic import HKPIC
-from common import local_time, save_log
+from common import local_time
 from concurrent.futures import ThreadPoolExecutor
+from time import sleep
 import sys
 import json
+
+
+def test(title: str):
+    for i in range(20):
+        print(f'{title}:{i}')
+        sleep(1)
 
 
 if __name__ == "__main__":
@@ -14,7 +21,6 @@ if __name__ == "__main__":
 
     ltime = local_time().strftime('%Y-%m-%d %H:%M:%S')
     print(f'\n当前北京时间：{ltime}\n')
-    save_log(ltime)
 
     jsonValue = json.loads(sys.argv[1])
     # 读取并设置微信openid（功能暂时没用）
@@ -33,3 +39,4 @@ if __name__ == "__main__":
             # hkpic.runAction()
             future = executor.submit(hkpic.runAction)
             future_list.append(future)
+            sleep(2)

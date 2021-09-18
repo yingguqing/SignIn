@@ -3,15 +3,18 @@
 # 配置文件
 
 
-from common import save_values, valueForKey, load_values, local_time, print_sleep
-from time import time
+from common import save_values, valueForKey, load_values, local_time
+from time import time, sleep
 from enum import Enum, auto
+from loginfo import PrintLog, PrintType
 
 
 class Config:
     key = ''
 
-    def __init__(self):
+    def __init__(self, log: PrintLog):
+        self.log = log
+        self.total_sleep_time = 0
         self.public_config = load_values('PUBLIC_CONFIG', '', {})
 
     # 配置参数封装成字典，子类实现
@@ -32,6 +35,27 @@ class Config:
         if not self.public_config:
             return
         save_values('PUBLIC_CONFIG', '', self.public_config)
+
+    # 休息提示
+    def print_sleep(self, secs):
+        if secs is None:
+            return
+
+        total = self.total_sleep_time
+        if secs <= 0:
+            if secs == 0 and total:
+                min = int(total/60)
+                if min > 0:
+                    consume = '%d分%.0f秒' % (min, total - min*60)
+                else:
+                    consume = f'{"%.0f" % total}秒'
+
+                if total > 0:
+                    self.log.print(f'休息：{consume}', PrintType.Magenta)
+            return
+
+        self.total_sleep_time += secs
+        sleep(secs)
 
 
 # 比思发表类型
@@ -75,20 +99,11 @@ class PicType(Enum):
         else:
             return 0
 
-    # 休息时间
-    def sleep(self, key):
-        if not isinstance(self, PicType):
-            return
-        sec: int = self.sleepSec()
-        if sec <= 0:
-            return
-        print_sleep(sec, key)
-
 
 class HKpicConfig(Config):
 
-    def __init__(self, mark, username):
-        super().__init__()
+    def __init__(self, log: PrintLog, mark, username):
+        super().__init__(log)
         self.key = f'HKPIC_CONFIG_{mark}'
         self.username = username
         date = str(local_time().date())
@@ -139,6 +154,15 @@ class HKpicConfig(Config):
     # 是否需要发表分享
     def canShare(self):
         return self.share_times < self.max_share_times
+
+    # 根据类型休息
+    def sleep(self, type: PicType):
+        if not isinstance(type, PicType):
+            return
+        sec: int = type.sleepSec()
+        if sec <= 0:
+            return
+        self.print_sleep(sec)
 
     def configValue(self):
         values = {
