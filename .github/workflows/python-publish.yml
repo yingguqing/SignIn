@@ -52,6 +52,15 @@ jobs:
         author_emal: yingguqing@gmail.com
         message: "update config.json"
         add: "config.json"
+      env:
+        github_token: ${{ secrets.MY_GIT_TOKEN  }}
+
+    - name: Commit files
+      uses:  ad-m/github-push-action@master
+      with:
+        author_name: yingguqing
+        author_emal: yingguqing@gmail.com
+        message: "update log file"
         add: "*.txt"
       env:
         github_token: ${{ secrets.MY_GIT_TOKEN  }}
