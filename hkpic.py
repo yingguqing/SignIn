@@ -22,7 +22,7 @@ class HKPIC(Network):
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)
         self.log = PrintLog(title=self.username)
-        self.log.setDebugAndLogFileName(f'log_{mark}.txt', True)
+        # self.log.setDebugAndLogFileName(f'log_{mark}.txt', True)
         self.config = HKpicConfig(self.log, mark, self.username)
         # 需要签到
         self.need_sign_in = True
@@ -128,7 +128,7 @@ class HKPIC(Network):
             if temp != 0:
                 self.config.money = self.my_money
                 self.config.save()
-                self.log.print(f'增加金币：{temp}\n金钱：{self.my_money}', PrintType.Info)
+                self.log.print([f'增加金币：{temp}', f'金钱：{self.my_money}'], PrintType.Info)
             else:
                 self.log.print(f'金钱：{self.my_money}', PrintType.Info)
 
@@ -237,7 +237,7 @@ class HKPIC(Network):
         if items:
             self.log.print(items[0], PrintType.Success)
         else:
-            self.log.print(f'签到失败\n{html}', PrintType.Error)
+            self.log.print(['签到失败', html], PrintType.Error)
 
     # 版块帖子列表
     def forum_list(self, first_time=False):
@@ -255,7 +255,7 @@ class HKPIC(Network):
         html = self.request(url, post=False)
 
         if first_time:
-            self.log.print(f'开始评论。\n每次评论需要间隔{PicType.Reply.sleepSec()}秒。', PrintType.Info)
+            self.log.print(['开始评论。', f'每次评论需要间隔{PicType.Reply.sleepSec()}秒。'], PrintType.Info)
             # 第一次时，先获取一下现有金币数
             self.myMoney(False)
 
@@ -328,7 +328,7 @@ class HKPIC(Network):
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.log.print('\n'.join([comment] + items) if items else html, PrintType.Error)
+            self.log.print(([comment] + items) if items else html, PrintType.Error)
             self.log.print('发表评论失败', PrintType.Error)
             for item in items:
                 if '您目前處於見習期間' in item:
@@ -404,7 +404,7 @@ class HKPIC(Network):
             is_faild = True
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.log.print('\n'.join(items) if items else html, PrintType.Error)
+            self.log.print(items if items else html, PrintType.Error)
             for item in items:
                 if '您目前沒有權限進行評論' in item:
                     self.config.share_times = 888
@@ -438,7 +438,7 @@ class HKPIC(Network):
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.log.print('\n'.join(items) if items else html, PrintType.Error)
+            self.log.print(items if items else html, PrintType.Error)
             self.log.print('删除留言失败', PrintType.Error)
 
     # 获取我的金币数
@@ -496,7 +496,7 @@ class HKPIC(Network):
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.log.print('\n'.join(items) if items else html, PrintType.Error)
+            self.log.print(items if items else html, PrintType.Error)
             self.log.print('删除动态失败', PrintType.Error)
 
     # 发表一条记录
@@ -778,7 +778,7 @@ class HKPIC(Network):
             is_fail = True
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.log.print('\n'.join(items) if items else html, PrintType.Error)
+            self.log.print(items if items else html, PrintType.Error)
             self.log.print(f'发布分享第{fail_time+1}次失败', PrintType.Error)
             for item in items:
                 if '您目前沒有權限發佈分享' in item:
@@ -807,5 +807,5 @@ class HKPIC(Network):
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
-            self.log.print('\n'.join(items) if items else html, PrintType.Error)
+            self.log.print(items if items else html, PrintType.Error)
             self.log.print('删除分享失败', PrintType.Error)

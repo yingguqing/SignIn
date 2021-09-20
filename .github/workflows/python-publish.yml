@@ -20,7 +20,7 @@ on: #[push]
   #         │ │ │ │ │
   #         │ │ │ │ │
   #         * * * * *
-  - cron:  '0 19,22,23 * * *'
+  - cron:  '0 17,19,21 * * *'
 
 jobs:
   build:
@@ -48,12 +48,12 @@ jobs:
          git config --local user.email "yingguqing@gmail.com"
          git config --local user.name "yingguqing"
          git add config.json
-         git add log_5byD5ayP5rmA.txt
-         git add log_5p265Lmh6KS65qWO.txt
-         git add log_6I285b+u5Ly26ZiG.txt
-         git add log_CwIrVVUsQy8LFA==.txt
          git commit -m "update config.json"
          
+#git add log_5byD5ayP5rmA.txt
+#git add log_5p265Lmh6KS65qWO.txt
+#git add log_6I285b+u5Ly26ZiG.txt
+#git add log_CwIrVVUsQy8LFA==.txt
     - name: Push changes
       uses:  ad-m/github-push-action@master
       with:

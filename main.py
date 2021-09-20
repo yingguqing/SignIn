@@ -9,12 +9,6 @@ import sys
 import json
 
 
-def test(title: str):
-    for i in range(20):
-        print(f'{title}:{i}')
-        sleep(1)
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit()

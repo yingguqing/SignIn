@@ -5,7 +5,6 @@
 
 from enum import Enum
 import random
-from typing import Text
 from common import get_running_path, local_time
 
 
@@ -95,9 +94,14 @@ class PrintLog:
         info.print()
 
     # 打印日志
-    def print(self, text: str, type: PrintType):
-        info: LogInfo = LogInfo(text, type, self.title, self.logName)
-        self.__print(info)
+    def print(self, text, type: PrintType):
+        if isinstance(text, list):
+            [self.print(t, type) for t in text]
+            for t in text:
+                self.print(t, type)
+        elif isinstance(text, str):
+            info: LogInfo = LogInfo(text, type, self.title, self.logName)
+            self.__print(info)
 
     # 清空所有日志
     def clear(self):
