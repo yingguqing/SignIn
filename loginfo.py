@@ -65,7 +65,7 @@ class LogInfo:
         path = get_running_path(self.logName)
         with open(path, 'a+', encoding='utf-8') as f:
             f.seek(0)
-            f.write(f'{ltime}: self.log')
+            f.write(f'{ltime}: {self.log}')
             f.write('\n')
             f.flush()
 
