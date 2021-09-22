@@ -103,7 +103,7 @@ class HKPIC(Network):
         try:
             self.log.print(f'------------- {self.username} 比思签到 -------------', PrintType.Normal)
             # 自动登录
-            self.login(True)
+            self.login()
             # 签到
             self.signIn()
             # 评论
@@ -202,7 +202,7 @@ class HKPIC(Network):
                     break
 
     # 登录
-    def login(self, show=False):
+    def login(self):
         # 需要登录时，把cookie清空
         self.cookie_dit = {}
         self.cookies = ''
@@ -217,10 +217,10 @@ class HKPIC(Network):
         # 访问首页抓取相关数据
         self.forum()
 
-        if not show:
+        if self.formhash:
             return
 
-        self.log.print('登录成功' if self.formhash else '登录失败', PrintType.Success)
+        self.log.print('登录失败', PrintType.Success)
 
     # 签到
     def signIn(self):
