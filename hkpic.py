@@ -135,17 +135,13 @@ class HKPIC(Network):
             # 显示总休息时长
             self.config.print_sleep(0)
         except Exception as e:
-            print(f'-----d-d-d-d-d-d-{e}')
             self.log.print(f'执行发生错误：{e}', PrintType.Error)
         finally:
             # 统计执行时长
             s = time.time() - self.start
             min = int(s/60)
-            if min > 0:
-                consume = '%d分%.0f秒' % (min, s - min*60)
-            else:
-                consume = f'{"%.2f" % s}秒'
-            self.log.print(f'------------- {self.username} 签到完成,耗时{consume} -------------', PrintType.Normal)
+            consume = '%d分%.0f秒' % (min, s - min * 60) if min > 0 else f'{"%.2f" % s}秒'
+            self.log.print(f'------------- 签到完成,耗时{consume} -------------', PrintType.Normal)
             self.log.printAll()
 
     # 访问首页
