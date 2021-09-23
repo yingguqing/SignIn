@@ -8,6 +8,7 @@ import random
 from common import get_running_path, local_time
 
 
+# 日志类型
 class PrintType(Enum):
     # 正常打印，没有颜色
     Normal = 0
@@ -47,12 +48,17 @@ class PrintType(Enum):
         return show
 
 
+# 日志信息
 class LogInfo:
 
     def __init__(self, log: str, type: PrintType, title: str = '', logName: str = ''):
+        # 日志内容
         self.log = log
+        # 日志类型
         self.type = type
+        # 日志标题（非必须）
         self.title = title
+        # 日志保存文件名（非必须）
         self.logName = logName
 
     # 保存日志到文件中
@@ -68,11 +74,13 @@ class LogInfo:
             f.write('\n')
             f.flush()
 
+    # 打印当前日志
     def print(self):
         title = f'{self.title}:' if self.title else ''
         print(f'{title}{self.type.text(self.log)}')
 
 
+# 打印日志
 class PrintLog:
 
     def __init__(self, title: str = ''):
@@ -81,11 +89,13 @@ class PrintLog:
         self.isDebug = False
         self.logName = ''
 
+    # 设置Debug模式和保存日志的文件名
     def setDebugAndLogFileName(self, name: str, isDebug: bool = False):
         self.isDebug = isDebug
         self.logName = name
         self.print('', PrintType.Normal)
 
+    # 记录日志列表，并打印日志
     def __print(self, info: LogInfo):
         self.__logs.append(info)
         if not self.isDebug:

@@ -83,6 +83,7 @@ class PicType(Enum):
         else:
             return '未知'
 
+    # 比思各类型发表需要休息时间
     def sleepSec(self):
         if self is PicType.Reply:
             return 51
