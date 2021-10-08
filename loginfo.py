@@ -8,8 +8,10 @@ import random
 from common import get_running_path, local_time
 
 
-# 日志类型
 class PrintType(Enum):
+    '''
+    日志类型
+    '''
     # 正常打印，没有颜色
     Normal = 0
     # 34-37之间随机颜色
@@ -29,8 +31,10 @@ class PrintType(Enum):
     # 失败
     Error = 300
 
-    # 根据类型，生成相应颜色的文字
     def text(self, log: str):
+        '''
+        根据类型，生成相应颜色的文字
+        '''
         show: str
         if self is PrintType.Error:
             show = '\033[7;30;31m{message}\033[0m'.format(message=log)
@@ -48,8 +52,10 @@ class PrintType(Enum):
         return show
 
 
-# 日志信息
 class LogInfo:
+    '''
+    日志信息
+    '''
 
     def __init__(self, log: str, type: PrintType, title: str = '', logName: str = ''):
         # 日志内容
@@ -61,8 +67,10 @@ class LogInfo:
         # 日志保存文件名（非必须）
         self.logName = logName
 
-    # 保存日志到文件中
     def saveLogToText(self):
+        '''
+        保存日志到文件中
+        '''
         if not self.logName:
             return
 
@@ -74,8 +82,10 @@ class LogInfo:
             f.write('\n')
             f.flush()
 
-    # 打印当前日志
     def print(self):
+        '''
+        打印当前日志
+        '''
         title = f'{self.title}:' if self.title else ''
         print(f'{title}{self.type.text(self.log)}')
 
@@ -89,16 +99,24 @@ class PrintLog:
         self.isDebug = False
         self.logName = ''
 
-    # 设置Debug模式和保存日志的文件名
-    def setDebugAndLogFileName(self, name: str, isDebug: bool = False):
-        self.isDebug = isDebug
+    def setDebugAndLogFileName(self, name: str = ''):
+        '''
+        设置Debug模式和保存日志的文件名
+
+        参数:
+            name:文件名，为空时，不保存成文件
+        '''
+        self.isDebug = True
         self.logName = name
         self.print('', PrintType.Normal)
 
-    # 记录日志列表，并打印日志
     def __print(self, info: LogInfo, isDebug: bool = False):
         '''
-        当前日志属于debug时，只在日志系统为debug模式下，才显示
+        记录日志列表，并打印日志
+
+        参数:
+            info:日志信息
+            isDebug:是否是debug信息，debug信息只有在系统为debug模式下，才显示
         '''
         if not isDebug or self.isDebug:
             self.__logs.append(info)
@@ -110,7 +128,12 @@ class PrintLog:
     # 打印日志
     def print(self, text, type: PrintType, isDebug: bool = False):
         '''
-        当前日志属于debug时，只在日志系统为debug模式下，才显示
+        打印日志
+
+        参数:
+            text:日志内容，可以是数组
+            type:日志类型
+            isDebug:是否是debug信息，debug信息只有在系统为debug模式下，才显示
         '''
         if isinstance(text, list):
             [self.print(t, type, isDebug) for t in text]
@@ -118,14 +141,23 @@ class PrintLog:
             info: LogInfo = LogInfo(text, type, self.title, self.logName)
             self.__print(info, isDebug)
 
-    # 清空所有日志
     def clear(self):
+        '''
+        清空所有日志
+        '''
         self.__logs.clear()
 
-    # 打印所有记录下来的日志
     def printAll(self):
+        '''
+        打印所有记录下来的日志
+        '''
         all = map(lambda log: log.type.text(log.log), self.__logs)
+
         if not all:
             return
+
+        if self.isDebug:
+            print('\n' * 5)
+
         print('\n'.join(all))
         print('\n')

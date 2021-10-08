@@ -14,6 +14,10 @@ from loginfo import PrintLog, PrintType
 
 
 class HKPIC(Network):
+    '''
+    比思论坛自动获取金币
+    '''
+
     def __init__(self, jsonValue):
         super().__init__(jsonValue)
         self.start = time.time()
@@ -88,8 +92,10 @@ class HKPIC(Network):
             '我靠！看来医生是都疯了！要不怎么让他出院了！', '打破老婆终身制，实行小姨股份制。引入小姐竞争制，推广情人合同制。'
         ]
 
-    # 保存cookie
     def response_cookies(self, cookies):
+        '''
+        保存cookie
+        '''
         self.cookie_dit = {**self.cookie_dit, **cookies}
 
         self.cookies = ''
@@ -98,8 +104,10 @@ class HKPIC(Network):
             values.append(f'{key}={value}')
         self.cookies = '; '.join(values)
 
-    # 开始入口
     def runAction(self):
+        '''
+        开始入口
+        '''
         try:
             self.log.print(f'------------- {self.username} 比思签到 -------------', PrintType.Normal)
             # 自动登录
@@ -144,9 +152,14 @@ class HKPIC(Network):
             self.log.print(f'------------- 签到完成,耗时{consume} -------------', PrintType.Normal)
             self.log.printAll()
 
-    # 访问首页
     def forum(self, host=None, check_host=False):
+        '''
+        访问首页
 
+        参数:
+            host:使用域名，为空使用默认域名
+            check_host:是否测试域名
+        '''
         host = host if host else self.host
         url = self.encapsulateURL('forum.php', host=host)
         html = self.request(url, post=False)
@@ -197,8 +210,10 @@ class HKPIC(Network):
                     self.user_href = self.encapsulateURL(item)
                     break
 
-    # 登录
     def login(self):
+        '''
+        登录
+        '''
         # 需要登录时，把cookie清空
         self.cookie_dit = {}
         self.cookies = ''
@@ -218,8 +233,10 @@ class HKPIC(Network):
 
         self.log.print('登录失败', PrintType.Success)
 
-    # 签到
     def signIn(self):
+        '''
+        签到
+        '''
 
         if not self.need_sign_in:
             return
@@ -235,9 +252,13 @@ class HKPIC(Network):
         else:
             self.log.print(['签到失败', html], PrintType.Error)
 
-    # 版块帖子列表
     def forum_list(self, first_time=False):
+        '''
+        版块帖子列表
 
+        参数:
+            first_time:是否是第一次获取，如果是的话会打印日志，并获取一下现有金币
+        '''
         if not self.config.canReply():
             return
 
@@ -280,8 +301,10 @@ class HKPIC(Network):
         if self.config.canReply():
             self.forum_list()
 
-    # 发表评论
     def reply(self, comment, fid, href):
+        '''
+        发表评论
+        '''
         pattern = re.compile(r'\w*thread-(\d+)-\d+-\d+.\w+', re.S)
         items = re.findall(pattern, href)
         tid = items[0] if items else ''
@@ -340,14 +363,24 @@ class HKPIC(Network):
                     self.config.save()
             return False
 
-    # 从空间链接中获取用户id
     def getUid(self, href):
+        '''
+        从空间链接中获取用户id
+
+        参数:
+            href:用户的空间链接
+
+        返回值:
+            用户id
+        '''
         pattern = re.compile(r'\w*space-uid-(\d+).\w+', re.S)
         items = re.findall(pattern, href)
         return items[0] if items else ''
 
-    # 访问别人空间
     def visitUserZone(self):
+        '''
+        访问别人空间
+        '''
 
         if not self.config.is_visit_other_zone:
             return
@@ -364,8 +397,15 @@ class HKPIC(Network):
         else:
             self.log.print('别人空间地址为空', PrintType.Error)
 
-    # 留言
     def leavMessage(self, uid, fail_time: int = 0, is_faild: bool = False):
+        '''
+        留言
+
+        参数:
+            uid：用户id
+            fail_time:失败次数
+            is_faild:是否是失败重试
+        '''
         if not self.config.is_leave_message:
             return
 
@@ -416,8 +456,13 @@ class HKPIC(Network):
             self.log.print(f'留言第{fail_time+1}次失败', PrintType.Error)
             self.leavMessage(uid, fail_time, is_faild)
 
-    # 删除留言
     def deleteMessage(self, cid):
+        '''
+        删除留言
+
+        参数:
+            cid:留言id
+        '''
         if not cid:
             return
         # 获取删除留言相关参数
@@ -441,8 +486,13 @@ class HKPIC(Network):
             self.log.print(items if items else html, PrintType.Error)
             self.log.print('删除留言失败', PrintType.Error)
 
-    # 获取我的金币数
     def myMoney(self, is_print=True):
+        '''
+        获取我的金币数
+
+        参数:
+            is_print:是否打印金币数
+        '''
         if not self.my_zone_url:
             return
         html = self.request(self.my_zone_url, post=False)
@@ -456,8 +506,10 @@ class HKPIC(Network):
         else:
             self.log.print('获取金币失败', PrintType.Error)
 
-    # 删除自己空间留言所产生的动态
     def delAllLeavMessageDynamic(self):
+        '''
+        删除自己空间留言所产生的动态
+        '''
         if not self.my_uid:
             return
 
@@ -475,8 +527,14 @@ class HKPIC(Network):
         for feedid in feedids:
             self.delLeavMessageDynamic(feedid, url)
 
-    # 删除一条动态
     def delLeavMessageDynamic(self, feedid, referer):
+        '''
+        删除一条动态
+
+        参数:
+            feedid:动态的id
+            referer:来源地址
+        '''
         if not feedid or not referer:
             return
 
@@ -499,9 +557,14 @@ class HKPIC(Network):
             self.log.print(items if items else html, PrintType.Error)
             self.log.print('删除动态失败', PrintType.Error)
 
-    # 发表一条记录
     def record(self, fail_time: int = 0, is_faild: bool = False):
+        '''
+        发表一条记录
 
+        参数:
+            fail_time: 失败次数
+            is_faild: 是否是失败重试
+        '''
         if not self.config.is_record:
             return
 
@@ -537,8 +600,13 @@ class HKPIC(Network):
             self.log.print(f'发表记录第{fail_time+1}次失败', PrintType.Error)
             self.record(fail_time, True)
 
-    # 通过查询所有记录id
     def findAllRecord(self, html=None):
+        '''
+        通过查询所有记录id
+
+        参数:
+            html: 所有记录的html内容，为空就自动获取
+        '''
         if not self.my_uid:
             return
 
@@ -555,9 +623,10 @@ class HKPIC(Network):
                 all_ids.append(id[1])
         return all_ids
 
-    # 删除记录
     def delRecord(self):
-
+        '''
+        删除记录
+        '''
         self.login()
         all_ids = self.findAllRecord()
 
@@ -589,9 +658,15 @@ class HKPIC(Network):
         params = f'handlekey={start}_doing_delete_{end}_&referer={referer}&deletesubmit=true&formhash={self.formhash}'
         self.request(url, params)
 
-    # 发表日志
     def journal(self, money_history=None, fail_time: int = 0, is_fail: bool = False):
+        '''
+        发表日志
 
+        参数:
+            money_history:发表前的金币数
+            fail_time:失败次数
+            is_fail:是否是失败重试
+        '''
         if not self.config.canJournal():
             return
 
@@ -661,8 +736,13 @@ class HKPIC(Network):
         else:
             self.log.print(f'发表{self.config.journal_times}篇日志', PrintType.Success)
 
-    # 查询自己所有脚本发表的日志
     def allJournals(self, is_show):
+        '''
+        查询自己所有脚本发表的日志
+
+        参数:
+            is_show:是否显示日志和日志id
+        '''
         all_blogids = []
         api_params = f'mod=space&uid={self.my_uid}&do=blog&view=me&from=space'
         url = self.encapsulateURL('home.php', api_params)
@@ -677,9 +757,14 @@ class HKPIC(Network):
                 all_blogids.append(id[1])
         return all_blogids
 
-    # 删除日志
     def delJournal(self, all_blogids=None, del_time=0):
+        '''
+        删除日志
 
+        参数:
+            all_blogids:所有的日志id，为空自动获取
+            del_time:删除次数（达到5次时，不再删除）
+        '''
         if del_time > 5:
             return
 
@@ -716,9 +801,14 @@ class HKPIC(Network):
             return
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
-    # 发布一个分享
     def share(self, fail_time: int = 0, is_fail: bool = False):
+        '''
+        发布一个分享
 
+        参数:
+            fail_time:失败次数
+            is_fail:是否是失败重试
+        '''
         if not self.config.canShare():
             return
 
@@ -792,8 +882,13 @@ class HKPIC(Network):
         else:
             self.log.print(f'发表{self.config.share_times}次分享', PrintType.Success)
 
-    # 删除一条分享
     def delShare(self, sid):
+        '''
+        删除一条分享
+
+        参数:
+            sid:分享的id
+        '''
         if not sid:
             return
 

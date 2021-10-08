@@ -10,6 +10,9 @@ from loginfo import PrintLog, PrintType
 
 
 class Config:
+    '''
+    配置的基类
+    '''
     key = ''
 
     def __init__(self, log: PrintLog):
@@ -30,14 +33,18 @@ class Config:
 
         save_values(self.key, '', value)
 
-    # 保存公共配置数据
     def savePublicConfig(self):
+        '''
+        保存公共配置数据
+        '''
         if not self.public_config:
             return
         save_values('PUBLIC_CONFIG', '', self.public_config)
 
-    # 休息提示
     def print_sleep(self, secs):
+        '''
+        休息提示
+        '''
         if secs is None:
             return
 
@@ -58,8 +65,10 @@ class Config:
         sleep(secs)
 
 
-# 比思发表类型
 class PicType(Enum):
+    '''
+    比思发表类型
+    '''
     Reply = auto()
     LeaveMessage = auto()
     Record = auto()
@@ -83,8 +92,10 @@ class PicType(Enum):
         else:
             return '未知'
 
-    # 比思各类型发表需要休息时间
     def sleepSec(self):
+        '''
+        比思各类型发表需要休息时间
+        '''
         if self is PicType.Reply:
             return 51
         elif self is PicType.LeaveMessage:
@@ -102,6 +113,9 @@ class PicType(Enum):
 
 
 class HKpicConfig(Config):
+    '''
+    比思的配置类
+    '''
 
     def __init__(self, log: PrintLog, mark, username):
         super().__init__(log)
@@ -140,24 +154,32 @@ class HKpicConfig(Config):
         #  最大分享次数
         self.max_share_times = 3
 
-    # 是否需要发表评论
     def canReply(self):
+        '''
+        是否需要发表评论
+        '''
         reply = self.reply_times < self.max_reply_times
         if reply and self.reply_times == 10:
             # 一个小时内，同一个账号，发表评论数最大为10
             return time() - self.last_reply_time > 3600
         return reply
 
-    # 是否需要发表日志
     def canJournal(self):
+        '''
+        是否需要发表日志
+        '''
         return self.journal_times < self.max_journal_times
 
-    # 是否需要发表分享
     def canShare(self):
+        '''
+        是否需要发表分享
+        '''
         return self.share_times < self.max_share_times
 
-    # 根据类型休息
     def sleep(self, type: PicType):
+        '''
+        根据类型休息
+        '''
         if not isinstance(type, PicType):
             return
         sec: int = type.sleepSec()
@@ -166,6 +188,9 @@ class HKpicConfig(Config):
         self.print_sleep(sec)
 
     def configValue(self):
+        '''
+        配置信息生成字典，用于保存数据
+        '''
         values = {
             'name': self.username,
             'money': self.money,

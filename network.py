@@ -7,11 +7,6 @@ from urllib.parse import urljoin
 from common import valueForKey
 import time
 
-# 整个程序的开始时间
-# StartTime = time.time()
-# 最大执行时长(单位：秒)
-# MaxRunTime = 3600
-
 
 class Network:
 

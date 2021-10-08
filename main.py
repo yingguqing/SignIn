@@ -30,7 +30,6 @@ if __name__ == "__main__":
         for account in accounts:
             dic = {**hkpicValue, **account}
             hkpic = HKPIC(dic)
-            # hkpic.runAction()
             future = executor.submit(hkpic.runAction)
             future_list.append(future)
             sleep(2)
