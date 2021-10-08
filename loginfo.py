@@ -96,20 +96,27 @@ class PrintLog:
         self.print('', PrintType.Normal)
 
     # 记录日志列表，并打印日志
-    def __print(self, info: LogInfo):
-        self.__logs.append(info)
+    def __print(self, info: LogInfo, isDebug: bool = False):
+        '''
+        当前日志属于debug时，只在日志系统为debug模式下，才显示
+        '''
+        if not isDebug or self.isDebug:
+            self.__logs.append(info)
         if not self.isDebug:
             return
         info.saveLogToText()
         info.print()
 
     # 打印日志
-    def print(self, text, type: PrintType):
+    def print(self, text, type: PrintType, isDebug: bool = False):
+        '''
+        当前日志属于debug时，只在日志系统为debug模式下，才显示
+        '''
         if isinstance(text, list):
-            [self.print(t, type) for t in text]
+            [self.print(t, type, isDebug) for t in text]
         elif isinstance(text, str):
             info: LogInfo = LogInfo(text, type, self.title, self.logName)
-            self.__print(info)
+            self.__print(info, isDebug)
 
     # 清空所有日志
     def clear(self):
