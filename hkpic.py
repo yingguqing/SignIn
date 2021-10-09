@@ -334,9 +334,6 @@ class HKPIC(Network):
             self.log.print(f'第{self.config.reply_times}条：「{comment}」-> 發佈成功', PrintType.Success, True)
             self.myMoney(False)
 
-            if not self.config.canReply:
-                self.log.print(f'发表{self.config.reply_times}条评论', PrintType.Success)
-
             if money_history == self.my_money:
                 # 如果发表评论后，金币数不增加，就不再发表评论
                 self.log.print('评论达到每日上限。不再发表评论。', PrintType.Warn)
@@ -387,7 +384,7 @@ class HKPIC(Network):
 
         if self.user_href:
             url = self.user_href
-            self.log.print(f'访问别人空间：{url}', PrintType.Info)
+            self.log.print(f'访问别人空间：{url}', PrintType.Info, True)
             self.request(url, post=False)
             self.config.is_visit_other_zone = False
             self.config.save()
@@ -432,7 +429,7 @@ class HKPIC(Network):
         self.is_send = True
         if '操作成功' in html:
             is_faild = False
-            self.log.print('留言成功', PrintType.Success)
+            self.log.print('留言成功', PrintType.Success, True)
             self.config.is_leave_message = False
             self.config.save()
             pattern = re.compile(r'\{\s*\'cid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
@@ -593,7 +590,7 @@ class HKPIC(Network):
         html = self.request(url, params, header)
         self.is_send = True
         if comment in html:
-            self.log.print(f'记录：「{comment}」-> 发表成功', PrintType.Success)
+            self.log.print(f'记录：「{comment}」-> 发表成功', PrintType.Success, True)
             self.config.is_record = False
             self.config.save()
         else:
@@ -720,7 +717,7 @@ class HKPIC(Network):
             is_fail = False
             self.config.journal_times += 1
             self.config.save()
-            self.log.print(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', PrintType.Success)
+            self.log.print(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', PrintType.Success, True)
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
@@ -733,8 +730,6 @@ class HKPIC(Network):
         # 发表有时间间隔限制
         if self.config.canJournal():
             self.journal(money_history=self.my_money, fail_time=fail_time, is_fail=is_fail)
-        else:
-            self.log.print(f'发表{self.config.journal_times}篇日志', PrintType.Success)
 
     def allJournals(self, is_show):
         '''
@@ -879,8 +874,6 @@ class HKPIC(Network):
 
         if self.config.canShare():
             self.share(fail_time, is_fail)
-        else:
-            self.log.print(f'发表{self.config.share_times}次分享', PrintType.Success)
 
     def delShare(self, sid):
         '''
