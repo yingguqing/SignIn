@@ -136,9 +136,10 @@ class HKPIC(Network):
             if temp != 0:
                 self.config.money = self.my_money
                 self.config.save()
-                self.log.print([f'增加金币：{temp}', f'金钱：{self.my_money}'], PrintType.Info)
+                self.log.print(f'增加金币：{temp}', PrintType.Cyan)
+                self.log.print(f'金钱：{self.my_money}', PrintType.White)
             else:
-                self.log.print(f'金钱：{self.my_money}', PrintType.Info)
+                self.log.print(f'金钱：{self.my_money}', PrintType.White)
 
             # 显示总休息时长
             self.config.print_sleep(0)
@@ -517,7 +518,7 @@ class HKPIC(Network):
         pattern = re.compile(r'"home.php\?mod=spacecp&amp;ac=feed&amp;op=menu&amp;feedid=(\d+)"')
         feedids = re.findall(pattern, html)
         if feedids:
-            self.log.print(f'{len(feedids)}条动态', PrintType.Success)
+            self.log.print(f'{len(feedids)}条动态', PrintType.Success, True)
         else:
             return
 
@@ -748,7 +749,7 @@ class HKPIC(Network):
         for id in ids:
             if id and id[2].startswith('我的日志'):
                 if is_show:
-                    self.log.print(f'日志：{id[1]}->「{id[2]}」', PrintType.White)
+                    self.log.print(f'日志：{id[1]}->「{id[2]}」', PrintType.White, True)
                 all_blogids.append(id[1])
         return all_blogids
 
