@@ -5,6 +5,7 @@
 
 from enum import Enum
 import random
+from typing import TypeVar
 from common import get_running_path, local_time
 
 
@@ -93,6 +94,9 @@ class LogInfo:
 # 打印日志
 class PrintLog:
 
+    # 打印日志的类型，可以是字符串，可以是字符串数组
+    T = TypeVar('T', str, list[str])
+
     def __init__(self, title: str = ''):
         self.__logs = []
         self.title = title
@@ -125,8 +129,7 @@ class PrintLog:
         info.saveLogToText()
         info.print()
 
-    # 打印日志
-    def print(self, text, type: PrintType, isDebug: bool = False):
+    def print(self, text: T, type: PrintType, isDebug: bool = False):
         '''
         打印日志
 
