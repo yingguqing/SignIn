@@ -185,7 +185,7 @@ class HKPIC(Network):
             if span:
                 # 提取自己的空间地址
                 self.my_zone_url = self.encapsulateURL(span['href']) if span.has_attr('href') else ''
-                self.log.print(f'我的空间地址:{self.my_zone_url}', PrintType.Info, True)
+                self.log.debugPrint(f'我的空间地址:{self.my_zone_url}', PrintType.Info)
                 self.my_uid = self.getUid(self.my_zone_url)
                 login_success = span.text == self.username
                 if login_success:
@@ -273,14 +273,14 @@ class HKPIC(Network):
         html = self.request(url, post=False)
 
         if first_time:
-            self.log.print(['开始评论。', f'每次评论需要间隔{PicType.Reply.sleepSec()}秒。'], PrintType.Info, True)
+            self.log.debugPrint(['开始评论。', f'每次评论需要间隔{PicType.Reply.sleepSec()}秒。'], PrintType.Info)
             # 第一次时，先获取一下现有金币数
             self.myMoney(False)
 
         soup = BeautifulSoup(html, 'html.parser')
         span = soup.find('a', href=f'forum-{fid}-1.html')
         if span and span.text:
-            self.log.print(f'进入版块：{span.text}「{fid}」', PrintType.Info, True)
+            self.log.debugPrint(f'进入版块：{span.text}「{fid}」', PrintType.Info)
 
         # 提取板块下所有的帖子链接
         spans = soup.find_all('a', onclick='atarget(this)')
@@ -318,7 +318,7 @@ class HKPIC(Network):
             self.config.sleep(PicType.Reply)
 
         url = self.encapsulateURL(f'thread-{tid}-1-1.html')
-        self.log.print(f'进入帖子：{url}', PrintType.Info, True)
+        self.log.debugPrint(f'进入帖子：{url}', PrintType.Info)
         # 发表评论前的金币数
         money_history = self.my_money
         api_param = f'mod=post&action=reply&fid={fid}&tid={tid}&extra=page%3D1&replysubmit=yes&infloat=yes&handlekey=fastpost&inajax=1'
@@ -332,7 +332,7 @@ class HKPIC(Network):
             self.config.reply_times += 1
             self.config.last_reply_time = time.time()
             self.config.save()
-            self.log.print(f'第{self.config.reply_times}条：「{comment}」-> 發佈成功', PrintType.Success, True)
+            self.log.debugPrint(f'第{self.config.reply_times}条：「{comment}」-> 發佈成功', PrintType.Success)
             self.myMoney(False)
 
             if money_history == self.my_money:
@@ -385,7 +385,7 @@ class HKPIC(Network):
 
         if self.user_href:
             url = self.user_href
-            self.log.print(f'访问别人空间：{url}', PrintType.Info, True)
+            self.log.debugPrint(f'访问别人空间：{url}', PrintType.Info)
             self.request(url, post=False)
             self.config.is_visit_other_zone = False
             self.config.save()
@@ -430,7 +430,7 @@ class HKPIC(Network):
         self.is_send = True
         if '操作成功' in html:
             is_faild = False
-            self.log.print('留言成功', PrintType.Success, True)
+            self.log.debugPrint('留言成功', PrintType.Success)
             self.config.is_leave_message = False
             self.config.save()
             pattern = re.compile(r'\{\s*\'cid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
@@ -476,7 +476,7 @@ class HKPIC(Network):
         params = f'referer={refer}&deletesubmit=true&formhash={self.formhash}&handlekey=c_{cid}_delete'
         html = self.request(url, params)
         if '操作成功' in html:
-            self.log.print('删除留言成功', PrintType.Success, True)
+            self.log.debugPrint('删除留言成功', PrintType.Success)
             self.config.sleep(PicType.Other)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
@@ -518,7 +518,7 @@ class HKPIC(Network):
         pattern = re.compile(r'"home.php\?mod=spacecp&amp;ac=feed&amp;op=menu&amp;feedid=(\d+)"')
         feedids = re.findall(pattern, html)
         if feedids:
-            self.log.print(f'{len(feedids)}条动态', PrintType.Success, True)
+            self.log.debugPrint(f'{len(feedids)}条动态', PrintType.Success)
         else:
             return
 
@@ -548,7 +548,7 @@ class HKPIC(Network):
         params = f'referer={referer}&feedsubmit=true&formhash={self.formhash}'
         html = self.request(url, params)
         if '操作成功' in html:
-            self.log.print('一条动态删除成功', PrintType.Success, True)
+            self.log.debugPrint('一条动态删除成功', PrintType.Success)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
@@ -591,7 +591,7 @@ class HKPIC(Network):
         html = self.request(url, params, header)
         self.is_send = True
         if comment in html:
-            self.log.print(f'记录：「{comment}」-> 发表成功', PrintType.Success, True)
+            self.log.debugPrint(f'记录：「{comment}」-> 发表成功', PrintType.Success)
             self.config.is_record = False
             self.config.save()
         else:
@@ -718,7 +718,7 @@ class HKPIC(Network):
             is_fail = False
             self.config.journal_times += 1
             self.config.save()
-            self.log.print(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', PrintType.Success, True)
+            self.log.debugPrint(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', PrintType.Success)
             self.myMoney(False)
             if money_history == self.my_money:
                 # 如果发表后，金币数不增加，就不再发表
@@ -749,7 +749,7 @@ class HKPIC(Network):
         for id in ids:
             if id and id[2].startswith('我的日志'):
                 if is_show:
-                    self.log.print(f'日志：{id[1]}->「{id[2]}」', PrintType.White, True)
+                    self.log.debugPrint(f'日志：{id[1]}->「{id[2]}」', PrintType.White)
                 all_blogids.append(id[1])
         return all_blogids
 
@@ -789,7 +789,7 @@ class HKPIC(Network):
         self.config.sleep(PicType.Other)
         all_blogids = self.allJournals(False)
         if blogid not in all_blogids:
-            self.log.print(f'日志删除成功:「{blogid}」', PrintType.Success, True)
+            self.log.debugPrint(f'日志删除成功:「{blogid}」', PrintType.Success)
         else:
             del_time += 1
             self.log.print(f'日志删除失败:「{blogid}」', PrintType.Error)
@@ -854,7 +854,7 @@ class HKPIC(Network):
                 self.config.share_times = 9999
                 self.config.save()
             else:
-                self.log.print('发布分享成功。', PrintType.Success, True)
+                self.log.debugPrint('发布分享成功。', PrintType.Success)
 
             # 删除刚发表的分享
             pattern = re.compile(r'\{\s*\'sid\'\s*:\s*\'(\d+)\'\s*\}', re.S)
@@ -896,7 +896,7 @@ class HKPIC(Network):
         }
         html = self.request(url, self.paramsString(params))
         if '操作成功' in html:
-            self.log.print('删除分享成功', PrintType.Success, True)
+            self.log.debugPrint('删除分享成功', PrintType.Success)
         else:
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
