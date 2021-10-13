@@ -137,8 +137,11 @@ class PrintLog:
             type:日志类型
             isDebug:是否是debug信息，debug信息只有在系统为debug模式下，才显示
         '''
+        if not self.isDebug:
+            return
+
         if isinstance(text, list):
-            [self.print(t, type, True) for t in text]
+            [self.debugPrint(t, type) for t in text]
         elif isinstance(text, str):
             info: LogInfo = LogInfo(text, type, self.title, self.logName)
             self.__print(info, True)
@@ -153,7 +156,7 @@ class PrintLog:
             isDebug:是否是debug信息，debug信息只有在系统为debug模式下，才显示
         '''
         if isinstance(text, list):
-            [self.print(t, type, False) for t in text]
+            [self.print(t, type) for t in text]
         elif isinstance(text, str):
             info: LogInfo = LogInfo(text, type, self.title, self.logName)
             self.__print(info, False)
