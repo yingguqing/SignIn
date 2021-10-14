@@ -268,7 +268,8 @@ class HKPIC(Network):
         self.all_fid.remove(fid)
         # 页码
         page = randint(3, 10)
-        api = f'forum-{fid}-{page}.html'
+        # 版本排序：最后发贴，防止 180 天以前的主題自動關閉，不再接受新回復
+        api = f'forum.php?mod=forumdisplay&fid={fid}&filter=author&orderby=dateline&page={page}'
         url = self.encapsulateURL(api)
         html = self.request(url, post=False)
 
