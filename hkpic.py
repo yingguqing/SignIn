@@ -307,7 +307,8 @@ class HKPIC(Network):
         '''
         发表评论
         '''
-        pattern = re.compile(r'\w*thread-(\d+)-\d+-\d+.\w+', re.S)
+        # pattern = re.compile(r'\w*thread-(\d+)-\d+-\d+.\w+', re.S)
+        pattern = re.compile(r'tid=(\d+)', re.S)
         items = re.findall(pattern, href)
         tid = items[0] if items else ''
         if not tid:
