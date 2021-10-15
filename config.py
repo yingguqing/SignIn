@@ -147,18 +147,28 @@ class HKpicConfig(Config):
         # -----------以下是固定值------------------
         # 本次最大评论次数(有奖次数为15，小时内最大评论数为10)
         self.max_reply_times = 10
+        # 评论最大失败次数
+        self.max_reply_fail_times = 10
         if self.reply_times > 5:
             self.max_reply_times = 15
         # 发表日志的最大次数
         self.max_journal_times = 3
-        #  最大分享次数
+        # 最大分享次数
         self.max_share_times = 3
+        # 留言的最大失败次数
+        self.max_leave_msg_fail_times = 5
+        # 发表记录的最大失败次数
+        self.max_record_fail_times = 5
+        # 发表日志的最大失败次数
+        self.max_journal_fail_times = 5
+        # 发表分享的最大失败次数
+        self.max_share_fail_times = 5
 
     def canReply(self):
         '''
         是否需要发表评论
         '''
-        reply = self.reply_times < self.max_reply_times
+        reply = self.reply_times < self.max_reply_times and self.max_reply_fail_times > 0
         if reply and self.reply_times == 10:
             # 一个小时内，同一个账号，发表评论数最大为10
             return time() - self.last_reply_time > 3600
@@ -168,13 +178,25 @@ class HKpicConfig(Config):
         '''
         是否需要发表日志
         '''
-        return self.journal_times < self.max_journal_times
+        return self.journal_times < self.max_journal_times and self.max_journal_fail_times > 0
 
     def canShare(self):
         '''
         是否需要发表分享
         '''
-        return self.share_times < self.max_share_times
+        return self.share_times < self.max_share_times and self.max_share_fail_times > 0
+
+    def canLeaveMessage(self):
+        '''
+        是否需要留言
+        '''
+        return self.is_leave_message and self.max_leave_msg_fail_times > 0
+
+    def canRecord(self):
+        '''
+        是否需要发表记录
+        '''
+        return self.is_record and self.max_record_fail_times > 0
 
     def sleep(self, type: PicType):
         '''

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # 比思每日签到
 
+from genericpath import isfile
 from network import Network
 from common import valueForKey, random_all_string, xor
 from bs4 import BeautifulSoup
@@ -303,15 +304,29 @@ class HKPIC(Network):
         if self.config.canReply():
             self.forum_list()
 
+    def tidFromURL(self, href: str) -> str:
+        '''
+            从url中提取帖子id
+        参数:
+            href:帖子地址
+        返回值:
+            帖子id
+        '''
+        patterns = [r'tid=(\d+)', r'\w*thread-(\d+)-\d+-\d+.\w+']
+        for p in patterns:
+            pattern = re.compile(p, re.S)
+            items = re.findall(pattern, href)
+            if items and items[0]:
+                return items[0]
+        return ''
+
     def reply(self, comment, fid, href):
         '''
         发表评论
         '''
-        # pattern = re.compile(r'\w*thread-(\d+)-\d+-\d+.\w+', re.S)
-        pattern = re.compile(r'tid=(\d+)', re.S)
-        items = re.findall(pattern, href)
-        tid = items[0] if items else ''
+        tid = self.tidFromURL(href)
         if not tid:
+            self.config.max_reply_fail_times -= 1
             self.log.print('帖子id不存在', PrintType.Error)
             return False
 
@@ -353,6 +368,8 @@ class HKPIC(Network):
             items = re.findall(pattern, html)
             self.log.print(([comment] + items) if items else html, PrintType.Error)
             self.log.print('发表评论失败', PrintType.Error)
+            self.config.max_reply_fail_times -= 1
+            # 抱歉，管理員設置了本版塊發表於 180 天以前的主題自動關閉，不再接受新回復
             for item in items:
                 if '您目前處於見習期間' in item:
                     self.config.reply_times = 888
@@ -397,31 +414,22 @@ class HKPIC(Network):
         else:
             self.log.print('别人空间地址为空', PrintType.Error)
 
-    def leavMessage(self, uid, fail_time: int = 0, is_faild: bool = False):
+    def leavMessage(self, uid):
         '''
         留言
 
         参数:
             uid：用户id
-            fail_time:失败次数
-            is_faild:是否是失败重试
         '''
-        if not self.config.is_leave_message:
+        if not self.config.canLeaveMessage():
             return
 
         if not uid:
             self.log.print('他人id为空', PrintType.Error)
             return
 
-        if not is_faild:
-            if self.is_send:
-                self.config.sleep(PicType.LeaveMessage)
-        elif is_faild and fail_time < 5:
+        if self.is_send:
             self.config.sleep(PicType.LeaveMessage)
-            fail_time += 1
-        else:
-            self.log.print('发表留言失败', PrintType.Error)
-            return
 
         api_param = 'mod=spacecp&ac=comment&inajax=1'
         url = self.encapsulateURL('home.php', api_param)
@@ -431,7 +439,6 @@ class HKPIC(Network):
         html = self.request(url, params)
         self.is_send = True
         if '操作成功' in html:
-            is_faild = False
             self.log.debugPrint('留言成功', PrintType.Success)
             self.config.is_leave_message = False
             self.config.save()
@@ -441,7 +448,6 @@ class HKPIC(Network):
                 cid = items[0]
                 self.deleteMessage(cid)
         else:
-            is_faild = True
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             self.log.print(items if items else html, PrintType.Error)
@@ -453,8 +459,12 @@ class HKPIC(Network):
                     self.config.is_record = False
                     self.config.save()
                     return
-            self.log.print(f'留言第{fail_time+1}次失败', PrintType.Error)
-            self.leavMessage(uid, fail_time, is_faild)
+            self.log.print(f'留言失败', PrintType.Error)
+            self.config.max_leave_msg_fail_times -= 1
+            if self.config.canLeaveMessage():
+                self.leavMessage(uid)
+            else:
+                self.log.print('发表留言失败,超过最大失败次数', PrintType.Error)
 
     def deleteMessage(self, cid):
         '''
@@ -557,28 +567,18 @@ class HKPIC(Network):
             self.log.print(items if items else html, PrintType.Error)
             self.log.print('删除动态失败', PrintType.Error)
 
-    def record(self, fail_time: int = 0, is_faild: bool = False):
+    def record(self):
         '''
         发表一条记录
-
-        参数:
-            fail_time: 失败次数
-            is_faild: 是否是失败重试
         '''
-        if not self.config.is_record:
+        if not self.config.canRecord():
             return
 
         if not self.my_uid:
             return
 
-        if not is_faild:
-            if self.is_send:
-                self.config.sleep(PicType.Record)
-        elif fail_time < 5:
+        if self.is_send:
             self.config.sleep(PicType.Record)
-            fail_time += 1
-        else:
-            return
 
         refer = f'home.php?mod=space&uid={self.my_uid}&do=doing&view=me&from=space'
         api_param = 'mod=spacecp&ac=doing&view=me'
@@ -597,8 +597,12 @@ class HKPIC(Network):
             self.config.is_record = False
             self.config.save()
         else:
-            self.log.print(f'发表记录第{fail_time+1}次失败', PrintType.Error)
-            self.record(fail_time, True)
+            self.log.print(f'发表记录失败', PrintType.Error)
+            self.config.max_record_fail_times -= 1
+            if self.config.canRecord():
+                self.record()
+            else:
+                self.log.print(f'发表记录失败，超过最大失败次数', PrintType.Error)
 
     def findAllRecord(self, html=None):
         '''
@@ -658,28 +662,18 @@ class HKPIC(Network):
         params = f'handlekey={start}_doing_delete_{end}_&referer={referer}&deletesubmit=true&formhash={self.formhash}'
         self.request(url, params)
 
-    def journal(self, money_history=None, fail_time: int = 0, is_fail: bool = False):
+    def journal(self, money_history=None):
         '''
         发表日志
 
         参数:
             money_history:发表前的金币数
-            fail_time:失败次数
-            is_fail:是否是失败重试
         '''
         if not self.config.canJournal():
             return
 
-        if not is_fail:
-            if self.is_send:
-                self.config.sleep(PicType.Journal)
-        elif fail_time < 5:
+        if self.is_send:
             self.config.sleep(PicType.Journal)
-            fail_time += 1
-            self.log.print('发表日志失败，准备重试。', PrintType.Error)
-        else:
-            self.log.print('发表日志失败!!', PrintType.Error)
-            return
 
         self.login()
         if not money_history:
@@ -717,7 +711,6 @@ class HKPIC(Network):
         html = self.request(url, params, header)
         self.is_send = True
         if title in html:
-            is_fail = False
             self.config.journal_times += 1
             self.config.save()
             self.log.debugPrint(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', PrintType.Success)
@@ -728,11 +721,14 @@ class HKPIC(Network):
                 self.config.journal_times = 9999
                 self.config.save()
         else:
-            is_fail = True
+            self.config.max_journal_fail_times -= 1
+            self.log.print('发表日志失败，准备重试。', PrintType.Error)
 
         # 发表有时间间隔限制
         if self.config.canJournal():
-            self.journal(money_history=self.my_money, fail_time=fail_time, is_fail=is_fail)
+            self.journal(money_history=self.my_money)
+        elif self.config.max_journal_fail_times <= 0:
+            self.log.print('发表日志失败，超过最大失败次数。', PrintType.Error)
 
     def allJournals(self, is_show):
         '''
@@ -799,25 +795,15 @@ class HKPIC(Network):
             return
         self.delJournal(all_blogids=all_blogids, del_time=del_time)
 
-    def share(self, fail_time: int = 0, is_fail: bool = False):
+    def share(self):
         '''
         发布一个分享
-
-        参数:
-            fail_time:失败次数
-            is_fail:是否是失败重试
         '''
         if not self.config.canShare():
             return
 
-        if not is_fail:
-            if self.is_send:
-                self.config.sleep(PicType.Share)
-        elif fail_time < 5:
+        if self.is_send:
             self.config.sleep(PicType.Share)
-            fail_time += 1
-        else:
-            return
 
         self.login()
         # 发表前的金币数
@@ -845,8 +831,8 @@ class HKPIC(Network):
         }
         html = self.request(url, self.paramsString(params), header)
         self.is_send = True
+        is_fail = False
         if '操作成功' in html:
-            is_fail = False
             self.config.share_times += 1
             self.config.save()
             self.myMoney(False)
@@ -865,18 +851,20 @@ class HKPIC(Network):
                 sid = items[0]
                 self.delShare(sid)
         else:
-            is_fail = True
             pattern = re.compile(r'\[CDATA\[(.*?)<', re.I)
             items = re.findall(pattern, html)
             self.log.print(items if items else html, PrintType.Error)
-            self.log.print(f'发布分享第{fail_time+1}次失败', PrintType.Error)
+            self.log.print(f'发布分享失败', PrintType.Error)
+            self.config.max_share_fail_times -= 1
             for item in items:
                 if '您目前沒有權限發佈分享' in item:
                     self.config.share_times = 888
                     self.config.save()
 
         if self.config.canShare():
-            self.share(fail_time, is_fail)
+            self.share()
+        elif self.config.max_share_fail_times <= 0:
+            self.log.print(f'发布分享失败，超过最大失败次数。', PrintType.Error)
 
     def delShare(self, sid):
         '''
