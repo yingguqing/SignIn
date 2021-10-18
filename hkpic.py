@@ -359,7 +359,7 @@ class HKPIC(Network):
                 self.config.save()
             return True
         elif '抱歉，您所在的用戶組每小時限制發回帖' in html:
-            self.log.print('评论数超过限制', PrintType.Warn)
+            self.log.print('评论超过每小時限制数', PrintType.Warn)
             self.config.last_reply_time = time.time()
             self.config.max_reply_times = self.config.reply_times
             return True
