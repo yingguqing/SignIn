@@ -146,11 +146,9 @@ class HKpicConfig(Config):
         self.share_times = valueForKey(dic, 'share_times', 0)
         # -----------以下是固定值------------------
         # 本次最大评论次数(有奖次数为15，小时内最大评论数为10)
-        self.max_reply_times = 10
+        self.max_reply_times = 15
         # 评论最大失败次数
         self.max_reply_fail_times = 10
-        if self.reply_times > 5:
-            self.max_reply_times = 15
         # 发表日志的最大次数
         self.max_journal_times = 3
         # 最大分享次数
