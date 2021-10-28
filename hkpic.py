@@ -133,9 +133,8 @@ class HKPIC(Network):
             self.delAllLeavMessageDynamic()
             # 查询我的金币
             self.myMoney(False)
-            temp = self.my_money - self.config.money
-            if temp != 0:
-                self.log.debugPrint(f'增加金币：{temp}', PrintType.Cyan)
+
+            self.log.debugPrint(f'增加金币：{self.my_money - self.config.money}', PrintType.Cyan)
 
             self.config.money = self.my_money
             self.config.save()
