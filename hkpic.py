@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # 比思每日签到
 
-from genericpath import isfile
 from network import Network
 from common import valueForKey, random_all_string, xor
 from bs4 import BeautifulSoup
@@ -19,7 +18,7 @@ class HKPIC(Network):
     比思论坛自动获取金币
     '''
 
-    def __init__(self, jsonValue):
+    def __init__(self, jsonValue, notice):
         super().__init__(jsonValue)
         self.start = time.time()
         self.username = valueForKey(jsonValue, 'username')
@@ -27,6 +26,7 @@ class HKPIC(Network):
         self.xor_key = valueForKey(jsonValue, 'xor', 'hkpicxorkey')
         mark = xor(self.username, self.xor_key, True)
         self.log = PrintLog(title=self.username)
+        self.notice = notice
         # self.log.setDebugAndLogFileName(f'log_{mark}.txt', True)
         self.config = HKpicConfig(self.log, mark, self.username)
         # 需要签到
@@ -140,10 +140,14 @@ class HKPIC(Network):
             self.config.save()
             self.log.print(f'金钱：{self.my_money}', PrintType.White)
 
+            # 添加通知消息
+            self.notice.addNotice(f'{self.username}:{self.my_money}')
             # 显示总休息时长
             self.config.print_sleep(0)
         except Exception as e:
             self.log.print(f'执行发生错误：{e}', PrintType.Error)
+            # 添加通知消息
+            self.notice.addNotice(f'{self.username}->执行发生错误：{e}')
         finally:
             # 统计执行时长
             s = time.time() - self.start

@@ -3,11 +3,11 @@
 
 from hkpic import HKPIC
 from common import local_time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import sleep
 import sys
 import json
-
+from notice import Notice
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -17,10 +17,10 @@ if __name__ == "__main__":
     print(f'\n当前北京时间：{ltime}\n')
 
     jsonValue = json.loads(sys.argv[1])
-    # 读取并设置微信openid（功能暂时没用）
-    # weixin_openid(jsonValue)
 
     hkpicValue = jsonValue['HKPIC']
+    # 配置比思通知类
+    hkpicNotice = Notice(hkpicValue)
     accounts = hkpicValue["accounts"]
     hkpicValue.pop('accounts')
 
@@ -29,7 +29,12 @@ if __name__ == "__main__":
         # 比思签到+赚取每日金币(多账号)
         for account in accounts:
             dic = {**hkpicValue, **account}
-            hkpic = HKPIC(dic)
+            hkpic = HKPIC(dic, hkpicNotice)
             future = executor.submit(hkpic.runAction)
             future_list.append(future)
             sleep(2)
+
+        for future in as_completed(future_list, timeout=3600):
+            future.result()
+
+        hkpicNotice.sendAllNotice('比思金币')

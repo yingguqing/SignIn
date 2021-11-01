@@ -1,17 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from typing import Text
 import requests
 from urllib.parse import urljoin
 from common import valueForKey
-import time
 
 
 class Network:
-
-    # 准备微信推送的消息
-    weixin = []
 
     def __init__(self, jsonValue):
         self.host = valueForKey(jsonValue, 'host')
