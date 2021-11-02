@@ -2,7 +2,6 @@
     "HKPIC_CONFIG_CwIrVVUsQy8LFA==": {
         "name": "yingguqing",
         "money": 3971,
-        "index": 0,
         "date": "2021-11-02",
         "is_visit_other_zone": false,
         "reply_times": 15,
@@ -11,7 +10,8 @@
         "journal_times": 3,
         "share_times": 3,
         "last_reply_time": 1635793690.09078,
-        "user_zone_url": "space-uid-4069661.html"
+        "user_zone_url": "space-uid-4069661.html",
+        "index": 0
     },
     "HKPIC_CONFIG_5byD5ayP5rmA": {
         "name": "影孤清",

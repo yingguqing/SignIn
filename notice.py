@@ -16,10 +16,11 @@ class Notice:
     def __init__(self, jsonValue):
         self.noticeKey = valueForKey(jsonValue, 'noticeKey')
         self.noticeIcon = valueForKey(jsonValue, 'noticeIcon')
+        self.groupName = valueForKey(jsonValue, 'groupName')
         # 一次发送的消息列表
         self.noticeList = []
 
-    def sendNotice(self, text: str, title: str = '', icon: str = ''):
+    def sendNotice(self, text: str, title: str = '', icon: str = '', group: str = ''):
         '''
         发送一条手机通知信息
 
@@ -27,24 +28,32 @@ class Notice:
         title:通知标题(可以为空)
         text:通知内容
         icon:通知图标
-
+        group:消息分组
         '''
         if not self.noticeKey or not text:
             return
 
-        url = f'https://api.day.app/{self.noticeKey}'
+        url = f'https://api.day.app/{self.noticeKey}/'
+        path = []
         # 加入标题
         if title:
-            title = '/' + quote(title, 'utf-8')
-            url += title
+            path.append(quote(title, 'utf-8'))
 
         # 加入内容
-        text = '/' + quote(text, 'utf-8')
-        url += text
+        path.append(quote(text, 'utf-8'))
+        url += '/'.join(path)
 
+        query = []
         # 通知图标
         if icon:
-            url += f'?icon={icon}'
+            query.append(f'icon={icon}')
+
+        # 消息分组
+        if group:
+            query.append(f'group={group}')
+
+        if query:
+            url += ('?' + '&'.join(query))
 
         res = requests.get(url=url)
         res.encoding = 'utf-8'
@@ -82,4 +91,4 @@ class Notice:
         # 把列表中的消息拼接
         text = '\n'.join(self.noticeList)
 
-        self.sendNotice(text, title, self.noticeIcon)
+        self.sendNotice(text, title, self.noticeIcon, self.groupName)
