@@ -124,6 +124,7 @@ class HKpicConfig(Config):
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
+        self.index = valueForKey(dic, 'index', -1)
         self.date = valueForKey(dic, 'date')
         self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
         if self.date != date:
@@ -227,4 +228,8 @@ class HKpicConfig(Config):
         }
         if self.user_zone_url:
             values['user_zone_url'] = self.user_zone_url
+
+        if self.index >= 0:
+            values['index'] = self.index
+
         return values
