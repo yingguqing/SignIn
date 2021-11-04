@@ -99,15 +99,15 @@ def random_num_string(randomlength=32):
 
 
 # 今天的日期是否在日志里
-def today_in_log():
-    path = get_running_path("log.txt")
+def today_in_file(filename: str = 'log.txt'):
+    path = get_running_path(filename)
     if not os.path.exists(path):
         return False
     t = time.strftime("%Y-%m-%d", time.localtime())
     with open(path, 'r') as f:
         text = f.read()
         f.close()
-        return text.find(t) > -1
+        return t in text
 
 
 # 保存日志到文件中

@@ -5,6 +5,7 @@
 from common import valueForKey
 from urllib.parse import quote
 import requests
+from threading import Lock
 
 
 class Notice:
@@ -17,6 +18,7 @@ class Notice:
         self.noticeKey = valueForKey(jsonValue, 'noticeKey')
         self.noticeIcon = valueForKey(jsonValue, 'noticeIcon')
         self.groupName = valueForKey(jsonValue, 'groupName')
+        self.lock = Lock()
         # 一次发送的消息列表
         self.noticeList = []
 
@@ -33,6 +35,7 @@ class Notice:
         if not self.noticeKey or not text:
             return
 
+        self.lock.acquire()
         url = f'https://api.day.app/{self.noticeKey}/'
         path = []
         # 加入标题
@@ -66,6 +69,7 @@ class Notice:
             print(res.text)
         finally:
             res.close()
+            self.lock.release()
 
     def addNotice(self, text: str, index: int = -1):
         '''
@@ -74,10 +78,12 @@ class Notice:
         text:通知内容
         index:插入位置（小于0表示添加到末尾）
         '''
+        self.lock.acquire()
         if not index or index < 0 or index > len(self.noticeList):
             self.noticeList.append(text)
         else:
             self.noticeList.insert(index, text)
+        self.lock.release()
 
     def sendAllNotice(self, title: str):
         '''

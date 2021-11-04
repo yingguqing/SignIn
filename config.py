@@ -127,7 +127,9 @@ class HKpicConfig(Config):
         self.index = valueForKey(dic, 'index', -1)
         self.date = valueForKey(dic, 'date')
         self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
-        if self.date != date:
+        # 配置文件中保存的日期，是否是今天的
+        self.isTodayDate = self.date == date
+        if not self.isTodayDate:
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
             dic = {}
