@@ -8,6 +8,13 @@ import requests
 from threading import Lock
 
 
+class NoticeText:
+
+    def __init__(self, text: str, index: int):
+        self.text = text
+        self.index = index
+
+
 class Notice:
 
     '''
@@ -80,9 +87,10 @@ class Notice:
         '''
         self.lock.acquire()
         if not index or index < 0 or index > len(self.noticeList):
-            self.noticeList.append(text)
+            noti = NoticeText(text, 99)
         else:
-            self.noticeList.insert(index, text)
+            noti = NoticeText(text, index)
+        self.noticeList.append(noti)
         self.lock.release()
 
     def sendAllNotice(self, title: str):
@@ -94,7 +102,10 @@ class Notice:
         if not self.noticeKey or not self.noticeList:
             return
 
+        # 对通知进行排序
+        sortList = sorted(self.noticeList, key=lambda noti: noti.index)
+
         # 把列表中的消息拼接
-        text = '\n'.join(self.noticeList)
+        text = '\n'.join([noti.text for noti in sortList])
 
         self.sendNotice(text, title, self.noticeIcon, self.groupName)
