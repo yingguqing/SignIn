@@ -86,7 +86,7 @@ class Notice:
         index:插入位置（小于0表示添加到末尾）
         '''
         self.lock.acquire()
-        if not index or index < 0 or index > len(self.noticeList):
+        if not index or index < 0:
             noti = NoticeText(text, 99)
         else:
             noti = NoticeText(text, index)
@@ -104,7 +104,6 @@ class Notice:
 
         # 对通知进行排序
         sortList = sorted(self.noticeList, key=lambda noti: noti.index)
-
         # 把列表中的消息拼接
         text = '\n'.join([noti.text for noti in sortList])
 
