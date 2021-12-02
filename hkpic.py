@@ -143,6 +143,7 @@ class HKPIC(Network):
             if self.config.isTodayDate:
                 # 添加通知消息(第一次跑不发通知)
                 self.notice.addNotice(f'{self.username}:{self.my_money}', self.config.index)
+                print(f'{self.config.index}->{self.username}:{self.my_money}')
 
             # 显示总休息时长
             self.config.print_sleep(0)

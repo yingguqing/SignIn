@@ -124,7 +124,7 @@ class HKpicConfig(Config):
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
-        self.index = valueForKey(dic, 'index', -1)
+        self.index = valueForKey(dic, 'index', 99)
         self.date = valueForKey(dic, 'date')
         self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
         # 配置文件中保存的日期，是否是今天的
@@ -231,7 +231,7 @@ class HKpicConfig(Config):
         if self.user_zone_url:
             values['user_zone_url'] = self.user_zone_url
 
-        if self.index >= 0:
+        if self.index >= 0 and self.index < 99:
             values['index'] = self.index
 
         return values
