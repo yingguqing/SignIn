@@ -104,6 +104,8 @@ class Notice:
 
         # 对通知进行排序
         sortList = sorted(self.noticeList, key=lambda noti: noti.index)
+        print(','.join([noti.index for noti in sortList]))
+
         # 把列表中的消息拼接
         text = '\n'.join([noti.text for noti in sortList])
 
