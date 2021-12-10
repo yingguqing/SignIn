@@ -102,15 +102,10 @@ class Notice:
         if not self.noticeKey or not self.noticeList:
             return
 
-        for noti in self.noticeList:
-            print(f'````|{noti.index}->{noti.text}')
-
         # 对通知进行排序
         sortList = sorted(self.noticeList, key=lambda noti: noti.index)
 
         # 把列表中的消息拼接
         text = '\n'.join([noti.text for noti in sortList])
-        print('-' * 50)
-        print(text)
 
         self.sendNotice(text, title, self.noticeIcon, self.groupName)

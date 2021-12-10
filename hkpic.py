@@ -136,14 +136,14 @@ class HKPIC(Network):
 
             self.log.debugPrint(f'增加金币：{self.my_money - self.config.money}', PrintType.Cyan)
 
-            self.config.money = self.my_money
-            self.config.save()
-            self.log.print(f'金钱：{self.my_money}', PrintType.White)
-
             if self.config.isTodayDate:
                 # 添加通知消息(第一次跑不发通知)
                 self.notice.addNotice(f'{self.username}:{self.my_money}', self.config.index)
                 print(f'{self.config.index}->{self.username}:{self.my_money}')
+                self.config.money = self.my_money
+
+            self.config.save()
+            self.log.print(f'金钱：{self.my_money}', PrintType.White)
 
             # 显示总休息时长
             self.config.print_sleep(0)
