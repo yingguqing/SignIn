@@ -110,6 +110,11 @@ class HKPIC(Network):
         开始入口
         '''
         try:
+
+            # 不是新手时，只跑一次，第二次不用再跑
+            if not self.config.isNewbie and self.config.isTodayDate:
+                return
+
             self.log.print(f'------------- {self.username} 比思签到 -------------', PrintType.Normal)
             # 自动登录
             self.login()
@@ -136,10 +141,9 @@ class HKPIC(Network):
 
             self.log.debugPrint(f'增加金币：{self.my_money - self.config.money}', PrintType.Cyan)
 
-            if self.config.isTodayDate:
+            if self.config.isTodayDate or not self.config.isNewbie:
                 # 添加通知消息(第一次跑不发通知)
                 self.notice.addNotice(f'{self.username}:{self.my_money}', self.config.index)
-                print(f'{self.config.index}->{self.username}:{self.my_money}')
                 self.config.money = self.my_money
 
             self.config.save()
@@ -362,6 +366,7 @@ class HKPIC(Network):
                 self.log.print('评论达到每日上限。不再发表评论。', PrintType.Warn)
                 self.config.reply_times = 9999
                 self.config.save()
+
             return True
         elif '抱歉，您所在的用戶組每小時限制發回帖' in html:
             self.log.print('评论超过每小時限制数', PrintType.Warn)
@@ -374,7 +379,7 @@ class HKPIC(Network):
             self.log.print(([comment] + items) if items else html, PrintType.Error)
             self.log.print('发表评论失败', PrintType.Error)
             self.config.max_reply_fail_times -= 1
-            # 抱歉，管理員設置了本版塊發表於 180 天以前的主題自動關閉，不再接受新回復
+
             for item in items:
                 if '您目前處於見習期間' in item:
                     self.config.reply_times = 888
@@ -383,6 +388,7 @@ class HKPIC(Network):
                     self.config.is_leave_message = False
                     self.config.is_record = False
                     self.config.save()
+
             return False
 
     def getUid(self, href):

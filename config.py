@@ -125,6 +125,8 @@ class HKpicConfig(Config):
         dic = load_values(self.key, '', {})
         self.money = valueForKey(dic, 'money', 0)
         self.index = valueForKey(dic, 'index', 99)
+        # 是否是新手，新手最多发表10条评论，每天需要自动运行两次
+        self.isNewbie = valueForKey(dic, 'newbie', True)
         self.date = valueForKey(dic, 'date')
         self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
         # 配置文件中保存的日期，是否是今天的
@@ -135,7 +137,7 @@ class HKpicConfig(Config):
             dic = {}
         # 上一次发表评论的时间，因为一个小时内只能发10条
         self.last_reply_time = valueForKey(dic, 'last_reply_time', 0)
-        # 发表评论次数（1小时内限发10次，有奖次数为15次）
+        # 发表评论次数（新手1小时内限发10次，有奖次数为15次）
         self.reply_times = valueForKey(dic, 'reply_times', 0)
         # 是否访问别人空间
         self.is_visit_other_zone = valueForKey(dic, 'is_visit_other_zone', True)
@@ -152,8 +154,10 @@ class HKpicConfig(Config):
         self.max_reply_times = 10
         # 评论最大失败次数
         self.max_reply_fail_times = 10
-        if self.reply_times > 5:
+        # 不是新手时，最大评论次数为15次
+        if self.reply_times > 5 or not self.isNewbie:
             self.max_reply_times = 15
+
         # 发表日志的最大次数
         self.max_journal_times = 3
         # 最大分享次数
@@ -226,7 +230,8 @@ class HKpicConfig(Config):
             'is_record': self.is_record,
             'journal_times': self.journal_times,
             'share_times': self.share_times,
-            'last_reply_time': self.last_reply_time
+            'last_reply_time': self.last_reply_time,
+            'newbie': self.isNewbie
         }
         if self.user_zone_url:
             values['user_zone_url'] = self.user_zone_url
