@@ -176,8 +176,8 @@ class HKpicConfig(Config):
         是否需要发表评论
         '''
         reply = self.reply_times < self.max_reply_times and self.max_reply_fail_times > 0
-        if reply and self.reply_times == 10:
-            # 一个小时内，同一个账号，发表评论数最大为10
+        if reply and self.isNewbie and self.reply_times == 10:
+            # 新手：一个小时内，同一个账号，发表评论数最大为10
             return time() - self.last_reply_time > 3600
         return reply
 
