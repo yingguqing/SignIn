@@ -665,7 +665,6 @@ class HKPIC(Network):
         url = self.encapsulateURL('home.php', api_params)
         self.request(url, post=False)
 
-        referer = self.encapsulateURL('home.php?mod=space&do=doing&view=me')
         api_params = f'mod=spacecp&ac=doing&op=delete&doid={end}&id=0'
         url = self.encapsulateURL('home.php', api_params)
         referer = self.encapsulateURL('home.php', 'mod=space&do=doing&view=me')
@@ -841,6 +840,7 @@ class HKPIC(Network):
             'Referer': self.encapsulateURL(referer)
         }
         html = self.request(url, self.paramsString(params), header)
+        print(self.paramsString(params))
         self.is_send = True
         is_fail = False
         if '操作成功' in html:
