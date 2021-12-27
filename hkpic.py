@@ -840,9 +840,7 @@ class HKPIC(Network):
             'Referer': self.encapsulateURL(referer)
         }
         html = self.request(url, self.paramsString(params), header)
-        print(self.paramsString(params))
         self.is_send = True
-        is_fail = False
         if '操作成功' in html:
             self.config.share_times += 1
             self.config.save()
