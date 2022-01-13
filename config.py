@@ -4,9 +4,11 @@
 
 
 from common import save_values, valueForKey, load_values, local_time
-from time import time, sleep
+from time import sleep
 from enum import Enum, auto
 from loginfo import PrintLog, PrintType
+from network import Network
+import re
 
 
 class Config:
@@ -117,26 +119,27 @@ class HKpicConfig(Config):
     比思的配置类
     '''
 
-    def __init__(self, log: PrintLog, mark, username):
+    def __init__(self, log: PrintLog, mark, username, host):
         super().__init__(log)
         self.key = f'HKPIC_CONFIG_{mark}'
+        self.otherUserId = 0
         self.username = username
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
-        self.money = valueForKey(dic, 'money', 0)
+        money = valueForKey(dic, 'money', 0)
+        self.money = money
         self.index = valueForKey(dic, 'index', 99)
-        # 是否是新手，新手最多发表10条评论，每天需要自动运行两次
-        self.isNewbie = valueForKey(dic, 'newbie', True)
         self.date = valueForKey(dic, 'date')
-        self.user_zone_url = valueForKey(dic, 'user_zone_url', '')
+        self.userId = valueForKey(dic, 'user_id', 0)
+        self.network = Network({'host': host})
         # 配置文件中保存的日期，是否是今天的
         self.isTodayDate = self.date == date
         if not self.isTodayDate:
             # 如果数据不是今天的，就不读取，使用默认值
             self.date = date
             dic = {}
-        # 上一次发表评论的时间，因为一个小时内只能发10条
-        self.last_reply_time = valueForKey(dic, 'last_reply_time', 0)
+        # 历史金币：第一次运行时，从网页获取，第二次运行时，从数据文件读取
+        self.historyMoney = valueForKey(dic, 'history_money', money)
         # 发表评论次数（新手1小时内限发10次，有奖次数为15次）
         self.reply_times = valueForKey(dic, 'reply_times', 0)
         # 是否访问别人空间
@@ -151,13 +154,9 @@ class HKpicConfig(Config):
         self.share_times = valueForKey(dic, 'share_times', 0)
         # -----------以下是固定值------------------
         # 本次最大评论次数(有奖次数为15，小时内最大评论数为10)
-        self.max_reply_times = 10
+        self.max_reply_times = 15
         # 评论最大失败次数
         self.max_reply_fail_times = 10
-        # 不是新手时，最大评论次数为15次
-        if self.reply_times > 5 or not self.isNewbie:
-            self.max_reply_times = 15
-
         # 发表日志的最大次数
         self.max_journal_times = 3
         # 最大分享次数
@@ -171,15 +170,55 @@ class HKpicConfig(Config):
         # 发表分享的最大失败次数
         self.max_share_fail_times = 5
 
+    def reloadMoney(self):
+        '''
+        获取当前金钱数
+        '''
+        for _ in range(0, 5):
+            money = self.userMoney(self.userId)
+            if money > -1:
+                isMore = self.money > money
+                self.money = money
+                return isMore
+        return False
+
+    def userMoney(self, userId):
+        '''
+        获取用户当前金钱数
+        '''
+        if userId < 9999:
+            return -1
+        url = self.network.encapsulateURL(f'space-uid-{userId}.html')
+        html = self.network.request(url, post=False)
+        pattern = re.compile(r'<li>金錢:\s*<a href=".*?">(\d+)</a>', re.I)
+        items = re.findall(pattern, html)
+        if items:
+            money = int(items[0])
+            return money
+        else:
+            return -1
+
+    def moneyAddition(self, type: int):
+        '''
+        新增金钱。格式1：100 = 90 + 10,格式2：+10 -> 100
+        '''
+        if self.historyMoney < 0:
+            return f'{self.money}'
+        temp = self.money - self.historyMoney
+        if temp <= 0:
+            return f'{self.money}'
+        if type == 1:
+            return f'{self.money} = {self.historyMoney} + {temp}'
+        elif type == 2:
+            return f'+{temp} -> {self.money}'
+        else:
+            return f'{self.money}'
+
     def canReply(self):
         '''
         是否需要发表评论
         '''
-        reply = self.reply_times < self.max_reply_times and self.max_reply_fail_times > 0
-        if reply and self.isNewbie and self.reply_times == 10:
-            # 新手：一个小时内，同一个账号，发表评论数最大为10
-            return time() - self.last_reply_time > 3600
-        return reply
+        return self.reply_times < self.max_reply_times and self.max_reply_fail_times > 0
 
     def canJournal(self):
         '''
@@ -222,21 +261,21 @@ class HKpicConfig(Config):
         '''
         values = {
             'name': self.username,
-            'money': self.money,
+            'user_id': self.userId,
             'date': self.date,
+            'money': self.money,
             'is_visit_other_zone': self.is_visit_other_zone,
             'reply_times': self.reply_times,
             'is_leave_message': self.is_leave_message,
             'is_record': self.is_record,
             'journal_times': self.journal_times,
-            'share_times': self.share_times,
-            'last_reply_time': self.last_reply_time,
-            'newbie': self.isNewbie
+            'share_times': self.share_times
         }
-        if self.user_zone_url:
-            values['user_zone_url'] = self.user_zone_url
 
-        if self.index >= 0 and self.index < 99:
+        if self.money >= self.historyMoney:
+            values["history_money"] = self.historyMoney
+
+        if 0 < self.index < 99:
             values['index'] = self.index
 
         return values

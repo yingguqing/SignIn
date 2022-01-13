@@ -95,7 +95,7 @@ class LogInfo:
 class PrintLog:
 
     # 打印日志的类型，可以是字符串，可以是字符串数组
-    T = TypeVar('T', str, list[str])
+    T = TypeVar('T', str, list)
 
     def __init__(self, title: str = ''):
         self.__logs = []

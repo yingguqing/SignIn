@@ -26,10 +26,24 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor() as executor:
         future_list = []
+        hkpics = []
+        otherUserId = 0
         # 比思签到+赚取每日金币(多账号)
         for account in accounts:
             dic = {**hkpicValue, **account}
             hkpic = HKPIC(dic, hkpicNotice)
+            if otherUserId > 9999:
+                hkpic.config.otherUserId = otherUserId
+            otherUserId = hkpic.config.userId
+            hkpics.append(hkpic)
+
+        # 互换一下用户id来访问空间
+        count = len(hkpics)
+        if count > 1:
+            hkpic = hkpics[0]
+            hkpic.config.otherUserId = otherUserId
+
+        for hkpic in hkpics:
             future = executor.submit(hkpic.runAction)
             future_list.append(future)
             sleep(2)
