@@ -282,6 +282,8 @@ class HKPIC(Network):
         # 评论数不够15条时，获取帖子下一页列表
         if self.config.canReply():
             self.forum_list()
+        elif self.config.reply_times < 99:
+            self.log.print(f'发表评论{self.config.reply_times}次', PrintType.Success)
 
     def tidFromURL(self, href: str) -> str:
         '''
@@ -669,6 +671,8 @@ class HKPIC(Network):
             self.journal()
         elif self.config.max_journal_fail_times <= 0:
             self.log.print('发表日志失败，超过最大失败次数。', PrintType.Error)
+        elif self.config.journal_times < 99:
+            self.log.print(f'发表日志{self.config.journal_times}次', PrintType.Success)
 
     def allJournals(self, is_show):
         '''
@@ -802,6 +806,8 @@ class HKPIC(Network):
             self.share()
         elif self.config.max_share_fail_times <= 0:
             self.log.print('发布分享失败，超过最大失败次数。', PrintType.Error)
+        elif self.config.share_times < 99:
+            self.log.print(f'发表分享{self.config.share_times}次', PrintType.Success)
 
     def delShare(self, sid):
         '''
