@@ -7,6 +7,10 @@ from enum import Enum
 import random
 from typing import TypeVar
 from common import get_running_path, local_time
+import platform
+
+# windows系统，日志不输出颜色
+isWindows = platform.system() == 'Windows'
 
 
 class PrintType(Enum):
@@ -36,21 +40,21 @@ class PrintType(Enum):
         '''
         根据类型，生成相应颜色的文字
         '''
-        show: str
-        if self is PrintType.Error:
-            show = '\033[7;30;31m{message}\033[0m'.format(message=log)
+        if isWindows:
+            return log
+        elif self is PrintType.Error:
+            return '\033[7;30;31m{message}\033[0m'.format(message=log)
         elif self is PrintType.Success:
-            show = '\033[7;30;32m{message}\033[0m'.format(message=log)
+            return '\033[7;30;32m{message}\033[0m'.format(message=log)
         elif self is PrintType.Warn:
-            show = '\033[7;30;33m{message}\033[0m'.format(message=log)
+            return '\033[7;30;33m{message}\033[0m'.format(message=log)
         elif self is PrintType.Info:
             index = random.randint(34, 37)
-            show = '\033[7;30;{i}m{message}\033[0m'.format(message=log, i=index)
+            return '\033[7;30;{i}m{message}\033[0m'.format(message=log, i=index)
         elif self.value >= 34 and self.value <= 37:
-            show = '\033[7;30;{i}m{message}\033[0m'.format(message=log, i=self.value)
+            return '\033[7;30;{i}m{message}\033[0m'.format(message=log, i=self.value)
         else:
-            show = log
-        return show
+            return log
 
 
 class LogInfo:
