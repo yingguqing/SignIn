@@ -333,7 +333,7 @@ class HKPIC(Network):
             if not self.config.reloadMoney():
                 # 如果发表评论后，金币数不增加，就不再发表评论
                 self.log.print('评论达到每日上限。不再发表评论。', PrintType.Warn)
-                self.config.reply_times = 9999
+                self.config.reply_times += 1000
                 self.config.save()
 
             return True
@@ -351,9 +351,9 @@ class HKPIC(Network):
 
             for item in items:
                 if '您目前處於見習期間' in item:
-                    self.config.reply_times = 888
-                    self.config.share_times = 888
-                    self.config.journal_times = 888
+                    self.config.reply_times += 10000
+                    self.config.share_times += 10000
+                    self.config.journal_times += 10000
                     self.config.is_leave_message = False
                     self.config.is_record = False
                     self.config.save()
@@ -417,8 +417,8 @@ class HKPIC(Network):
             self.log.print(items if items else html, PrintType.Error)
             for item in items:
                 if '您目前沒有權限進行評論' in item:
-                    self.config.share_times = 888
-                    self.config.journal_times = 888
+                    self.config.share_times += 10000
+                    self.config.journal_times += 10000
                     self.config.is_leave_message = False
                     self.config.is_record = False
                     self.config.save()
@@ -658,7 +658,7 @@ class HKPIC(Network):
             if not self.config.reloadMoney():
                 # 如果发表后，金币数不增加，就不再发表
                 self.log.print('发表日志达到每日上限。', PrintType.Warn)
-                self.config.journal_times = 9999
+                self.config.journal_times += 1000
                 self.config.save()
         else:
             self.config.max_journal_fail_times -= 1
@@ -759,7 +759,7 @@ class HKPIC(Network):
         referer = f'home.php?mod=space&uid={self.config.userId}&do=share&view=me&quickforward=1'
         params = {
             'link': quote('http://www.baidu.com', 'utf-8'),
-            'general': quote('123123123', 'utf-8'),
+            'general': quote(choice(self.comments), 'utf-8'),
             'referer': quote(referer, 'utf-8'),
             'sharesubmit': 'true',
             'formhash': self.formhash,
@@ -776,7 +776,7 @@ class HKPIC(Network):
             if not self.config.reloadMoney():
                 # 如果发表后，金币数不增加，就不再发表
                 self.log.print('发表分享达到每日上限。', PrintType.Warn)
-                self.config.share_times = 9999
+                self.config.share_times += 1000
                 self.config.save()
             else:
                 self.log.debugPrint('发布分享成功。', PrintType.Success)
@@ -795,7 +795,7 @@ class HKPIC(Network):
             self.config.max_share_fail_times -= 1
             for item in items:
                 if '您目前沒有權限發佈分享' in item:
-                    self.config.share_times = 888
+                    self.config.share_times += 10000
                     self.config.save()
 
         if self.config.canShare():
