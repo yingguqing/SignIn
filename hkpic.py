@@ -332,7 +332,7 @@ class HKPIC(Network):
 
             if not self.config.reloadMoney():
                 # 如果发表评论后，金币数不增加，就不再发表评论
-                self.log.print('评论达到每日上限。不再发表评论。', PrintType.Warn)
+                self.log.print(f'评论：{self.config.reply_times}，达到每日上限。不再发表评论。', PrintType.Warn)
                 self.config.reply_times += 1000
                 self.config.save()
 
@@ -657,7 +657,7 @@ class HKPIC(Network):
             self.log.debugPrint(f'第{self.config.journal_times}篇日志：「{title}」-> 發佈成功', PrintType.Success)
             if not self.config.reloadMoney():
                 # 如果发表后，金币数不增加，就不再发表
-                self.log.print('发表日志达到每日上限。', PrintType.Warn)
+                self.log.print(f'日志：{self.config.journal_times}，达到每日上限。', PrintType.Warn)
                 self.config.journal_times += 1000
                 self.config.save()
         else:
@@ -775,7 +775,7 @@ class HKPIC(Network):
             self.config.save()
             if not self.config.reloadMoney():
                 # 如果发表后，金币数不增加，就不再发表
-                self.log.print('发表分享达到每日上限。', PrintType.Warn)
+                self.log.print(f'分享：{self.config.share_times}，达到每日上限。', PrintType.Warn)
                 self.config.share_times += 1000
                 self.config.save()
             else:

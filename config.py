@@ -177,9 +177,10 @@ class HKpicConfig(Config):
         for _ in range(0, 5):
             money = self.userMoney(self.userId)
             if money > -1:
-                isMore = self.money > money
+                isMore = self.money < money
                 self.money = money
                 return isMore
+        self.log.print('获取金钱失败', PrintType.Error)
         return False
 
     def userMoney(self, userId):
