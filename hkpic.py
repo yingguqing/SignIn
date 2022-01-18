@@ -192,9 +192,6 @@ class HKPIC(Network):
                 if uid > 9999 and uid != my_id:
                     self.config.otherUserId = uid
                     break
-            self.log.print(f'提取他人id：{self.config.otherUserId}', PrintType.Info)
-        else:
-            self.log.print(f'内部他人id：{self.config.otherUserId}', PrintType.Info)
 
     def login(self):
         '''
