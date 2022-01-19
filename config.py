@@ -126,12 +126,12 @@ class HKpicConfig(Config):
         self.username = username
         date = str(local_time().date())
         dic = load_values(self.key, '', {})
-        money = valueForKey(dic, 'money', 0)
-        self.money = money
-        self.index = valueForKey(dic, 'index', 99)
-        self.date = valueForKey(dic, 'date')
         self.userId = valueForKey(dic, 'user_id', 0)
         self.network = Network({'host': host})
+        self.money = valueForKey(dic, 'money', 0)
+        self.reloadMoney()
+        self.index = valueForKey(dic, 'index', 99)
+        self.date = valueForKey(dic, 'date')
         # 配置文件中保存的日期，是否是今天的
         self.isTodayDate = self.date == date
         if not self.isTodayDate:
@@ -139,7 +139,7 @@ class HKpicConfig(Config):
             self.date = date
             dic = {}
         # 历史金币：第一次运行时，从网页获取，第二次运行时，从数据文件读取
-        self.historyMoney = valueForKey(dic, 'history_money', money)
+        self.historyMoney = valueForKey(dic, 'history_money', self.money)
         # 发表评论次数（新手1小时内限发10次，有奖次数为15次）
         self.reply_times = valueForKey(dic, 'reply_times', 0)
         # 是否访问别人空间
