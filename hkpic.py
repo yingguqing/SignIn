@@ -132,8 +132,11 @@ class HKPIC(Network):
             self.config.save()
 
             self.log.print(f'金钱：{self.config.moneyAddition(1)}', PrintType.Cyan)
-            # 添加通知消息
-            self.notice.addNotice(f'{self.username}:{self.config.moneyAddition(2)}', self.config.index)
+
+            if self.config.money > self.config.historyMoney:
+                # 添加通知消息
+                self.notice.addNotice(f'{self.username}:{self.config.moneyAddition(2)}', self.config.index)
+
             # 显示总休息时长
             self.config.print_sleep(0)
         except Exception as e:
